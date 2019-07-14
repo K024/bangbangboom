@@ -1,6 +1,6 @@
 {
-  "name": "bangbangboom-webapp",
-  "short_name": "bangbangboom-webapp",
+  "name": "bangbangboom",
+  "short_name": "bangbangboom",
   "icons": [
     {
       "src": "./img/icons/android-chrome-192x192.png",

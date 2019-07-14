@@ -35,12 +35,15 @@ namespace bangbangboom
             services.AddOptions();
             services.AddMemoryCache();
 
+            AppDbContext.DefaultBuildOption += options =>
+                this.ConfigureDatabase(options);
+
             services.AddDbContext<AppDbContext>(options =>
-                options.UseMySql(Configuration.GetConnectionString("MySql")));
+                AppDbContext.DefaultBuildOption(options));
 
             services.AddIdentity<IdentityUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<AppDbContext>();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -61,13 +64,18 @@ namespace bangbangboom
             services.Configure<DataProtectionTokenProviderOptions>(options =>
                 options.TokenLifespan = TimeSpan.FromHours(2));
 
+            void ConfigCookie(CookieBuilder cookie)
+            {
+                cookie.SecurePolicy = CookieSecurePolicy.Always;
+                cookie.SameSite = SameSiteMode.Strict;
+                cookie.HttpOnly = true;
+                cookie.Path = "/api/";
+                cookie.Expiration = TimeSpan.FromDays(30);
+            }
+
             services.ConfigureApplicationCookie(options =>
             {
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.Strict;
-                options.Cookie.HttpOnly = true;
-                options.Cookie.Path = "/api/";
-                options.Cookie.Expiration = TimeSpan.FromDays(30);
+                ConfigCookie(options.Cookie);
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
 
                 options.SlidingExpiration = true;
@@ -82,15 +90,11 @@ namespace bangbangboom
 
             services.AddAntiforgery(options =>
             {
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.Strict;
-                options.Cookie.HttpOnly = true;
-                options.Cookie.Path = "/api/";
-                options.Cookie.Expiration = TimeSpan.FromDays(30);
+                ConfigCookie(options.Cookie);
                 options.HeaderName = "X-CSRF-TOKEN";
             });
 
-            services.AddTransient<IEmailSender, EmailSender>();
+            ConfiureProductionServices(services);
 
             services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new Info() { Title = "bangbangboom", Version = "v1" }));
@@ -98,6 +102,17 @@ namespace bangbangboom
             services.AddMvc(options =>
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+        }
+
+        protected virtual void ConfigureDatabase(DbContextOptionsBuilder options)
+        {
+            var connectionString = Configuration.GetConnectionString("MySql");
+            options.UseMySql(connectionString);
+        }
+
+        protected virtual void ConfiureProductionServices(IServiceCollection services)
+        {
+            services.AddTransient<IEmailSender, EmailSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -135,6 +150,15 @@ namespace bangbangboom
 
             app.UseAuthentication();
             app.UseMvc();
+
+            app.Use(async (req, next) =>
+            {
+                var uri = req.Request.Path.Value.ToLower();
+                if (uri == "/api" || uri.StartsWith("/api/"))
+                    req.Response.StatusCode = StatusCodes.Status404NotFound;
+                else
+                    await next();
+            });
             app.UseSpa(config => { });
 
             dbContext.Database.Migrate();

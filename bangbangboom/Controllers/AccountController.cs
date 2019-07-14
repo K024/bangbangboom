@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
+using bangbangboom.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -22,7 +25,6 @@ namespace bangbangboom.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailSender _emailSender;
-
         public AccountController(
             UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager,
             IConfiguration configuration, IEmailSender emailSender)
@@ -61,10 +63,10 @@ namespace bangbangboom.Controllers
                 return Ok();
 
             if (result.IsLockedOut)
-                return StatusCode(401, "LockedOut");
+                return StatusCode(403, "LockedOut");
 
             if (!await _userManager.IsEmailConfirmedAsync(user))
-                return StatusCode(401, "EmailNotConfirmed");
+                return StatusCode(403, "EmailNotConfirmed");
 
             return StatusCode(401);
         }
@@ -78,25 +80,22 @@ namespace bangbangboom.Controllers
         }
 
         [HttpPost]
-        public async Task<object> TryResetPassword(
+        public async Task<object> ForgotPassword(
             [FromForm][Required] string UserName,
             [FromForm][Required] string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
 
-            if (user?.UserName == UserName)
+            if (user != null && user.UserName == UserName)
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
                 _ = _emailSender.SendEmailAsync(Email,
                     "Reset your password in bangbangboom",
-                    $@"
-Dear {UserName},
-
-To reset your password in bangbangboom, click the link below:
-https://{_configuration["Domain"]}/account/confirmemail?email={WebUtility.UrlEncode(Email)}&token={WebUtility.UrlEncode(token)}
-
-If you are not attempting to reset your password, please ignore this email.
-");
+                    $"Dear {UserName},\n\n" +
+                    $"To reset your password in bangbangboom, click the link below:\n" +
+                    $"https://{_configuration["Domain"]}/account/resetpassword?" +
+                    $"guid={user.Id}&token={WebUtility.UrlEncode(token)}\n\n" +
+                    $"If you are not attempting to reset your password, please ignore this email.");
                 return Ok();
             }
             return StatusCode(401);
@@ -104,11 +103,11 @@ If you are not attempting to reset your password, please ignore this email.
 
         [HttpPost]
         public async Task<object> ResetPassword(
-            [FromForm][Required] string Email,
+            [FromForm][Required] string Guid,
             [FromForm][Required] string Token,
             [FromForm][Required] string NewPassword)
         {
-            var user = await _userManager.FindByEmailAsync(Email);
+            var user = await _userManager.FindByIdAsync(Guid);
             var result = await _userManager.ResetPasswordAsync(user, Token, NewPassword);
             if (result.Succeeded)
             {
@@ -119,59 +118,89 @@ If you are not attempting to reset your password, please ignore this email.
         }
 
         [HttpPost]
-        public async Task<object> Register(
-            [FromForm][Required] string UserName,
-            [FromForm][Required] string Email,
-            [FromForm][Required] string Password)
+        public async Task<object> TestEmail(
+            [FromForm][Required] string Email)
         {
+            var user = await _userManager.FindByEmailAsync(Email);
+            if (user == null)
+                return Ok("Acceptable");
+            return Ok("Registered");
+        }
+
+        [HttpPost]
+        public async Task<object> Register(
+            [FromForm][Required] string Email)
+        {
+            var id = Guid.NewGuid().ToString();
             var user = new IdentityUser()
             {
-                Id = UserName,
-                UserName = UserName,
+                Id = id,
+                UserName = id.Replace('-', '_'),
                 Email = Email,
             };
-            var result = await _userManager.CreateAsync(user, Password);
+            var result = await _userManager.CreateAsync(user);
             if (result.Succeeded)
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 _ = _emailSender.SendEmailAsync(Email,
                     "Confirm your email in bangbangboom",
-                    $@"
-Dear {UserName},
-
-To confirm your email in bangbangboom, click the link below:
-https://{_configuration["Domain"]}/account/confirmemail?email={WebUtility.UrlEncode(Email)}&token={WebUtility.UrlEncode(token)}
-
-If you are not attempting to register an account in bangbangboom, please ignore this email.
-");
-                DeleteIfNotConfirmedAfter2h(user);
-                return Ok();
-            }
-            return StatusCode(401, result.Errors.FirstOrDefault()?.Code);
-        }
-
-        [HttpPost]
-        public async Task<object> ConfirmEmail(
-            [FromForm][Required] string Email,
-            [FromForm][Required] string Token)
-        {
-            var user = await _userManager.FindByEmailAsync(Email);
-            var result = await _userManager.ConfirmEmailAsync(user, Token);
-            if (result.Succeeded)
-            {
-                await _signInManager.SignInAsync(user, true);
+                    $"Dear {Email},\n\n" +
+                    $"To confirm your email in bangbangboom, click the link below:\n" +
+                    $"https://{_configuration["Domain"]}/account/confirmemail?" +
+                    $"guid={user.Id}&token={WebUtility.UrlEncode(token)}\n\n" +
+                    $"If you are not attempting to register an account in bangbangboom, please ignore this email.");
+                DeleteIfNotConfirmedAfter2h(user.Id);
                 return Ok();
             }
             return StatusCode(401);
         }
 
+        [HttpPost]
+        public async Task<object> TestUserName(
+            [FromForm][Required] string UserName)
+        {
+            var user = await _userManager.FindByNameAsync(UserName);
+            if (user == null)
+                return Ok("Acceptable");
+            return Ok("Registered");
+        }
+
+        [HttpPost]
+        public async Task<object> ConfirmEmail(
+            [FromForm][Required] string Guid,
+            [FromForm][Required] string Token,
+            [FromForm][Required] string UserName,
+            [FromForm][Required] string Password,
+            [FromServices] AppDbContext appDbContext)
+        {
+            using (var transaction = appDbContext.Database.BeginTransaction())
+            {
+                var user = await _userManager.FindByIdAsync(Guid);
+                var result = await _userManager.ConfirmEmailAsync(user, Token);
+                var message = "";
+                while (result.Succeeded)
+                {
+                    var result2 = await _userManager.SetUserNameAsync(user, UserName);
+                    if (!result2.Succeeded) { message = result2.Errors.FirstOrDefault()?.Code; break; }
+                    var result3 = await _userManager.AddPasswordAsync(user, Password);
+                    if (!result3.Succeeded) { message = result3.Errors.FirstOrDefault()?.Code; break; }
+                    await _signInManager.SignInAsync(user, true);
+                    transaction.Commit();
+                    return Ok();
+                }
+                transaction.Rollback();
+                return StatusCode(401, message);
+            }
+        }
+
         [NonAction]
-        private void DeleteIfNotConfirmedAfter2h(IdentityUser user)
+        private void DeleteIfNotConfirmedAfter2h(string guid)
         {
             Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromHours(2));
-                if(!await _userManager.IsEmailConfirmedAsync(user))
+                var user = await _userManager.FindByIdAsync(guid);
+                if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
                 {
                     await _userManager.DeleteAsync(user);
                 }

@@ -22,8 +22,8 @@ namespace bangbangboom.Services
         {
             if (isDev)
             {
-                var filename = string.Format("{0}\\Desktop\\Email {1}.txt",
-                    Environment.GetEnvironmentVariable("USERPROFILE"), DateTime.Now.ToString("MM-dd"));
+                var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "Desktop", $"Email {DateTime.Now.ToString("MM-dd")}.txt");
                 var output = new StreamWriter(new FileStream(
                     filename, FileMode.Append, FileAccess.Write));
                 await output.WriteAsync(
@@ -35,6 +35,7 @@ Message:
 {htmlMessage}
 
 ");
+                output.Close();
             }
             else
             {

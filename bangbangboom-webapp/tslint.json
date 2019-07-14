@@ -9,11 +9,16 @@
     ]
   },
   "rules": {
-    "quotemark": [true, "single"],
-    "indent": [true, "spaces", 2],
-    "interface-name": false,
+    "indent": [
+      true,
+      "spaces",
+      4
+    ],
     "ordered-imports": false,
     "object-literal-sort-keys": false,
-    "no-consecutive-blank-lines": false
+    "no-consecutive-blank-lines": false,
+    "semicolon": false,
+    "object-literal-shorthand": false,
+    "only-arrow-functions": false
   }
 }
