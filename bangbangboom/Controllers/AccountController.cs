@@ -57,6 +57,7 @@ namespace bangbangboom.Controllers
                 await _userManager.FindByEmailAsync(UserName) :
                 await _userManager.FindByNameAsync(UserName);
 
+            if (user is null) return StatusCode(401);
             var result = await _signInManager.PasswordSignInAsync(user, Password, true, true);
 
             if (result.Succeeded)
@@ -85,7 +86,6 @@ namespace bangbangboom.Controllers
             [FromForm][Required] string Email)
         {
             var user = await _userManager.FindByEmailAsync(Email);
-
             if (user != null && user.UserName == UserName)
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -108,6 +108,7 @@ namespace bangbangboom.Controllers
             [FromForm][Required] string NewPassword)
         {
             var user = await _userManager.FindByIdAsync(Guid);
+            if (user is null) return StatusCode(401);
             var result = await _userManager.ResetPasswordAsync(user, Token, NewPassword);
             if (result.Succeeded)
             {
@@ -176,6 +177,7 @@ namespace bangbangboom.Controllers
             using (var transaction = appDbContext.Database.BeginTransaction())
             {
                 var user = await _userManager.FindByIdAsync(Guid);
+                if (user is null) return StatusCode(401);
                 var result = await _userManager.ConfirmEmailAsync(user, Token);
                 var message = "";
                 while (result.Succeeded)

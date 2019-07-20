@@ -19,6 +19,16 @@
     "no-consecutive-blank-lines": false,
     "semicolon": false,
     "object-literal-shorthand": false,
-    "only-arrow-functions": false
+    "only-arrow-functions": false,
+    "quotemark": false,
+    "curly": false,
+    "trailing-comma": false,
+    "no-trailing-whitespace": false,
+    "member-access": false,
+    "member-ordering": false,
+    "arrow-parens": false,
+    "no-for-in-array": false,
+    "forin": false,
+    "no-console": false
   }
 }
