@@ -14,4 +14,5 @@ const userstate = CreateStore({
 })
 export default userstate
 
-
+export const passwordvalidate = (pass: string) =>
+    pass.length >= 8 && /[a-z]/.test(pass) && /[0-9]/.test(pass);

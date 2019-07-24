@@ -29,6 +29,9 @@
     "arrow-parens": false,
     "no-for-in-array": false,
     "forin": false,
-    "no-console": false
+    "no-console": false,
+    "variable-name": false,
+    "space-before-function-paren": false,
+    "max-line-length": false
   }
 }

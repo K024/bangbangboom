@@ -1,11 +1,18 @@
 <template>
-    <div>
-        <el-input class="input" placeholder="用户名" v-model="username" clearable></el-input>
-        <el-input class="input" placeholder="密码" v-model="password" show-password></el-input>
-        <div v-if="userstate.message" class="message">{{userstate.message}}</div>
-        <div class="buttons">
-            <el-button type="primary" @click="login">登录</el-button>
-            <div @click="register" class="register">注册</div>
+    <div class="container">
+        <el-input class="input" :placeholder="$t('w.username') + '/' + $t('w.email')" v-model="username" clearable></el-input>
+        <el-input class="input" :placeholder="$t('w.password')" v-model="password" show-password></el-input>
+        <div v-if="userstate.message">{{userstate.message}}</div>
+        <el-button
+            type="primary"
+            plain
+            @click="login"
+            class="fill-w"
+            :disabled="!username && !password"
+        >{{$t('w.login')}}</el-button>
+        <div class="buttons flex">
+            <div @click="register">{{$t('w.register')}}</div>
+            <div @click="fogotpass">{{$t('w.forgotpass')}}</div>
         </div>
     </div>
 </template>
@@ -25,9 +32,15 @@ export default Vue.extend({
         userstate: () => userstate
     },
     methods: {
-        login: function() {},
+        login: function() {
+            // login
+        },
         register: function() {
-            this.$router.push("/account/register");
+            this.$router.push("/register");
+            this.$emit("close");
+        },
+        fogotpass: function() {
+            this.$router.push("/forgotpass");
             this.$emit("close");
         }
     }
@@ -35,22 +48,14 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.input {
-    margin-bottom: 8px;
-}
-.message {
-    width: 100%;
-    display: flex;
-    align-items: center;
+.container > * {
+    margin: 5px 0;
 }
 .buttons {
-    width: 100%;
-    display: flex;
-    align-items: center;
     justify-content: space-around;
 }
-.register {
-    padding: 0 20px;
+.buttons > * {
+    cursor: pointer;
 }
 </style>
 

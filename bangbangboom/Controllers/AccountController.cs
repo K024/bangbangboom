@@ -93,7 +93,7 @@ namespace bangbangboom.Controllers
                     "Reset your password in bangbangboom",
                     $"Dear {UserName},\n\n" +
                     $"To reset your password in bangbangboom, click the link below:\n" +
-                    $"https://{_configuration["Domain"]}/account/resetpassword?" +
+                    $"https://{_configuration["Domain"]}/resetpass?" +
                     $"guid={user.Id}&token={WebUtility.UrlEncode(token)}\n\n" +
                     $"If you are not attempting to reset your password, please ignore this email.");
                 return Ok();
@@ -147,7 +147,7 @@ namespace bangbangboom.Controllers
                     "Confirm your email in bangbangboom",
                     $"Dear {Email},\n\n" +
                     $"To confirm your email in bangbangboom, click the link below:\n" +
-                    $"https://{_configuration["Domain"]}/account/confirmemail?" +
+                    $"https://{_configuration["Domain"]}/confirmemail?" +
                     $"guid={user.Id}&token={WebUtility.UrlEncode(token)}\n\n" +
                     $"If you are not attempting to register an account in bangbangboom, please ignore this email.");
                 DeleteIfNotConfirmedAfter2h(user.Id);

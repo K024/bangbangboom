@@ -11,3 +11,43 @@ body {
     background-size:100% 100%;
     background-repeat:no-repeat;
 }
+
+.flex {
+    display: flex;
+    align-items: center;
+}
+
+.flex.center {
+    justify-content: center;
+}
+
+.fill-w {
+    width: 100%
+}
+
+.form-panel {
+    width: 100%;
+    max-width: 340px;
+    margin: 10vh 10px;
+}
+
+.form-panel > * {
+    margin: 15px 0;
+}
+
+/* bigger device */
+@media only screen and (min-width: 768px) {
+    .only-s {
+        display: none!important;
+    }
+}
+
+/* smaller device */
+@media only screen and (max-width: 767px) {
+    .only-g {
+        display: none!important;
+    }
+    .form-panel {
+        margin: 20px 10px;
+    }
+}
