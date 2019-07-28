@@ -11,17 +11,19 @@ namespace UnitTest
 {
     static class Utilities
     {
+        private static WebApplicationFactory<TestStartup> _factory;
 
-        private static readonly WebApplicationFactory<TestStartup> Factory =
-            new CustomWebApplicationFactory<TestStartup>()
-            .WithWebHostBuilder(options =>
-            {
-                options.UseSetting("https_port", "5001");
-            });
-
-        public static WebApplicationFactory<TestStartup> GetWebApplicationFactory()
+        public static WebApplicationFactory<TestStartup> Factory
         {
-            return Factory;
+            get
+            {
+                if (_factory is null) _factory = new CustomWebApplicationFactory<TestStartup>()
+                  .WithWebHostBuilder(options =>
+                  {
+                      options.UseSetting("https_port", "5001");
+                  });
+                return _factory;
+            }
         }
 
         public static TService GetService<TService>()

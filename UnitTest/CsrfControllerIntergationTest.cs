@@ -16,7 +16,7 @@ namespace UnitTest
         [TestMethod]
         public async Task ShouldReturnBadRequest()
         {
-            var client = Utilities.GetWebApplicationFactory().CreateClient();
+            var client = Utilities.Factory.CreateClient();
             var result = await client.PostAsync("api/ping", new StringContent(""));
             Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
         }

@@ -187,6 +187,37 @@ namespace UnitTest
         }
 
         [TestMethod]
+        public async Task ConfirmEmail_BadGuid()
+        {
+            var client = await Utilities.GetClientWithCsrfAsync();
+
+            var email = Utilities.UniqueEmail();
+            var form = new FormUrlEncodedContent(new[]
+            {
+                new KeyValuePair<string, string>("email", email)
+            });
+            var result = await client.PostAsync("api/account/register", form);
+
+            result.EnsureSuccessStatusCode();
+
+            Assert.IsNotNull(TestEmailSender.Emails[email]);
+            GetGuidAndToken(TestEmailSender.Emails[email], out var guid, out var token);
+
+            var form2 = Form(new
+            {
+                guid = "badguid",
+                token,
+                username = Utilities.UniqueUserName(),
+                password = "Password123"
+            });
+
+            var result2 = await client.PostAsync("api/account/confirmemail", form2);
+
+            Assert.AreEqual(HttpStatusCode.Unauthorized, result2.StatusCode);
+            Assert.IsTrue(string.IsNullOrEmpty(await result2.Content.ReadAsStringAsync()));
+        }
+
+        [TestMethod]
         public async Task RegiterAndConfirmEmail_Success()
         {
             var client = await Utilities.GetClientWithCsrfAsync();
