@@ -47,6 +47,8 @@ const messages = {
             resetpasssuccess: 'Reset password successfully',
 
             pleaselogin: 'Please login first',
+
+            neterror: "An error occurred with network connection",
         },
 
         ...enLocale,
@@ -86,6 +88,8 @@ const messages = {
             resetpasssuccess: '重置密码成功',
 
             pleaselogin: '请先登录',
+
+            neterror: "网络连接故障",
         },
 
         ...zhLocale,
@@ -125,6 +129,8 @@ const messages = {
             resetpasssuccess: 'パスワードをリセットした',
 
             pleaselogin: 'ログインしてください',
+
+            neterror: "ネット接続エラーが発生しました",
         },
 
         ...jaLocale,

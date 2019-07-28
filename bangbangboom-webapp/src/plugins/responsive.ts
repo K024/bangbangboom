@@ -14,14 +14,20 @@ class Responsive implements PluginObject<any> {
         window.addEventListener("resize", resize)
         resize()
     }
+    /** 屏幕宽度 */
     get size() { return r.size }
-    get g() { return r.size >= 768 }
+    /** 大于768px */
+    get g() { return r.size > 768 }
+    /** 小于等于768px */
     get s() { return !this.g }
 }
 
 declare module 'vue/types/vue' {
     // tslint:disable-next-line
     interface Vue {
+        /**
+         * 可观察的响应式变量
+         */
         $responsive: Responsive
     }
 }

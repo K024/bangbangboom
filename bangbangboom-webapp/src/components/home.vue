@@ -1,5 +1,9 @@
 <template>
-    <div class="home">Home</div>
+    <div class="home">
+        <div>Home</div>
+        <el-button @click="$Progress.set(20)">progress start</el-button>
+        <el-button @click="$Progress.finish()">progress finish</el-button>
+    </div>
 </template>
 
 <script lang="ts">

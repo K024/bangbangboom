@@ -32,21 +32,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { debounce, delay } from "@/tools/functions";
-import axios from "axios";
 import { passwordvalidate } from "./state";
-
-const checkUserName = debounce(
-    300,
-    async (userName: string, callback: (res: boolean) => void) => {
-        try {
-            await delay(200);
-            callback(true);
-        } catch (err) {
-            callback(false);
-        }
-    }
-);
 
 export default Vue.extend({
     data: function() {

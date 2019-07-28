@@ -18,13 +18,13 @@
                         class="inline"
                         type="warning"
                         :closable="false"
-                        v-else-if="unstate == 'registered'"
+                        v-else-if="unstate === 'registered'"
                     >{{$t('s.usernameregistered')}}</el-alert>
                     <el-alert
                         class="inline"
                         type="success"
                         :closable="false"
-                        v-else-if="unstate == 'acceptable'"
+                        v-else-if="unstate === 'acceptable'"
                     >{{$t('w.available')}}</el-alert>&nbsp;
                 </div>
                 <div class="flex">
@@ -55,19 +55,19 @@
 import Vue from "vue";
 import { debounce, delay } from "@/tools/functions";
 import axios from "axios";
-import { passwordvalidate } from "./state";
+import { usernamevalidate, passwordvalidate } from "./state";
 
-const checkUserName = debounce(
-    300,
-    async (userName: string, callback: (res: boolean) => void) => {
-        try {
-            await delay(200);
-            callback(true);
-        } catch (err) {
-            callback(false);
-        }
+/**
+ * 检查用户名
+ */
+const checkUserName = debounce(300, async (userName: string) => {
+    try {
+        await delay(200);
+        return true;
+    } catch (error) {
+        return false;
     }
-);
+});
 
 export default Vue.extend({
     data: function() {
@@ -99,15 +99,19 @@ export default Vue.extend({
         }
     },
     watch: {
-        userName: function() {
-            if (this.userName && /^.{4,}$/.test(this.userName)) {
+        userName: async function() {
+            if (usernamevalidate(this.userName)) {
                 this.unstate = "checking";
                 const userName = this.userName;
-                checkUserName(this.userName, (res: boolean) => {
+                try {
+                    const res = await checkUserName(this.userName);
                     if (userName !== this.userName) return;
                     if (res) this.unstate = "acceptable";
                     else this.unstate = "registered";
-                });
+                } catch (error) {
+                    this.unstate = "empty";
+                    this.$message.error(this.$t("s.neterror") as string);
+                }
             } else {
                 this.unstate = "empty";
             }

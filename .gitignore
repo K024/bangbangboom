@@ -10,6 +10,9 @@
 *.userosscache
 *.sln.docstates
 
+# nohup output file
+nohup*
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

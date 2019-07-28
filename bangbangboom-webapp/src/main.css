@@ -35,19 +35,19 @@ body {
     margin: 15px 0;
 }
 
-/* bigger device */
-@media only screen and (min-width: 768px) {
-    .only-s {
-        display: none!important;
-    }
-}
-
 /* smaller device */
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 768px) {
     .only-g {
         display: none!important;
     }
     .form-panel {
         margin: 20px 10px;
+    }
+}
+
+/* bigger device */
+@media only screen and (min-width: 769px) {
+    .only-s {
+        display: none!important;
     }
 }

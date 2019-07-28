@@ -8,7 +8,7 @@
             plain
             @click="login"
             class="fill-w"
-            :disabled="!username && !password"
+            :disabled="!username || !password"
         >{{$t('w.login')}}</el-button>
         <div class="buttons flex">
             <div @click="register">{{$t('w.register')}}</div>

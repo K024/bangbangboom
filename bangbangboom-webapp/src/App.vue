@@ -27,9 +27,9 @@
                             <i class="el-icon-arrow-down el-icon--right"></i>
                         </div>
                         <el-dropdown-menu slot="dropdown">
-                            <el-dropdown-item command="zh">中文</el-dropdown-item>
-                            <el-dropdown-item command="en">English</el-dropdown-item>
-                            <el-dropdown-item command="ja">日本語</el-dropdown-item>
+                            <el-dropdown-item command="en" :disabled="'en'===$i18n.locale">English</el-dropdown-item>
+                            <el-dropdown-item command="zh" :disabled="'zh'===$i18n.locale">中文</el-dropdown-item>
+                            <el-dropdown-item command="ja" :disabled="'ja'===$i18n.locale">日本語</el-dropdown-item>
                         </el-dropdown-menu>
                     </el-dropdown>
                     <el-popover
@@ -59,12 +59,14 @@
             <div class="footer">footer</div>
         </div>
         <el-backtop></el-backtop>
+        <vue-progress-bar></vue-progress-bar>
     </div>
 </template>
 
 <script lang='ts'>
 import Vue from "vue";
 import userlogin from "@/components/account/userlogin.vue";
+import { HideLoader } from "./plugins/loader";
 
 export default Vue.extend({
     name: "app",
@@ -93,6 +95,9 @@ export default Vue.extend({
         const lang =
             localStorage.getItem("locale") || navigator.language.substr(0, 2);
         if (this.$i18n.messages[lang]) this.$i18n.locale = lang;
+    },
+    mounted: function() {
+        HideLoader();
     }
 });
 </script>
@@ -179,5 +184,12 @@ export default Vue.extend({
 
 .main {
     min-height: 70vh;
+}
+
+.el-dropdown,
+.el-dropdown-selfdefine {
+    height: 100%;
+    display: flex;
+    align-items: center;
 }
 </style>

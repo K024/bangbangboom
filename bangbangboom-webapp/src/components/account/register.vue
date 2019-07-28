@@ -43,18 +43,16 @@
 import Vue from "vue";
 import { debounce, delay } from "@/tools/functions";
 import axios from "axios";
+import { emailvalidate } from "./state";
 
-const checkEmail = debounce(
-    300,
-    async (email: string, callback: (res: boolean) => void) => {
-        try {
-            await delay(200);
-            callback(true);
-        } catch (err) {
-            callback(false);
-        }
+const checkEmail = debounce(300, async (email: string) => {
+    try {
+        await delay(200);
+        return true;
+    } catch (err) {
+        return false;
     }
-);
+});
 
 export default Vue.extend({
     data: function() {
@@ -70,15 +68,19 @@ export default Vue.extend({
         }
     },
     watch: {
-        email: function() {
-            if (this.email && /^.+@.+$/.test(this.email)) {
+        email: async function() {
+            if (emailvalidate(this.email)) {
                 this.state = "checking";
                 const email = this.email;
-                checkEmail(this.email, (res: boolean) => {
+                try {
+                    const res = await checkEmail(this.email);
                     if (email !== this.email) return;
                     if (res) this.state = "acceptable";
                     else this.state = "registered";
-                });
+                } catch (error) {
+                    this.state = "empty";
+                    this.$message.error(this.$t("s.neterror") as string);
+                }
             } else {
                 this.state = "empty";
             }

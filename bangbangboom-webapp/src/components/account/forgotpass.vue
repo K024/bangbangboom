@@ -12,7 +12,7 @@
                     plain
                     class="fill-w"
                     @click="confirm"
-                    :disabled="!/^.+@.+$/.test(email)"
+                    :disabled="emailvalid"
                 >{{$t('w.confirm')}}</el-button>
             </template>
         </div>
@@ -22,6 +22,7 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
+import { emailvalidate } from "./state";
 
 export default Vue.extend({
     data: function() {
@@ -29,6 +30,11 @@ export default Vue.extend({
             email: "",
             sent: false
         };
+    },
+    computed: {
+        emailvalid(): boolean {
+            return emailvalidate(this.email);
+        }
     },
     methods: {
         confirm: function() {

@@ -5,6 +5,7 @@ import '@/tools/registerServiceWorker';
 import i18n from '@/plugins/i18n';
 import '@/plugins/Axios'
 import '@/plugins/responsive'
+import '@/plugins/progressbar'
 
 import "./main.css";
 

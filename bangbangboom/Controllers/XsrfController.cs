@@ -11,10 +11,10 @@ namespace bangbangboom.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CsrfController : Controller
+    public class XsrfController : Controller
     {
         private readonly IAntiforgery _antiforgery;
-        public CsrfController(IAntiforgery antiforgery)
+        public XsrfController(IAntiforgery antiforgery)
         {
             _antiforgery = antiforgery;
         }

@@ -13,6 +13,11 @@
 <script lang="ts">
 import Vue from "vue";
 import userlogin from "./userlogin.vue";
+
+/**
+ * 用户修改个人信息界面
+ * 个人设置界面
+ */
 export default Vue.extend({
     components: {
         "user-login": userlogin
