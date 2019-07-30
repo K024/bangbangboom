@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace UnitTest
 {
     [TestClass]
-    public class CsrfControllerIntergationTest
+    public class XsrfControllerIntergationTest
     {
 
         [TestMethod]

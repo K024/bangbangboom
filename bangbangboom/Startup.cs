@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,11 +25,13 @@ namespace bangbangboom
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            this.env = env;
         }
 
+        private readonly IHostingEnvironment env;
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -51,7 +54,7 @@ namespace bangbangboom
             services.AddDbContext<AppDbContext>(options =>
                 AppDbContext.DefaultBuildOption(options));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<AppUser, IdentityRole>()
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<AppDbContext>();
 
@@ -101,8 +104,14 @@ namespace bangbangboom
             services.AddAntiforgery(options =>
             {
                 ConfigCookie(options.Cookie);
-                options.HeaderName = "X-CSRF-TOKEN";
+                options.HeaderName = "X-XSRF-TOKEN";
             });
+
+            services.Configure<HashFileProviderOptions>(options =>
+                options.BaseDir = Path.Combine(env.ContentRootPath, ".hashfiles"));
+            services.AddSingleton<HashFileProvider>();
+
+            services.AddSingleton<MediaFileProcessor>();
 
             ConfiureProductionServices(services);
 
@@ -122,11 +131,11 @@ namespace bangbangboom
 
         protected virtual void ConfiureProductionServices(IServiceCollection services)
         {
-            services.AddTransient<IEmailSender, EmailSender>();
+            services.AddSingleton<IEmailSender, EmailSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext)
+        public void Configure(IApplicationBuilder app, AppDbContext dbContext)
         {
             app.UseResponseCompression();
             if (env.IsDevelopment())
