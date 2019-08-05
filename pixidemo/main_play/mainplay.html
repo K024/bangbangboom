@@ -1,0 +1,843 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Hello World</title>
+</head>
+<style>
+  * {
+    padding: 0;
+    margin: 0
+  }
+</style>
+<script src="./src/pixi.min.js"></script>
+<script src="./src/sound.js"></script>
+<script src="./src/tink.js"></script>
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+
+<body>
+  <script type="text/javascript">
+    let Application = PIXI.Application,
+      Container = PIXI.Container,
+      loader = PIXI.loader,
+      resources = PIXI.loader.resources,
+      Graphics = PIXI.Graphics,
+      TextureCache = PIXI.utils.TextureCache,
+      Sprite = PIXI.Sprite,
+      Text = PIXI.Text,
+      TextStyle = PIXI.TextStyle;
+
+    //设置屏幕，游戏宽高
+    /*let  screenWidth = document.documentElement.clientWidth,
+      screenHeight =document.documentElement.clientHeight,*/
+    let screenWidth,
+      screenHeight,
+      gameHeight,
+      gameWidth,
+      half_gameWidth,
+      half_gameHeight,
+      gamespeed_coef,
+      //也表示 每 1/60 秒 音符圆圈走过的距离
+      //即每秒 走 half_gameWidth * gamespeed_coef 的路程
+      gameSpeed,
+      //所以每个音符应该出现的提前 1/60 秒数为 advance_time,即音符走完全程所用的时间 为 advance_time * 1/60 秒
+      advance_time;
+
+    set_width_height_speed();
+
+    let center_position = {};
+    let circle_position_x = [];
+    let circle_position_y = [];
+    // circle 用于储存在屏幕上出现的七个圆圈精灵
+    let circle = [];
+
+    //设置游戏进行的时间
+    let gameTimeOffset = 0;
+    //设置游戏中途暂停的时间
+    let pauseTime = 0;
+    //startCont 用于计数当前画面中 时间上第一个出现的音符 也即 即将 第一个消失的音符
+    //endCount 用于计数当前画面中 时间上最后一个出现的音符 也即 当前画面中最后一个消失的音符
+    let endCount = 0;
+    let startCount = 0;
+
+    //设置延迟时间 ms
+    let latencyTime = 0;
+    let badLatencyTime = 200;
+    let goodLatencyTime = 100;
+    let perfectLatencyTime = 50;
+
+    let fileGet;
+    //加载所有音符，利用json表示
+    var allnotes = null;
+    let notes_length = null
+
+    //存储具体时间
+    let time_list = [];
+    let appear_time_list = [];
+    let type_list = [];
+    let dest_list = [];
+    //存储所有的击打音符 精灵
+    let allnotes_sprite = [];
+    //bool 用于判断音符是否已经被判定为 good 或 bad
+    let is_hit = [];
+    //游戏结束的时间
+    let gameEndTime;
+
+    //从0逐一增长，计算每一个轨道上音符的 counter
+    let counter_onRoad = [];
+    for (i = 0; i < 7; i++) {
+      counter_onRoad[i] = 0;
+    }
+
+    //用法：若第2(从0计数)条轨道的第1(从0计数)个音符是总音符的第5(从0计数)个
+    //则 trans_localToGlobal[2][1]=5
+    //或 trans_localToGlobal[2][counter_onRoad[2]]=5
+    let trans_localToGlobal = [];
+    for (i = 0; i < 7; i++) {
+      trans_localToGlobal[i] = [];
+    }
+
+    //在设置一个容器放所有音符 圆圈
+    let gameSceen = new Container();
+    //存储背景图片的精灵
+    let backgroundImgSprite;
+
+    //右上角的暂停游戏按钮
+    let pauseButtonUrl;
+    let pauseButton;
+
+    //显示的各种信息
+    //perfect good bad
+    let typeMessage;
+    //显示 “combo”
+    let comboMessage;
+    //显示combo数字
+    let comboNumMessage;
+    //界面载入后 的 “点击开始游戏“
+    let startGameMessage;
+    //暂停游戏后返回游戏的文字
+    let backTOGameMessage;
+
+
+    let comboStyle;
+    let comboNumStyle;
+    let perfectStyle;
+    let startGameStyle;
+    let backToGameStyle;
+
+    //计算combo个数的变量
+    let comboNum = 0;
+
+    //键盘监听的具体按钮
+    let keyButton = [];
+
+    let normalCircleUrl;
+    let hitCircleUrl;
+    let backgroundImgUrl;
+    let backgroundMusicUrl;
+    let hitMusicUrl;
+
+    //具体音乐的实现对象
+    let backgroundMusic;
+    //击打显示音乐分7个 给每个轨道各一个
+    let hitMusic = [];
+
+
+    let app = new Application({
+      width: screenWidth,
+      height: screenHeight,
+      antialiasing: true,
+      transparent: false,
+      resolution: 1
+    });
+
+
+    //全屏显示背景
+    app.renderer.view.style.position = "absolute";
+    app.renderer.view.style.display = "block";
+    app.renderer.autoResize = true;
+    app.renderer.resize(window.innerWidth, window.innerHeight);
+
+    //Add the canvas that Pixi automatically created for you to the HTML document
+    document.body.appendChild(app.view);
+
+    //设置tink
+    let t = new Tink(PIXI, app.renderer.view)
+    let pointer = t.makePointer();
+
+
+    //加载具体信息的文件
+    $.ajax({
+      url: "allnotes.json",
+      async: false,
+      success: function (data) {
+        fileGet = data;
+        allnotes = data.notes;
+        normalCircleUrl = data.normalCircleUrl;
+        hitCircleUrl = data.hitCircleUrl;
+        backgroundImgUrl = data.backgroundImgUrl;
+        backgroundMusicUrl = data.backgroundMusicUrl;
+        hitMusicUrl = data.hitMusicUrl;
+        pauseButtonUrl = data.pauseButtonUrl;
+        //
+        //游戏结束时间为音乐结束时间加2秒
+        //获取音乐结束时间 musicEndTime 在制谱的时候自动获得 具体方法见 test.html
+        gameEndTime = data.musicEndTime * 1000 + 2000;
+        console.log(normalCircleUrl);
+      }
+    });
+
+    //加载音乐
+    sounds.load([backgroundMusicUrl, hitMusicUrl]);
+    sounds.whenLoaded = setupMusic;
+    sounds.onProgress = trackMusicLoaded;
+
+    //Circle加载，背景图片
+    // loader.add("images/normalCircle.png")
+    //   .add("images/hitCircle.png")
+    //   .load(setup);
+    loader.add(normalCircleUrl)
+      .add(hitCircleUrl)
+      .add(backgroundImgUrl)
+      .add(pauseButtonUrl)
+      .on("progress", loadProgressHandler)
+      .load(setup);
+
+    //游戏状态
+    let state;
+
+
+
+
+
+    function setup() {
+      //Initialize the game sprites, set the game `state` to `play`
+      //and start the 'gameLoop'
+
+
+      //设置与音符有关的变量 包括time_list type_list 等数组
+      set_variableAboutNotes();
+
+      //布局
+
+      //设置 背景图片
+      set_backgroundImg();
+
+      //加载游戏界面容器
+      app.stage.addChild(gameSceen);
+      gameSceen.position.set((screenWidth - gameWidth) / 2, (screenHeight - gameHeight) / 2);
+      gameSceen.visible = false;
+
+      //中线 测试用
+      // showMidlleLine()
+
+      //设置显示combo 和 perfect 的文字位置
+      //combo位置 和 combo前数字的位置
+      set_combo_num_box();
+
+      //perfect bad godd 位置 风格
+      set_hitType_box();
+
+
+      //设置7个圆圈和中心圆圈的位置大小
+      set_Circle();
+
+      //生成从中心飞来的各种combo圆圈
+      set_allnotes_sprite();
+
+      //设置键盘按钮的具体方法
+      set_keyboard();
+
+      //设置开始游戏的按钮,及其相应的点击事件
+      set_gameStartMessage();
+
+      //设置暂停游戏的按钮
+      set_pauseButton();
+
+      //从暂停返回游戏的文字
+      set_backToGameButton();
+
+
+      //Set the game state
+      state = readyForClick;
+
+
+      //游戏主循环
+      app.ticker.add(delta => gameLoop(delta));
+    }
+
+    function gameLoop(delta) {
+      //Runs the current game `state` in a loop and renders the sprites
+      t.update();
+      state(delta);
+    }
+
+    function readyForClick(delta) {
+
+    }
+
+    function readyForGame(delta) {
+
+    }
+
+    function pause(delta) {
+
+    }
+
+    function backToGame(delta) {
+
+    }
+
+    //当状态为Play是循环的函数
+    function play(delta) {
+      //决定 音符是否 开始移动
+      if (gameTimeOffset >= appear_time_list[endCount]) {
+        endCount++;
+      }
+      if (endCount <= allnotes.length) {
+        for (i = startCount; i < endCount; i++) {
+          note_moving(i);
+          //判断时间，是否该判断为bad音符
+          //bad 为延迟200毫秒 显示在 if 判断框中
+          if (gameTimeOffset >= (time_list[i] + 200)) {
+            if (is_hit[i] == false) {
+              allnotes_sprite[i].visible = false;
+              typeMessage.text = "bad";
+              comboMessage.visible = false;
+              comboNumMessage.visible = false;
+              comboNum = 0;
+              counter_onRoad[dest_list[i]]++;
+            }
+            startCount++;
+          }
+        }
+      }
+      //游戏结束,切换游戏状态
+      if (gameTimeOffset >= gameEndTime) {
+        console.log("game end");
+        state = end;
+      }
+    }
+
+    function end() {
+      //All the code that should run at the end of the game
+      //暂时想不出来
+      gameSceen.visible = false;
+    }
+
+
+
+
+
+
+
+
+
+    /*---------------------------------------------------------------------------------------------------*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //使用的自定函数
+
+    //图片加载时的加载函数
+    function loadProgressHandler(loader, resource) {
+      //Display the file `url` currently being loaded
+      console.log("loading: " + resource.url);
+
+      //If you gave your files names with the `add` method, you can access
+      //them like this
+      //console.log("loading: " + resource.name);
+
+      //Display the precentage of files currently loaded
+      console.log("progress: " + loader.progress + "%");
+    }
+
+    //音频加载时的加载函数
+    function trackMusicLoaded() {
+      console.log("已加载音频文件" + sounds.loaded + "/" + sounds.toLoad);
+    }
+
+    function ready_inThree() {
+      startGameMessage.visible = true;
+      startGameMessage.text = "3";
+    }
+
+    function ready_inTwo() {
+      startGameMessage.text = "2";
+    }
+
+    function ready_inOne() {
+      startGameMessage.text = "1";
+    }
+
+    function ready_go() {
+      startGameMessage.text = "Go";
+    }
+
+    function gameStart() {
+      startGameMessage.visible = false;
+      window.setInterval(function(){
+        gameTimeOffset += 5;
+      },5)
+      state = play;
+      backgroundMusic.play();
+    }
+
+    function setupMusic() {
+      console.log("set music");
+      backgroundMusic = sounds[backgroundMusicUrl];
+      for (i = 0; i < 7; i++) {
+        hitMusic.push(sounds[hitMusicUrl]);
+      }
+    }
+
+    function set_width_height_speed() {
+      screenWidth = window.innerWidth,
+        screenHeight = window.innerHeight,
+        gameHeight = screenHeight * 0.7,
+        gameWidth = gameHeight * 2;
+      if (gameWidth > screenWidth) {
+        gameWidth = screenWidth * 0.9;
+        gameHeight = gameWidth / 2;
+      }
+      half_gameWidth = gameWidth / 2,
+        half_gameHeight = gameHeight / 2,
+        gamespeed_coef = 1,
+        //也表示 每 1/60 秒 音符圆圈走过的距离
+        //即每秒 走 half_gameWidth * gamespeed_coef 的路程
+        gameSpeed = half_gameWidth * gamespeed_coef / 60,
+        //所以每个音符应该出现的提前 1/60 秒数为 advance_time,即音符走完全程所用的时间 为 advance_time * 1/60 秒
+        advance_time = 60 / gamespeed_coef;
+    }
+
+    //设置 num combo 的位置 风格
+    function set_combo_num_box() {
+      //combo位置 和 combo前数字的位置
+      comboStyle = new TextStyle({
+        fontFamily: "Arial",
+        fontSize: 36,
+        fill: "white",
+        stroke: '#ff3300',
+        strokeThickness: 4,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowBlur: 4,
+        dropShadowAngle: Math.PI / 6,
+        dropShadowDistance: 6,
+      });
+
+      comboMessage = new Text("Combo", comboStyle);
+
+      comboNumStyle = new TextStyle({
+        fontFamily: "Arial",
+        fontSize: 36,
+        fill: "white",
+        stroke: '#ff3300',
+        strokeThickness: 4,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowBlur: 4,
+        dropShadowAngle: Math.PI / 6,
+        dropShadowDistance: 6,
+      });
+
+      comboNumMessage = new Text("Num", comboNumStyle);
+
+      //Position it and add it to the stage
+      comboMessage.position.set(1.05 * half_gameWidth, 0.2 * gameHeight);
+      comboNumMessage.position.set(0.95 * half_gameWidth - comboNumMessage.width, 0.2 * gameHeight);
+      comboMessage.visible = false;
+      comboNumMessage.visible = false;
+      gameSceen.addChild(comboMessage);
+      gameSceen.addChild(comboNumMessage);
+
+    }
+    //设置 perfect good bad 的位置 风格
+    function set_hitType_box() {
+      //perfect 位置
+      perfectStyle = new TextStyle({
+        fontFamily: "Arial",
+        fontSize: 36,
+        fill: "white",
+        stroke: '#ff3300',
+        strokeThickness: 4,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowBlur: 4,
+        dropShadowAngle: Math.PI / 6,
+        dropShadowDistance: 6,
+      });
+
+      typeMessage = new Text("", perfectStyle);
+
+      //Position it and add it to the stage
+      typeMessage.position.set(half_gameWidth - comboMessage.width / 2, 0.4 * gameHeight);
+      gameSceen.addChild(typeMessage);
+    }
+    //键盘监听
+    function keyboard(keyCode) {
+      var key = {};
+      key.code = keyCode;
+      key.isDown = false;
+      key.isUp = true;
+      key.press = undefined;
+      key.release = undefined;
+      //The `downHandler`
+      key.downHandler = event => {
+        if (event.keyCode === key.code) {
+          if (key.isUp && key.press) key.press();
+          key.isDown = true;
+          key.isUp = false;
+        }
+        event.preventDefault();
+      };
+
+      //The `upHandler`
+      key.upHandler = event => {
+        if (event.keyCode === key.code) {
+          if (key.isDown && key.release) key.release();
+          key.isDown = false;
+          key.isUp = true;
+        }
+        event.preventDefault();
+      };
+
+      //Attach event listeners
+      window.addEventListener(
+        "keydown", key.downHandler.bind(key), false
+      );
+      window.addEventListener(
+        "keyup", key.upHandler.bind(key), false
+      );
+      return key;
+    }
+
+    //键盘按钮具体赋值
+    function set_keyboard() {
+      //key 的 按钮设置
+      //a
+      keyButton.push(keyboard(65));
+      //s
+      keyButton.push(keyboard(83));
+      //d
+      keyButton.push(keyboard(68));
+      //f
+      keyButton.push(keyboard(70));
+      //g
+      keyButton.push(keyboard(71));
+      //h
+      keyButton.push(keyboard(72));
+      //j
+      keyButton.push(keyboard(74));
+
+      //keyboard  函数 press 和 release 设置
+      for (i = 0; i < 7; i++) {
+        keyButton[i].press = () => {
+          if (state == play) {
+            let tempGameTime =gameTimeOffset-latencyTime;
+            let tempTime = time_list[trans_localToGlobal[i][counter_onRoad[i]]];
+            if ((tempGameTime > tempTime - goodLatencyTime) && (tempGameTime < tempTime + goodLatencyTime)) {
+              if ((tempGameTime > tempTime - perfectLatencyTime) && (tempGameTime < tempTime + perfectLatencyTime)) {
+                typeMessage.text = "Perfect";
+              }
+              else {
+                typeMessage.text = "Good";
+              }
+              comboNum++;
+              if (comboNum >= 2) {
+                comboNumMessage.text = comboNum;
+                comboNumMessage.visible = true;
+                comboMessage.visible = true;
+              }
+              hitMusic[i].play();
+              allnotes_sprite[trans_localToGlobal[i][counter_onRoad[i]]].visible = false;
+              is_hit[trans_localToGlobal[i][counter_onRoad[i]]] = true;
+              counter_onRoad[i]++;
+            }
+          }
+        }
+      }
+    }
+    function notes_speed_set(noteSprite, dest) {
+      switch (dest) {
+        case 0:
+          noteSprite.vx = -gameSpeed;
+          noteSprite.vy = 0;
+          break;
+        case 1:
+          noteSprite.vx = -0.866 * gameSpeed;
+          noteSprite.vy = 0.5 * gameSpeed;
+          break;
+        case 2:
+          noteSprite.vx = -0.5 * gameSpeed;
+          noteSprite.vy = 0.866 * gameSpeed;
+          break;
+        case 3:
+          noteSprite.vx = 0;
+          noteSprite.vy = gameSpeed;
+          break
+        case 4:
+          noteSprite.vx = 0.5 * gameSpeed;
+          noteSprite.vy = 0.866 * gameSpeed;
+          break
+        case 5:
+          noteSprite.vx = 0.866 * gameSpeed;
+          noteSprite.vy = 0.5 * gameSpeed;
+          break
+        case 6:
+          noteSprite.vx = gameSpeed;
+          noteSprite.vy = 0;
+          break
+      }
+    }
+
+
+
+    function note_moving(index) {
+      allnotes_sprite[index].x += allnotes_sprite[index].vx;
+      allnotes_sprite[index].y += allnotes_sprite[index].vy;
+      allnotes_sprite[index].scale_coef += 1 / (gamespeed_coef * 60);
+      allnotes_sprite[index].scale.set(allnotes_sprite[index].scale_coef, allnotes_sprite[index].scale_coef)
+      allnotes_sprite[index].x -= circle_width / (2 * gamespeed_coef * 60);
+      allnotes_sprite[index].y -= circle_width / (2 * gamespeed_coef * 60);
+    }
+
+    //设置运动的音符圆圈
+    function set_allnotes_sprite() {
+      for (i = 0; i < allnotes.length; i++) {
+        allnotes_sprite.push(new Sprite(resources[normalCircleUrl].texture));
+        //缩小为0
+        //运动方式的参数需要变化
+        allnotes_sprite[i].position.set(half_gameWidth, 0);
+        allnotes_sprite[i].scale_coef = 0;
+        allnotes_sprite[i].scale.set(0, 0);
+        gameSceen.addChild(allnotes_sprite[i]);
+        //设置速度和方向
+        notes_speed_set(allnotes_sprite[i], dest_list[i]);
+
+      }
+    }
+    //设置7个圆圈和中心圆圈的位置大小
+    function set_Circle() {
+      //载入 texture
+      for (i = 0; i < 7; i++) {
+        circle.push(new Sprite(resources[hitCircleUrl].texture));
+      }
+      center_circle = new Sprite(resources[hitCircleUrl].texture);
+
+      //圆圈出生的方位
+      center_position.centerWidth = screenWidth / 2;
+      center_position.centerHeight = (screenHeight - gameHeight) / 2;
+
+      //剩余7个圆圈的中心位置
+
+      circle_position_x.push(0);
+      circle_position_x.push(0.134 * half_gameWidth);
+      circle_position_x.push(0.5 * half_gameWidth);
+      circle_position_x.push(half_gameWidth);
+      circle_position_x.push(1.5 * half_gameWidth);
+      circle_position_x.push(1.866 * half_gameWidth);
+      circle_position_x.push(gameWidth);
+      circle_position_y.push(0);
+      circle_position_y.push(0.5 * half_gameWidth);
+      circle_position_y.push(0.866 * half_gameWidth);
+      circle_position_y.push(half_gameWidth);
+      circle_position_y.push(0.866 * half_gameWidth);
+      circle_position_y.push(0.5 * half_gameWidth);
+      circle_position_y.push(0);
+
+      circle_width = circle[0].width;
+      circle_height = circle[0].height;
+      half_circle_width = circle_width / 2;
+      half_circle_height = circle_height / 2;
+
+      //7个圆， 每个隔30度，计数从0开始
+      circle[0].position.set(circle_position_x[0] - half_circle_width,
+        circle_position_y[0] - half_circle_height);
+      circle[1].position.set(circle_position_x[1] - half_circle_width,
+        circle_position_y[1] - half_circle_height);
+      circle[2].position.set(circle_position_x[2] - half_circle_width,
+        circle_position_y[2] - half_circle_height);
+      circle[3].position.set(circle_position_x[3] - half_circle_width,
+        circle_position_y[3] - half_circle_height);
+      circle[4].position.set(circle_position_x[4] - half_circle_width,
+        circle_position_y[4] - half_circle_height);
+      circle[5].position.set(circle_position_x[5] - half_circle_width,
+        circle_position_y[5] - half_circle_height);
+      circle[6].position.set(circle_position_x[6] - half_circle_width,
+        circle_position_y[6] - half_circle_height);
+
+      center_circle.scale.set(0.01, 0.01);
+      center_circle.position.set(half_gameWidth, 0);
+
+
+      //添加圆圈分组
+      for (i = 0; i < 7; i++) {
+        gameSceen.addChild(circle[i]);
+      }
+      gameSceen.addChild(center_circle);
+
+    }
+    function set_backgroundImg() {
+      backgroundImgSprite = new Sprite(resources[backgroundImgUrl].texture);
+      backgroundImgSprite.width = 0.9 * screenWidth;
+      backgroundImgSprite.height = screenHeight;
+      backgroundImgSprite.position.set((screenWidth - backgroundImgSprite.width) / 2, 0);
+      app.stage.addChild(backgroundImgSprite)
+    }
+    function showMidlleLine() {
+      //中线
+      // let rectangle = new Graphics();
+      // rectangle.lineStyle(4, 0xFF3300, 1);
+      // rectangle.beginFill(0x66CCFF);
+      // rectangle.drawRect(0, 0, 20, gameHeight);
+      // rectangle.endFill();
+      // rectangle.x = half_gameWidth-rectangle.width/2;
+      // rectangle.y = 0;
+      // gameSceen.addChild(rectangle);
+    }
+    function set_variableAboutNotes() {
+      for (i = 0; i < allnotes.length; i++) {
+        //时间换算成毫秒
+        time_list.push(allnotes[i].time_sec * 1000);
+        //音符提前出现的时间 1000/60 注意单位换算
+        appear_time_list.push(time_list[i] - advance_time * 100 / 6);
+        //音符类型
+        type_list.push(allnotes[i].note_type);
+        //音符目标方向 用 0 -6 表示
+        dest_list.push(allnotes[i].dest);
+        //
+        is_hit.push(false);
+        switch (allnotes[i].dest) {
+          case 0:
+            trans_localToGlobal[0].push(i);
+            break;
+          case 1:
+            trans_localToGlobal[1].push(i);
+            break;
+          case 2:
+            trans_localToGlobal[2].push(i);
+            break;
+          case 3:
+            trans_localToGlobal[3].push(i);
+            break;
+          case 4:
+            trans_localToGlobal[4].push(i);
+            break;
+          case 5:
+            trans_localToGlobal[5].push(i);
+            break;
+          case 6:
+            trans_localToGlobal[6].push(i);
+            break;
+        }
+      };
+    }
+    function set_gameStartMessage() {
+      //设置开始游戏的按钮
+      startGameStyle = new TextStyle({
+        fontFamily: "Arial",
+        fontSize: 36,
+        fill: "white",
+        stroke: '#ff3300',
+        strokeThickness: 4,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowBlur: 4,
+        dropShadowAngle: Math.PI / 6,
+        dropShadowDistance: 6,
+      });
+
+      startGameMessage = new Text("点击开始游戏", startGameStyle);
+      startGameMessage.position.set((screenWidth - startGameMessage.width) / 2, (screenHeight - startGameMessage.height) / 2);
+      app.stage.addChild(startGameMessage)
+
+      t.makeInteractive(startGameMessage);
+      startGameMessage.press = () => {
+        console.log("startMessage is pressed");
+        startGameMessage.visible = false;
+        gameSceen.visible = true;
+        window.setTimeout(ready_inThree, 1000);
+        window.setTimeout(ready_inTwo, 2000);
+        window.setTimeout(ready_inOne, 3000);
+        window.setTimeout(ready_go, 4000);
+        window.setTimeout(gameStart, 5000);
+      }
+    }
+
+    function set_pauseButton() {
+      pauseButton = new Sprite(resources[pauseButtonUrl].texture)
+      //按钮设为60*60
+      pauseButton.width = 60;
+      pauseButton.height = 60;
+      pauseButton.position.set(-20, -20);
+      gameSceen.addChild(pauseButton);
+
+      t.makeInteractive(pauseButton);
+      pauseButton.press = () => {
+        state = pause;
+        pauseTime = gameTimeOffset;
+        backTOGameMessage.visible = true;
+        backgroundMusic.pause();
+      }
+    }
+
+    function set_backToGameButton() {
+      backToGameStyle = new TextStyle({
+        fontFamily: "Arial",
+        fontSize: 36,
+        fill: "white",
+        stroke: '#ff3300',
+        strokeThickness: 4,
+        dropShadow: true,
+        dropShadowColor: "#000000",
+        dropShadowBlur: 4,
+        dropShadowAngle: Math.PI / 6,
+        dropShadowDistance: 6,
+      });
+      backTOGameMessage = new Text("点击返回游戏", backToGameStyle);
+      backTOGameMessage.position.set((screenWidth - backTOGameMessage.width) / 2, (screenHeight - backTOGameMessage.height) / 2);
+      backTOGameMessage.visible = false;
+      gameSceen.addChild(backTOGameMessage);
+
+      t.makeInteractive(backTOGameMessage);
+      backTOGameMessage.press = () => {
+        state = backToGame;
+        backTOGameMessage.visible = false;
+        startGameMessage.visible = true;
+        window.setTimeout(ready_inThree, 0);
+        window.setTimeout(ready_inTwo, 1000);
+        window.setTimeout(ready_inOne, 2000);
+        window.setTimeout(function () {
+          gameTimeOffset=pauseTime;
+          backgroundMusic.play();
+          state = play;
+          startGameMessage.visible = false;
+        }, 3000);
+      }
+    }
+  </script>
+</body>
+
+</html>

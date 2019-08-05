@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hello World</title>
+</head>
+  <style>* {padding: 0; margin: 0}</style>
+  <script src="./pixi.min.js"></script>
+  <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<body>
+
+    <body>  
+            <!-- <h1>My First JavaScript</h1>
+            <p id="demo">This is a paragraph.</p>
+            <button type="button" onclick="displayDate()">
+            Display Date</button>
+        <p>  
+        <video src="music/music.wav" controls preload="auto" id="player"></video>
+        </p>  
+        <input name="submit" type="submit" onclick="showInfo()">  
+        <button type="button" onclick="showInfo()">点击showInfo</button> -->
+        <button type="button" onclick="myF()">点击myF</button>
+        <p>  
+     
+        <script language="javascript">  
+            var video;
+//           function showInfo(){ 
+//                var time;  
+//           var pl=document.getElementById("player");  
+//           time = pl.duration;
+//           console.log(time);
+//          }  
+//          function displayDate()
+// {
+// document.getElementById("demo").innerHTML=Date();
+// }
+
+        function myF(){
+           video = document.createElement("video");
+           var url = "music/music.wav"
+           video.src=url;
+           video.preload = 'metadata';
+           video.onloadedmetadata = function(){
+               url=video.src;
+               var time = video.duration;
+               console.log(time);
+           }
+        //    var time = video.duration;
+        //    window.URL.revokeObjectURL(url);
+        //    console.log(time);
+        //    console.log("duration"+video.duration)
+        }
+        </script>  
+        </p>
+
+
+</body>
+
+</html>

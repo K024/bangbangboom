@@ -1,0 +1,41 @@
+{
+    "backgroundImgUrl": "https://img.xiami.net/images/collect/452/52/6045452_1344162785.jpg",
+    "normalCircleUrl": "images/normalCircle.png",
+    "hitCircleUrl": "images/hitCircle.png",
+    "backgroundMusicUrl": "music/music.wav",
+    "hitMusicUrl": "music/shoot.wav",
+    "pauseButtonUrl":"images/pauseButton.jpg",
+    "musicEndTime":17.45415,
+    "notes": [
+        {
+            "time_sec": 1,
+            "note_type": 1,
+            "note_value": 1,
+            "dest": 1
+        },
+        {
+            "time_sec": 2,
+            "note_type": 1,
+            "note_value": 1,
+            "dest": 2
+        },
+        {
+            "time_sec": 3,
+            "note_type": 1,
+            "note_value": 1,
+            "dest": 3
+        },
+        {
+            "time_sec": 4,
+            "note_type": 1,
+            "note_value": 1,
+            "dest": 4
+        },
+        {
+            "time_sec": 5,
+            "note_type": 1,
+            "note_value": 1,
+            "dest": 5
+        }
+    ]
+}
