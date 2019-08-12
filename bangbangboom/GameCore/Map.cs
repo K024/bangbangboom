@@ -20,7 +20,7 @@ namespace bangbangboom.GameCore
     {
         /// <summary>左边第一条是0</summary>
         public int lane;
-        /// <summary>从计时点开始的128分音符数量</summary>
+        /// <summary>从计时点开始 1/24 个4分音符数量</summary>
         public int time;
     }
 
@@ -30,7 +30,7 @@ namespace bangbangboom.GameCore
         public int time;
     }
 
-    public class Bar : Note
+    public class Slide : Note
     {
         public List<Single> notes;
         public bool flickEnd;
@@ -66,7 +66,7 @@ namespace bangbangboom.GameCore
         {
             if (note is Single single) return single.time;
             else if (note is Flick flick) return flick.time;
-            else if (note is Bar longn) return longn.notes[0]?.time ?? 0;
+            else if (note is Slide longn) return longn.notes[0]?.time ?? 0;
             throw new ArgumentException();
         }
 
@@ -74,7 +74,7 @@ namespace bangbangboom.GameCore
         {
             if (note is Single single) return single.lane;
             else if (note is Flick flick) return flick.lane;
-            else if (note is Bar longn) return longn.notes[0]?.lane ?? 0;
+            else if (note is Slide longn) return longn.notes[0]?.lane ?? 0;
             throw new ArgumentException();
         }
         public static int Compare<T>(T left, T right, params Func<T, IComparable>[] props)
@@ -98,7 +98,7 @@ namespace bangbangboom.GameCore
                 tp.notes.Sort();
                 foreach (var note in tp.notes)
                 {
-                    if (note is Bar longn)
+                    if (note is Slide longn)
                     {
                         longn.notes.Sort();
                         all.AddRange(longn.notes);

@@ -1,7 +1,6 @@
 import Vue, { PluginObject } from 'vue'
-import CreateStore from '@/tools/CreateStore';
 
-const r = CreateStore({
+const r = Vue.observable({
     size: 0
 })
 

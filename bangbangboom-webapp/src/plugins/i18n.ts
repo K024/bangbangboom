@@ -1,13 +1,5 @@
 import Vue from 'vue'
-import Element from 'element-ui'
 import VueI18n from 'vue-i18n'
-
-// tslint:disable-next-line: no-var-requires
-const enLocale = require('element-ui/lib/locale/lang/en')
-// tslint:disable-next-line: no-var-requires
-const zhLocale = require('element-ui/lib/locale/lang/zh-CN')
-// tslint:disable-next-line: no-var-requires
-const jaLocale = require('element-ui/lib/locale/lang/ja')
 
 Vue.use(VueI18n)
 
@@ -26,6 +18,7 @@ const messages = {
             email: 'Email',
             available: 'Available',
             confirm: 'Confirm',
+            account: 'Account',
         },
         l: {
             register: 'Register:',
@@ -49,9 +42,9 @@ const messages = {
             pleaselogin: 'Please login first',
 
             neterror: "An error occurred with network connection",
-        },
 
-        ...enLocale,
+            notfound: "Page not found",
+        },
     },
     zh: {
         w: {
@@ -67,6 +60,7 @@ const messages = {
             email: '邮箱',
             available: '可用',
             confirm: '确认',
+            account: '个人账户',
         },
         l: {
             register: '注册:',
@@ -90,9 +84,9 @@ const messages = {
             pleaselogin: '请先登录',
 
             neterror: "网络连接故障",
-        },
 
-        ...zhLocale,
+            notfound: "页面不存在",
+        },
     },
     ja: {
         w: {
@@ -108,6 +102,7 @@ const messages = {
             email: 'メール',
             available: '利用可能',
             confirm: '確認',
+            account: 'アカウント',
         },
         l: {
             register: '新規登録:',
@@ -131,9 +126,9 @@ const messages = {
             pleaselogin: 'ログインしてください',
 
             neterror: "ネット接続エラーが発生しました",
-        },
 
-        ...jaLocale,
+            notfound: "ページが見つかりません",
+        },
     },
 }
 
@@ -141,10 +136,6 @@ const i18n = new VueI18n({
     locale: 'en',
     fallbackLocale: 'en',
     messages,
-})
-
-Vue.use(Element, {
-    i18n: (key: string, value: string) => i18n.t(key, value),
 })
 
 Vue.use(VueI18n)

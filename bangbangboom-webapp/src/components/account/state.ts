@@ -1,4 +1,4 @@
-import CreateStore from '@/tools/CreateStore'
+import Vue from 'vue'
 import axios, { AxiosError } from 'axios'
 
 export class User {
@@ -7,7 +7,7 @@ export class User {
     roles: string[] = []
 }
 
-const userstate = CreateStore({
+const userstate = Vue.observable({
     loginstate: false,
     currentuser: new User(),
     message: ""

@@ -37,3 +37,10 @@ declare module "vue-progressbar" {
         }
     }
 }
+
+
+declare module "vue-material" {
+    import { PluginObject } from "vue";
+    const VueMaterial: PluginObject<any>
+    export default VueMaterial
+}

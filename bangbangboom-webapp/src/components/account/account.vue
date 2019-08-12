@@ -2,7 +2,7 @@
     <div class="containder">
         <template v-if="true">
             <div class="only-g flex center login">{{$t('s.pleaselogin')}}</div>
-            <div class="only-s login">
+            <div class="login fade-in" v-if="$responsive.s">
                 <user-login></user-login>
             </div>
         </template>
