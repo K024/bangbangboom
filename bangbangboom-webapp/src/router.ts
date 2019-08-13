@@ -2,7 +2,7 @@ import Vue from "vue"
 import Router, { RouteConfig } from "vue-router"
 import i18n from "@/plugins/i18n"
 import home from '@/components/home.vue'
-import notfound from '@/components/notfound.vue'
+import notfound from '@/components/others/notfound.vue'
 import account from '@/components/account/account.vue'
 import register from '@/components/account/register.vue'
 import confirmemail from '@/components/account/confirmemail.vue'

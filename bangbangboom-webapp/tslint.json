@@ -32,6 +32,8 @@
     "no-console": false,
     "variable-name": false,
     "space-before-function-paren": false,
-    "max-line-length": false
+    "max-line-length": false,
+    "max-classes-per-file": false,
+    "radix": false
   }
 }

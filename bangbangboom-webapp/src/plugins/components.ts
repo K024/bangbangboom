@@ -1,4 +1,6 @@
 import Vue from 'vue'
+import VueSlider from 'vue-slider-component'
+import './vue-slider.scss'
 import VueProgressBar from 'vue-progressbar'
 
 const option: VueProgressBar.OptionType = {
@@ -12,4 +14,6 @@ const option: VueProgressBar.OptionType = {
 }
 
 Vue.use(VueProgressBar, option)
+
+Vue.component("md-slider", VueSlider)
 

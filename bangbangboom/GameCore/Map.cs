@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+// ------------------ out of date ----------------------
 namespace bangbangboom.GameCore
 {
     public abstract class Note : IComparable<Note>

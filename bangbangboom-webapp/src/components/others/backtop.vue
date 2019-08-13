@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { debounce, throttle } from "../tools/functions";
+import { debounce, throttle } from "../../tools/functions";
 export default Vue.extend({
     data: function() {
         return {

@@ -1,0 +1,9 @@
+@import "~vue-material/dist/theme/engine"; // Import the theme engine
+
+@include md-register-theme("default", ());
+
+@include md-register-theme("dark", (
+    theme: dark
+));
+
+@import "~vue-material/dist/theme/all"; // Apply the theme

@@ -1,5 +1,5 @@
 <template>
-    <div id="app">
+    <md-content id="app" md-theme="default">
         <div class="header">
             <div class="content" style="height: 100%;position: relative;">
                 <div class="left flex header-part">
@@ -71,14 +71,14 @@
         </div>
         <vue-progress-bar></vue-progress-bar>
         <back-top></back-top>
-    </div>
+    </md-content>
 </template>
 
 <script lang='ts'>
 import Vue from "vue";
 import { HideLoader } from "@/tools/loader";
 import userlogin from "./account/userlogin.vue";
-import backtop from "./backtop.vue";
+import backtop from "./others/backtop.vue";
 
 // tslint:disable-next-line
 interface Menu {

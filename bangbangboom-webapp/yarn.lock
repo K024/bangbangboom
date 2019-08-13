@@ -774,6 +774,11 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/howler@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.npm.taobao.org/@types/howler/download/@types/howler-2.1.1.tgz#b2ba53009cc8415da5bb01d625a734babba11435"
+  integrity sha1-srpTAJzIQV2luwHWJac0uruhFDU=
+
 "@types/minimatch@*":
   version "3.0.3"
   resolved "https://registry.npm.taobao.org/@types/minimatch/download/@types/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
@@ -3967,6 +3972,11 @@ hosted-git-info@^2.1.4:
   version "2.7.1"
   resolved "https://registry.npm.taobao.org/hosted-git-info/download/hosted-git-info-2.7.1.tgz#97f236977bd6e125408930ff6de3eec6281ec047"
   integrity sha1-l/I2l3vW4SVAiTD/bePuxigewEc=
+
+howler@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.npm.taobao.org/howler/download/howler-2.1.2.tgz#8433a09d8fe84132a3e726e05cb2bd352ef8bd49"
+  integrity sha1-hDOgnY/oQTKj5ybgXLK9NS74vUk=
 
 hpack.js@^2.1.6:
   version "2.1.6"
@@ -8074,7 +8084,7 @@ vue-progressbar@^0.7.5:
   resolved "https://registry.npm.taobao.org/vue-progressbar/download/vue-progressbar-0.7.5.tgz#414730892252b1e45582d4979dec93038e007f79"
   integrity sha1-QUcwiSJSseRVgtSXneyTA44Af3k=
 
-vue-property-decorator@^8.1.0:
+vue-property-decorator@^8.0.0, vue-property-decorator@^8.1.0:
   version "8.2.1"
   resolved "https://registry.npm.taobao.org/vue-property-decorator/download/vue-property-decorator-8.2.1.tgz#3791662033b20d20d098cb20e86fd23842982508"
   integrity sha1-N5FmIDOyDSDQmMsg6G/SOEKYJQg=
@@ -8086,6 +8096,13 @@ vue-router@^3.0.3:
   version "3.0.7"
   resolved "https://registry.npm.taobao.org/vue-router/download/vue-router-3.0.7.tgz?cache=0&sync_timestamp=1562164292099&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fvue-router%2Fdownload%2Fvue-router-3.0.7.tgz#b36ca107b4acb8ff5bc4ff824584059c23fcb87b"
   integrity sha1-s2yhB7SsuP9bxP+CRYQFnCP8uHs=
+
+vue-slider-component@^3.0.37:
+  version "3.0.37"
+  resolved "https://registry.npm.taobao.org/vue-slider-component/download/vue-slider-component-3.0.37.tgz#062308cbe915babc7ec295928e672eb9901ef664"
+  integrity sha1-BiMIy+kVurx+wpWSjmcuuZAe9mQ=
+  dependencies:
+    vue-property-decorator "^8.0.0"
 
 vue-style-loader@^4.1.0:
   version "4.1.2"
