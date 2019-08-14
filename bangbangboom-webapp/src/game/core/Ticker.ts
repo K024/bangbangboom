@@ -8,7 +8,10 @@ export class Ticker {
         return Date.now()
     }
 
-    Tick = (delta: number, now: number) => { /** */ }
+    private lastd = 0
+    get lastFrame() { return this.lastd }
+
+    Tick = new Set<(delta: number, now: number) => void>()
 
     private lasttime = this.Now()
 
@@ -36,8 +39,9 @@ export class Ticker {
             skipframecounter = this.SkipFrame
 
             const now = this.Now()
+            this.lastd = now - this.lasttime
             if (this.Tick)
-                this.Tick(now - this.lasttime, now)
+                this.Tick.forEach(t => t(this.lastd, now))
 
             this.lasttime = now
         }

@@ -8,7 +8,7 @@ export const PlayState = Vue.observable({
     soundid: 0,
     duration: 5,
     position: 1,
-    rate: 1,
+    half: false,
     playing: false,
 })
 
@@ -32,14 +32,11 @@ export const MetaState = Vue.observable({
     musicSrc: "",
     loadError: "",
 
-    mapName: "",
-    description: "",
-    backgroundImage: null as File | null,
     backgroundImageSrc: "",
     backgroundDim: 70,
 
-    backgroundCover: false,
-    lowPerformance: true,
+    backgroundCover: true,
+    lowPerformance: false,
 })
 
 export const GameMapState = Vue.observable(new GameMap())
@@ -61,7 +58,7 @@ vm.$watch(() => PlayState.music, n => {
     if (n) {
         PlayState.duration = n.duration()
         PlayState.position = 0
-        PlayState.rate = 1
+        PlayState.half = false
         PlayState.playing = false
         PlayState.soundid = n.play()
         n.pause(PlayState.soundid)
@@ -71,14 +68,14 @@ vm.$watch(() => PlayState.music, n => {
         })
     }
 })
-vm.$watch(() => PlayState.rate, n => {
+vm.$watch(() => PlayState.half, n => {
     if (PlayState.music)
-        PlayState.music.rate(n, PlayState.soundid)
+        PlayState.music.rate(n ? 0.5 : 1, PlayState.soundid)
 })
 
 export const ticker = new Ticker()
 ticker.SkipFrame = 0
-ticker.Tick = () => {
+ticker.Tick.add(() => {
     const s = PlayState
     const m = s.music
     if (m) {
@@ -88,9 +85,25 @@ ticker.Tick = () => {
     } else {
         s.playing = false
     }
-}
+})
 
 vm.$watch(() => MetaState.lowPerformance, n => {
     if (n) ticker.SkipFrame = 1
     else ticker.SkipFrame = 0
 })
+
+
+export function SecondToString(s: number) {
+    function padZero(n: number, len: number) {
+        const str = n.toString();
+        if (str.length >= len) return str;
+        return ("000000" + n).slice(-len);
+    }
+    s = Math.abs(s);
+    const minutes = Math.floor(s / 60);
+    s -= minutes * 60;
+    const seconds = Math.floor(s);
+    s -= seconds;
+    const milis = Math.floor(s * 1000);
+    return `${padZero(minutes, 2)}:${padZero(seconds, 2)}.${padZero(milis, 3)}`;
+}

@@ -27,14 +27,6 @@
                 <span class="md-subtitle m-right">Backgound Dim</span>
                 <md-slider style="flex-grow: 1" v-model="metastate.backgroundDim"></md-slider>
             </div>
-            <md-field>
-                <label>Map Name</label>
-                <md-input v-model="metastate.mapName"></md-input>
-            </md-field>
-            <md-field>
-                <label>Description for map</label>
-                <md-textarea class="md-scrollbar" md-autogrow v-model="metastate.description"></md-textarea>
-            </md-field>
             <div class="flex">
                 <md-switch v-model="metastate.lowPerformance">Lower Performance</md-switch>
                 <md-switch v-model="metastate.backgroundCover">Backgound Cover</md-switch>
@@ -78,10 +70,8 @@ export default Vue.extend({
             const files = e.target && (e.target as HTMLInputElement).files;
             if (files && files.length) {
                 const file = files.item(0);
-                MetaState.backgroundImage = file;
                 MetaState.backgroundImageSrc = URL.createObjectURL(file);
             } else {
-                MetaState.backgroundImage = null;
                 MetaState.backgroundImageSrc = "";
             }
         }

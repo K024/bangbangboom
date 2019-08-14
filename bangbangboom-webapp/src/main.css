@@ -59,6 +59,10 @@ button.md-button {
     }
 }
 
+.dark-bg {
+    background-color: #80808040 !important;
+}
+
 /* smaller device */
 @media only screen and (max-width: 768px) {
     .only-g {

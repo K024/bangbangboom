@@ -1,6 +1,15 @@
 
 // tslint:disable
 
+declare module '*.vue' {
+    import Vue from 'vue';
+    export default Vue;
+}
+declare module '*.wav' {
+    const name: string
+    export default name;
+}
+
 declare module "vue-progressbar" {
     import { PluginFunction } from "vue";
 

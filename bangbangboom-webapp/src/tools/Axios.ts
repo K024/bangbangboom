@@ -15,8 +15,7 @@ const GetXSRFHeader = async () => {
         const result = await api.get<string>('xsrf')
         api.defaults.headers.post['X-XSRF-TOKEN'] = result.data;
     } catch (error) {
-        console.log("Get csrf failed, retry after 60s.")
-        setTimeout(GetXSRFHeader, 60 * 1000)
+        console.log("Get csrf failed.")
     }
 }
 GetXSRFHeader()

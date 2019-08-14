@@ -1,6 +1,11 @@
 
+function trackString() {
+    return Math.random().toString(36).substring(2, 15)
+}
 
-export abstract class Note { }
+export abstract class Note {
+    track = trackString()
+}
 
 /**
  * 单点
@@ -49,7 +54,7 @@ export class Slide extends Note {
  */
 export class TimePoint {
     /**
-     * 计时点开始时间
+     * 计时点开始时间，秒
      */
     time = 0
     /**
@@ -61,16 +66,58 @@ export class TimePoint {
      */
     bpb = 4
     notes: Note[] = []
+
+    beatTime() {
+        return 60 / this.bpm
+    }
+
+    getBeat(t: number) {
+        if (t < this.time) return null
+        const bt = this.beatTime()
+        const bar = bt * this.bpb
+        let off = t - this.time
+        const barCount = Math.floor(off / bar)
+        off -= barCount * bar
+        const beatCount = Math.floor(off / bt)
+        off -= beatCount * bt
+        return {
+            bar: barCount + 1,
+            beat: beatCount + 1,
+            offset: off
+        }
+    }
+
+    track = trackString()
 }
 
 export class GameMap {
     timepoints: TimePoint[] = []
 
+    getNextTimePoint(t: number) {
+        this.timepoints.sort((a, b) => a.time - b.time)
+        for (const tp of this.timepoints) {
+            if (tp.time > t)
+                return tp
+        }
+        return null
+    }
+
+    getCurrentTimePoint(t: number) {
+        this.timepoints.sort((a, b) => a.time - b.time)
+        let prev: TimePoint | null = null
+        for (const tp of this.timepoints) {
+            if (tp.time > t)
+                break
+            prev = tp
+        }
+        return prev
+    }
+
     toMapString() {
         const buffer = ["\n"]
 
         for (const tp of this.timepoints) {
-            buffer.push("\n+|", tp.time.toString(), "|", tp.bpm.toString(), "|", tp.bpb.toString(), "\n\n")
+            buffer.push("\n+|", tp.time.toString(), "|", tp.bpm.toString(), "|", tp.bpb.toFixed(), "\n\n")
 
             for (const note of tp.notes) {
                 if (note instanceof Single) {
@@ -109,7 +156,7 @@ export class GameMap {
             const tp = new TimePoint()
             tp.time = pf(items[1])
             tp.bpm = pf(items[2])
-            tp.bpb = pf(items[3])
+            tp.bpb = pi(items[3])
             gamemap.timepoints.push(tp)
         }
         function addSingle(items: string[]) {

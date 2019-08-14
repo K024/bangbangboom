@@ -3,19 +3,19 @@
         <div class="md-title" style="margin: 30px">Mapping is recommended in larger devices</div>
         <md-content style="background-color: black" md-theme="dark" class="map-editor only-g">
             <div class="background-image" :style="backgroundStyle"></div>
-            <md-content class="flex fill-w">
-                <md-tabs :md-active-tab="tab" @md-changed="tabchange" style="flex-grow: 1">
-                    <md-tab id="tab-meta" md-label="Meta"></md-tab>
-                    <md-tab id="tab-timing" md-label="Timing"></md-tab>
-                    <md-tab id="tab-mapping" md-label="Mapping"></md-tab>
+            <md-content class="flex fill-w dark-bg">
+                <md-tabs :md-active-tab="tab" style="flex-grow: 1">
+                    <md-tab id="tab-meta" md-label="Meta" to="/mapping#meta" replace></md-tab>
+                    <md-tab id="tab-timing" md-label="Timing" to="/mapping#timing" replace></md-tab>
+                    <md-tab id="tab-mapping" md-label="Mapping" to="/mapping#mapping" replace></md-tab>
                 </md-tabs>
                 <md-button class="md-icon-button" @click="$router.back()">
                     <md-icon>navigate_before</md-icon>
                 </md-button>
             </md-content>
             <meta-tab class="tab fade-in" v-show="tab === 'tab-meta'"></meta-tab>
-            <div class="tab" v-show="tab === 'tab-timing'">timing</div>
-            <div class="tab" v-show="tab === 'tab-mapping'">mapping</div>
+            <timing-tab class="tab fade-in" v-if="tab === 'tab-timing'"></timing-tab>
+            <div class="tab fade-in" v-if="tab === 'tab-mapping'">mapping</div>
             <player-bar></player-bar>
         </md-content>
     </div>
@@ -25,18 +25,19 @@
 import Vue from "vue";
 import player from "./components/player.vue";
 import meta from "./components/meta.vue";
+import timing from "./components/timing.vue";
 import { PlayState, MetaState, togglePlay, ticker } from "./state";
-
-function spacePause(e: KeyboardEvent) {
-    if (e.keyCode === 32) {
-        togglePlay();
-    }
-}
+import { Route } from "vue-router";
+import {
+    addKeyDownListener,
+    removeKeyDownListeners
+} from "../../tools/functions";
 
 export default Vue.extend({
     components: {
         "player-bar": player,
-        "meta-tab": meta
+        "meta-tab": meta,
+        "timing-tab": timing
     },
     data: function() {
         return {
@@ -57,6 +58,17 @@ export default Vue.extend({
             };
         }
     },
+    watch: {
+        $route: {
+            immediate: true,
+            handler: function(n: Route) {
+                if (!n.hash) this.$router.replace("/mapping#meta");
+                else {
+                    this.tab = "tab-" + n.hash.slice(1);
+                }
+            }
+        }
+    },
     methods: {
         tabchange: function(tab: string) {
             this.tab = tab;
@@ -64,11 +76,11 @@ export default Vue.extend({
     },
     mounted: function() {
         ticker.Start();
-        window.addEventListener("keydown", spacePause);
+        addKeyDownListener(32, togglePlay);
     },
     beforeDestroy: function() {
         ticker.Stop();
-        window.removeEventListener("keydown", spacePause);
+        removeKeyDownListeners(togglePlay);
     }
 });
 </script>
