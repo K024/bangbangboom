@@ -9,6 +9,17 @@
                     <md-tab id="tab-timing" md-label="Timing" to="/mapping#timing" replace></md-tab>
                     <md-tab id="tab-mapping" md-label="Mapping" to="/mapping#mapping" replace></md-tab>
                 </md-tabs>
+                <div class="flex center buttons">
+                    <md-button class="md-icon-button" @click="undo" :disabled="!undostate.canUndo">
+                        <md-icon>undo</md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button" @click="redo" :disabled="!undostate.canRedo">
+                        <md-icon>redo</md-icon>
+                    </md-button>
+                    <md-button class="md-icon-button" @click="save">
+                        <md-icon>save_alt</md-icon>
+                    </md-button>
+                </div>
                 <md-button class="md-icon-button" @click="$router.back()">
                     <md-icon>navigate_before</md-icon>
                 </md-button>
@@ -30,8 +41,10 @@ import { PlayState, MetaState, togglePlay, ticker } from "./state";
 import { Route } from "vue-router";
 import {
     addKeyDownListener,
-    removeKeyDownListeners
+    removeKeyDownListeners,
+    addKeyDownListenerEx
 } from "../../tools/functions";
+import { undoState, saveState } from "./gamemapstate";
 
 export default Vue.extend({
     components: {
@@ -56,7 +69,8 @@ export default Vue.extend({
                     ? "cover"
                     : "contain"
             };
-        }
+        },
+        undostate: () => undoState
     },
     watch: {
         $route: {
@@ -72,15 +86,42 @@ export default Vue.extend({
     methods: {
         tabchange: function(tab: string) {
             this.tab = tab;
+        },
+        undo: undoState.Undo,
+        redo: undoState.Redo,
+        save: function() {
+            saveState();
+            this.$toasted.success("Saved in local store");
         }
     },
     mounted: function() {
         ticker.Start();
-        addKeyDownListener(32, togglePlay);
+        addKeyDownListener(32, togglePlay, this);
+        addKeyDownListenerEx(
+            e => {
+                return e.ctrlKey && !e.shiftKey && e.keyCode === 90 /* z */;
+            },
+            undoState.Undo,
+            this
+        );
+        addKeyDownListenerEx(
+            e => {
+                return e.ctrlKey && e.shiftKey && e.keyCode === 90 /* z */;
+            },
+            undoState.Redo,
+            this
+        );
+        addKeyDownListenerEx(
+            e => {
+                return e.ctrlKey && e.keyCode === 83 /* s */;
+            },
+            this.save,
+            this
+        );
     },
     beforeDestroy: function() {
         ticker.Stop();
-        removeKeyDownListeners(togglePlay);
+        removeKeyDownListeners(this);
     }
 });
 </script>
@@ -110,7 +151,9 @@ export default Vue.extend({
 }
 .tab {
     flex-grow: 1;
-    padding: 20px;
     overflow: hidden;
+}
+.buttons {
+    margin: 0 20px;
 }
 </style>

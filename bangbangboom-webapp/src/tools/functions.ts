@@ -1,6 +1,4 @@
 
-// tslint:disable: ban-types
-
 /**
  * 清除抖动
  * Promise可能不会被resolve

@@ -19,8 +19,10 @@ export default Vue.extend({
         };
     },
     methods: {
-        // tslint:disable-next-line
-        onscroll: function() {},
+        onscroll: function() {
+            // later throttled
+            this.visible = window.pageYOffset >= 200;
+        },
         scrolltop: function() {
             if (!this.el.scrollTop) this.el = document.body;
             const half = this.el.scrollTop / 2 + 20;
@@ -35,10 +37,7 @@ export default Vue.extend({
     },
     mounted() {
         this.el = document.documentElement;
-        this.onscroll = throttle(
-            500,
-            () => (this.visible = window.pageYOffset >= 200)
-        );
+        this.onscroll = throttle(500, this.onscroll);
         document.addEventListener("scroll", this.onscroll);
     },
     beforeDestroy() {

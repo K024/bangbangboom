@@ -1,10 +1,10 @@
 
-function trackString() {
+export function trackid() {
     return Math.random().toString(36).substring(2, 15)
 }
 
 export abstract class Note {
-    track = trackString()
+    track = trackid()
 }
 
 /**
@@ -83,18 +83,18 @@ export class TimePoint {
         return {
             bar: barCount + 1,
             beat: beatCount + 1,
-            offset: off
+            offset: off,
+            totalbeat: barCount * this.bpb + beatCount + 1,
         }
     }
 
-    track = trackString()
+    track = trackid()
 }
 
 export class GameMap {
     timepoints: TimePoint[] = []
 
     getNextTimePoint(t: number) {
-        this.timepoints.sort((a, b) => a.time - b.time)
         for (const tp of this.timepoints) {
             if (tp.time > t)
                 return tp
@@ -103,7 +103,6 @@ export class GameMap {
     }
 
     getCurrentTimePoint(t: number) {
-        this.timepoints.sort((a, b) => a.time - b.time)
         let prev: TimePoint | null = null
         for (const tp of this.timepoints) {
             if (tp.time > t)
@@ -207,3 +206,38 @@ export class GameMap {
     }
 }
 
+function copyStatic<T>(from: T, to: T) {
+    for (const key in from) {
+        if (from[key] instanceof Object) continue
+        to[key] = from[key]
+    }
+}
+
+export function copyGameMap(m: GameMap) {
+    const n = new GameMap()
+    m.timepoints.forEach(tp => {
+        const ntp = new TimePoint()
+        copyStatic(tp, ntp)
+        tp.notes.forEach(note => {
+            let nn: Note = new Single()
+            if (note instanceof Single) {
+                nn = new Single()
+                copyStatic(note, nn)
+            } else if (note instanceof Flick) {
+                nn = new Flick()
+                copyStatic(note, nn)
+            } else if (note instanceof Slide) {
+                nn = new Slide()
+                copyStatic(note, nn)
+                note.notes.forEach(nts => {
+                    const nnn = new Single()
+                    copyStatic(nts, nnn);
+                    (nn as Slide).notes.push(nnn)
+                })
+            }
+            ntp.notes.push(nn)
+        })
+        n.timepoints.push(ntp)
+    })
+    return n
+}

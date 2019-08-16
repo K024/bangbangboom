@@ -1,15 +1,20 @@
 import Vue from 'vue'
-import { Howl, Howler } from 'howler'
-import { GameMap } from '../core/MapCore';
-import { Ticker } from '../core/Ticker';
+import { Howl } from 'howler'
+import { Ticker, MinTicker } from '../core/Ticker';
 
 export const PlayState = Vue.observable({
     music: null as Howl | null,
     soundid: 0,
     duration: 5,
+    /** *** should not be depended in large component in any way *** */
     position: 1,
     half: false,
     playing: false,
+})
+
+export const SoundTime = Vue.observable({
+    /** *** should not be depended in large component in any way *** */
+    value: 0
 })
 
 export function seekPercent(p: number) {
@@ -30,7 +35,6 @@ export function togglePlay() {
 
 export const MetaState = Vue.observable({
     musicSrc: "",
-    loadError: "",
 
     backgroundImageSrc: "",
     backgroundDim: 70,
@@ -39,15 +43,18 @@ export const MetaState = Vue.observable({
     lowPerformance: false,
 })
 
-export const GameMapState = Vue.observable(new GameMap())
-
 const vm = new Vue()
 vm.$watch(() => MetaState.musicSrc, n => {
     if (n) {
         PlayState.music = null
         const h = new Howl({ src: n, format: "mp3" })
-        h.once("load", () => PlayState.music = h)
-        h.once("loaderror", (id, err) => MetaState.loadError = "Please try to reload the file")
+        h.once("load", () => {
+            PlayState.music = h
+            PlayState.duration = h.duration()
+        })
+        h.once("loaderror", (id, err) => Vue.toasted.error("Load music error"))
+        h.on("play", () => PlayState.playing = true)
+        h.on("seek", sid => PlayState.position = h.seek(undefined, sid) as number)
     } else {
         if (PlayState.music)
             PlayState.music.unload()
@@ -78,9 +85,8 @@ ticker.SkipFrame = 0
 ticker.Tick.add(() => {
     const s = PlayState
     const m = s.music
-    if (m) {
+    if (m && s.playing) {
         s.position = m.seek(undefined, s.soundid) as number
-        s.duration = m.duration()
         s.playing = m.playing(s.soundid)
     } else {
         s.playing = false
@@ -91,7 +97,16 @@ vm.$watch(() => MetaState.lowPerformance, n => {
     if (n) ticker.SkipFrame = 1
     else ticker.SkipFrame = 0
 })
-
+export const minTicker = new MinTicker();
+minTicker.Tick.add(() => {
+    const s = PlayState
+    const m = s.music
+    if (m && s.playing) {
+        SoundTime.value = m.seek(undefined, s.soundid) as number
+    } else {
+        s.playing = false
+    }
+})
 
 export function SecondToString(s: number) {
     function padZero(n: number, len: number) {

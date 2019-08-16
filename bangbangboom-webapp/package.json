@@ -21,7 +21,8 @@
     "vue-progressbar": "^0.7.5",
     "vue-property-decorator": "^8.1.0",
     "vue-router": "^3.0.3",
-    "vue-slider-component": "^3.0.37"
+    "vue-slider-component": "^3.0.37",
+    "vue-toasted": "^1.1.27"
   },
   "devDependencies": {
     "@types/chai": "^4.1.0",

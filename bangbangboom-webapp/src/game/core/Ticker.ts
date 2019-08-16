@@ -1,19 +1,15 @@
+function Now() {
+    if (performance)
+        return performance.now()
+    return Date.now()
+}
 
 export class Ticker {
     SkipFrame = 0;
 
-    private Now() {
-        if (performance)
-            return performance.now()
-        return Date.now()
-    }
-
-    private lastd = 0
-    get lastFrame() { return this.lastd }
-
     Tick = new Set<(delta: number, now: number) => void>()
 
-    private lasttime = this.Now()
+    private lasttime = Now()
 
     private StopFlag = true
     private EndFlag = true
@@ -38,18 +34,41 @@ export class Ticker {
             }
             skipframecounter = this.SkipFrame
 
-            const now = this.Now()
-            this.lastd = now - this.lasttime
+            const now = Now()
             if (this.Tick)
-                this.Tick.forEach(t => t(this.lastd, now))
+                this.Tick.forEach(t => t(now - this.lasttime, now))
 
             this.lasttime = now
         }
-        this.lasttime = this.Now()
+        this.lasttime = Now()
         func()
     }
 
     Stop() {
         this.StopFlag = true
+    }
+}
+
+export class MinTicker {
+
+    Tick = new Set<(delta: number, now: number) => void>()
+
+    private lasttime = Now()
+    private interval = 0
+    private started = false
+
+    Start() {
+        if (this.started) return
+        this.started = true
+        this.interval = setInterval(() => {
+            const now = Now()
+            this.Tick.forEach(t => t(now - this.lasttime, now))
+            this.lasttime = now
+        })
+    }
+
+    Stop() {
+        clearInterval(this.interval)
+        this.started = false
     }
 }

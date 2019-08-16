@@ -32,9 +32,6 @@
                 <md-switch v-model="metastate.backgroundCover">Backgound Cover</md-switch>
             </div>
         </div>
-        <md-snackbar :md-active.sync="showSnackbar" md-persistent>
-            <span>Music load error: {{metastate.loadError}}</span>
-        </md-snackbar>
     </div>
 </template>
 
@@ -45,8 +42,7 @@ export default Vue.extend({
     data: function() {
         return {
             musicSource: "local",
-            musicId: "",
-            showSnackbar: false
+            musicId: ""
         };
     },
     computed: {
@@ -63,7 +59,8 @@ export default Vue.extend({
                     MetaState.musicSrc = "";
                 }
             } else {
-                MetaState.loadError = "To be implemented";
+                // todo
+                this.$toasted.error("To be implemented");
             }
         },
         changeBackground(e: Event) {
@@ -73,16 +70,6 @@ export default Vue.extend({
                 MetaState.backgroundImageSrc = URL.createObjectURL(file);
             } else {
                 MetaState.backgroundImageSrc = "";
-            }
-        }
-    },
-    watch: {
-        "metastate.loadError": function(n) {
-            if (n) {
-                this.showSnackbar = true;
-                setTimeout(() => {
-                    if (MetaState.loadError === n) MetaState.loadError = "";
-                }, 4000);
             }
         }
     }
@@ -95,12 +82,9 @@ export default Vue.extend({
 }
 .panel {
     max-width: 500px;
-    margin: auto;
+    margin: 20px auto;
 }
 .m-bottom {
     margin-bottom: 20px;
-}
-.md-snackbar {
-    z-index: 10010;
 }
 </style>
