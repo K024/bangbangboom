@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "es2015",
+    "module": "esNext",
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,

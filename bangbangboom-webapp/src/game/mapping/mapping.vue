@@ -26,7 +26,7 @@
             </md-content>
             <meta-tab class="tab fade-in" v-show="tab === 'tab-meta'"></meta-tab>
             <timing-tab class="tab fade-in" v-if="tab === 'tab-timing'"></timing-tab>
-            <div class="tab fade-in" v-if="tab === 'tab-mapping'">mapping</div>
+            <mapping-tab class="tab fade-in" v-if="tab === 'tab-mapping'"></mapping-tab>
             <player-bar></player-bar>
         </md-content>
     </div>
@@ -37,6 +37,7 @@ import Vue from "vue";
 import player from "./components/player.vue";
 import meta from "./components/meta.vue";
 import timing from "./components/timing.vue";
+import mapping from "./components/mapping.vue";
 import { PlayState, MetaState, togglePlay, ticker } from "./state";
 import { Route } from "vue-router";
 import {
@@ -50,7 +51,8 @@ export default Vue.extend({
     components: {
         "player-bar": player,
         "meta-tab": meta,
-        "timing-tab": timing
+        "timing-tab": timing,
+        "mapping-tab": mapping
     },
     data: function() {
         return {

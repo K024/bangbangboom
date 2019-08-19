@@ -163,6 +163,7 @@ export default Vue.extend({
         stopmeasure: function() {
             // later debounced
             this.measuring = false;
+            this.set();
         },
         measure: function() {
             if (!this.selected || !PlayState.playing) return;
@@ -174,7 +175,6 @@ export default Vue.extend({
                 const { bpm, offset } = calcmeasure(this.taps);
                 this.inputbpm = bpm.toFixed(3);
                 this.inputoffset = offset.toFixed(3);
-                this.set();
             }
         },
         movebeat: function(forward = false) {

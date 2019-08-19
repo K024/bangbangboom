@@ -3,37 +3,10 @@ import Router, { RouteConfig } from "vue-router"
 import i18n from "@/plugins/i18n"
 import home from '@/components/home.vue'
 import notfound from '@/components/others/notfound.vue'
-import account from '@/components/account/account.vue'
-import register from '@/components/account/register.vue'
-import confirmemail from '@/components/account/confirmemail.vue'
-import forgotpass from '@/components/account/forgotpass.vue'
-import resetpass from '@/components/account/resetpass.vue'
-import mapping from '@/game/mapping/mapping.vue'
+// import mapping from '@/game/mapping/mapping.vue'
+import { accountRoutes } from './components/account/routes';
 
 Vue.use(Router);
-
-const accountRoutes: RouteConfig[] = [{
-    path: '/account',
-    component: account,
-    meta: { title: "w.account" },
-}, {
-    path: '/account/register',
-    component: register,
-    meta: { title: "w.register" },
-}, {
-    path: '/account/confirmemail',
-    component: confirmemail,
-    meta: { title: "w.register" },
-}, {
-    path: '/account/forgotpass',
-    component: forgotpass,
-    meta: { title: "w.forgotpass" },
-}, {
-    path: '/account/resetpass',
-    component: resetpass,
-    meta: { title: "w.forgotpass" },
-},
-]
 
 export const router = new Router({
     mode: "history",
@@ -46,8 +19,13 @@ export const router = new Router({
         ...accountRoutes
         , {
             path: '/mapping',
-            component: mapping,
+            // component: mapping,
+            component: () => import("@/game/mapping/mapping.vue"),
             meta: { title: "w.mapping" },
+        }, {
+            path: '/play',
+            // component: mapping,
+            component: () => import("@/game/play/play.vue"),
         }, {
             path: '*',
             component: notfound,
