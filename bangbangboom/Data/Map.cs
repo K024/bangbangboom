@@ -29,11 +29,12 @@ namespace bangbangboom.Data
         [MaxLength(100)]
         public string ImageFileHash { get; set; }
 
-        public long PlayCount { get; set; }
         public bool Proved { get; set; } = false;
         public virtual List<Rate> Rates { get; set; }
+        public virtual List<PlayRecord> PlayRecords { get; set; }
         public virtual List<Comment> Comments { get; set; }
 
         public bool Locked { get; set; } = false;
+        public bool Deleted { get; set; } = false;
     }
 }

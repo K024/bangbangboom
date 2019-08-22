@@ -12,14 +12,13 @@ import { PlayState, minTicker, SoundTime } from "../../state";
 import { MinTicker } from "@/game/core/Ticker";
 import { lazyObject } from "@/tools/functions";
 
-import tickurl from "../../../assets/timing_tick.wav";
-import tackurl from "../../../assets/timing_tack.wav";
+import { assets } from "../../../assets/assetsmap";
 import { TimePoint } from "../../../core/MapCore";
 import { GameMapState } from "../../gamemapstate";
 
 const sounds = lazyObject({
-    tick: () => new Howl({ src: tickurl }),
-    tack: () => new Howl({ src: tackurl })
+    tick: () => new Howl({ src: assets.timing_tick }),
+    tack: () => new Howl({ src: assets.timing_tack })
 });
 
 export default Vue.extend({
@@ -27,8 +26,14 @@ export default Vue.extend({
         mute: { type: Boolean },
         selected: { type: TimePoint }
     },
+    data: function() {
+        return {
+            active: true
+        };
+    },
     computed: {
         padopacities: function(): Array<{ id: number; opacity: number }> {
+            if (!this.active) return [];
             const tp =
                 this.selected ||
                 GameMapState.s.getCurrentTimePoint(PlayState.position);
@@ -54,11 +59,18 @@ export default Vue.extend({
         }
     },
     mounted: function() {
-        const soundloaded = sounds.tick && sounds.tack;
+        const soundload = sounds.tick && sounds.tack;
+        this.active = true;
         this.$watch(
             () => SoundTime.value,
             (n, p) => {
-                if (!PlayState.music || !PlayState.playing || this.mute) return;
+                if (
+                    !this.active ||
+                    !PlayState.music ||
+                    !PlayState.playing ||
+                    this.mute
+                )
+                    return;
                 const tp =
                     this.selected || GameMapState.s.getCurrentTimePoint(n);
                 if (!tp) return;
@@ -73,6 +85,12 @@ export default Vue.extend({
             }
         );
         minTicker.Start();
+    },
+    activated: function() {
+        this.active = true;
+    },
+    deactivated: function() {
+        this.active = false;
     },
     beforeDestroy: function() {
         minTicker.Stop();
@@ -101,6 +119,7 @@ export default Vue.extend({
     width: 100%;
     height: 100%;
     background-color: cornflowerblue;
+    will-change: opacity;
 }
 .pad :first-child > * {
     background-color: darkorange;

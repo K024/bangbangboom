@@ -1,15 +1,15 @@
 <template>
     <div class="flex bar">
-        <div class="flex center time">{{ playstate.position | time }}</div>
+        <div class="flex center time" ref="time"></div>
         <div ref="bar" class="bar" @click="barclick">
             <div class="layer flex">
                 <div class="mid-line"></div>
             </div>
             <div class="layer">
-                <div class="timepoint" v-for="tp in timepoints" :key="tp.track" :style="leftstyle(tp.time)"></div>
+                <div class="timepoint" v-for="tp in timepoints" :key="tp.track" :style="{left:leftstyle(tp.time)}"></div>
             </div>
             <div class="layer" v-if="playstate.music">
-                <div class="progress" :style="progressTrans"></div>
+                <div class="progress" ref="progress"></div>
             </div>
         </div>
         <div class="flex center time">{{ playstate.duration | time }}</div>
@@ -26,16 +26,13 @@ export default Vue.extend({
     },
     computed: {
         playstate: () => PlayState,
-        progressTrans: function(): object {
-            return this.leftstyle(PlayState.position);
-        },
         timepoints: () => GameMapState.s.timepoints
     },
     methods: {
         leftstyle: function(time: number) {
             const r = PlayState.duration > 0 ? time / PlayState.duration : 0;
             const p = r * 100;
-            return { left: `${p}%` };
+            return `${p}%`;
         },
         barclick: function(e: MouseEvent) {
             const bar = this.$refs.bar as HTMLElement;
@@ -43,6 +40,17 @@ export default Vue.extend({
             const p = x / bar.clientWidth;
             seekPercent(p);
         }
+    },
+    mounted: function() {
+        this.$watch(
+            () => PlayState.position,
+            n => {
+                (this.$refs
+                    .progress as HTMLElement).style.left = this.leftstyle(n);
+                (this.$refs.time as HTMLElement).innerHTML = SecondToString(n);
+            },
+            { immediate: true }
+        );
     }
 });
 </script>
@@ -63,15 +71,13 @@ export default Vue.extend({
     height: 100%;
 }
 .mid-line {
-    height: 1px;
     width: 100%;
-    background-color: white;
+    border-bottom: 1px solid white;
 }
 .progress {
     position: absolute;
-    width: 4px;
     height: 100%;
-    background-color: red;
+    border-left: 4px solid red;
 }
 .timepoint {
     position: absolute;

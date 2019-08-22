@@ -9,6 +9,14 @@ declare module '*.wav' {
     const name: string
     export default name;
 }
+declare module '*.png' {
+    const name: string
+    export default name;
+}
+declare module '*.mp3' {
+    const name: string
+    export default name;
+}
 
 declare module "vue-progressbar" {
     import { PluginFunction } from "vue";

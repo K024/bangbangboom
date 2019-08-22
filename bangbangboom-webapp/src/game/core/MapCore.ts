@@ -5,6 +5,26 @@ export function trackid() {
 
 export abstract class Note {
     track = trackid()
+
+    getTime(): number {
+        if (this instanceof Single || this instanceof Flick) {
+            return this.time
+        }
+        if (this instanceof Slide) {
+            return this.notes[0].time
+        }
+        return -1
+    }
+
+    getLane(): number {
+        if (this instanceof Single || this instanceof Flick) {
+            return this.lane
+        }
+        if (this instanceof Slide) {
+            return this.notes[0].lane
+        }
+        return -1
+    }
 }
 
 /**

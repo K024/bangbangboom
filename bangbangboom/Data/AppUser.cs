@@ -15,5 +15,6 @@ namespace bangbangboom.Data
 
         public virtual List<Music> UploadedMusics { get; set; }
         public virtual List<Map> UploadedMaps { get; set; }
+        public virtual List<Favorite> Favorites { get; set; }
     }
 }

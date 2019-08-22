@@ -58,17 +58,30 @@ namespace bangbangboom.Data
                 r => r.Username,
                 r => r.User);
 
+            modelBuilder.ManyToAppUser<PlayRecord>(
+                r => r.Username,
+                r => r.User);
+
+            modelBuilder.ManyToAppUser<Favorite>(
+                r => r.Username,
+                r => r.User,
+                u => u.Favorites);
+
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.SubComments)
                 .HasForeignKey(c => c.ParentCommentId);
 
             modelBuilder.Entity<LikeDislike>()
-                .HasIndex(l => new { l.Username, l.CommentId })
+                .HasIndex(l => new { l.CommentId, l.Username })
                 .IsUnique();
 
             modelBuilder.Entity<Rate>()
-                .HasIndex(l => new { l.Username, l.MapId })
+                .HasIndex(l => new { l.MapId, l.Username })
+                .IsUnique();
+
+            modelBuilder.Entity<Favorite>()
+                .HasIndex(l => new { l.MapId, l.Username })
                 .IsUnique();
         }
 

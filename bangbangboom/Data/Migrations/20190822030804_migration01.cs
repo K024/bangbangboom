@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace bangbangboom.Data.Migrations
 {
-    public partial class temp : Migration
+    public partial class migration01 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -54,7 +54,8 @@ namespace bangbangboom.Data.Migrations
                     Description = table.Column<string>(maxLength: 400, nullable: true),
                     Date = table.Column<DateTime>(nullable: false),
                     FileHash = table.Column<string>(maxLength: 100, nullable: true),
-                    Locked = table.Column<bool>(nullable: false)
+                    Locked = table.Column<bool>(nullable: false),
+                    Deleted = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,9 +81,9 @@ namespace bangbangboom.Data.Migrations
                     Date = table.Column<DateTime>(nullable: false),
                     MapContent = table.Column<string>(nullable: true),
                     ImageFileHash = table.Column<string>(maxLength: 100, nullable: true),
-                    PlayCount = table.Column<long>(nullable: false),
                     Proved = table.Column<bool>(nullable: false),
-                    Locked = table.Column<bool>(nullable: false)
+                    Locked = table.Column<bool>(nullable: false),
+                    Deleted = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -131,6 +132,60 @@ namespace bangbangboom.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Comments_AspNetUsers_Username",
+                        column: x => x.Username,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "UserName",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Favorite",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Username = table.Column<string>(nullable: false),
+                    MapId = table.Column<long>(nullable: false),
+                    DateTime = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Favorite", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Favorite_Maps_MapId",
+                        column: x => x.MapId,
+                        principalTable: "Maps",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Favorite_AspNetUsers_Username",
+                        column: x => x.Username,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "UserName",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayRecord",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Username = table.Column<string>(nullable: false),
+                    MapId = table.Column<long>(nullable: false),
+                    DateTime = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayRecord", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayRecord_Maps_MapId",
+                        column: x => x.MapId,
+                        principalTable: "Maps",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlayRecord_AspNetUsers_Username",
                         column: x => x.Username,
                         principalTable: "AspNetUsers",
                         principalColumn: "UserName",
@@ -207,14 +262,25 @@ namespace bangbangboom.Data.Migrations
                 column: "Username");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LikeDislikes_CommentId",
-                table: "LikeDislikes",
-                column: "CommentId");
+                name: "IX_Favorite_Username",
+                table: "Favorite",
+                column: "Username");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LikeDislikes_Username_CommentId",
+                name: "IX_Favorite_MapId_Username",
+                table: "Favorite",
+                columns: new[] { "MapId", "Username" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LikeDislikes_Username",
                 table: "LikeDislikes",
-                columns: new[] { "Username", "CommentId" },
+                column: "Username");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LikeDislikes_CommentId_Username",
+                table: "LikeDislikes",
+                columns: new[] { "CommentId", "Username" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -233,21 +299,37 @@ namespace bangbangboom.Data.Migrations
                 column: "UploaderName");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rates_MapId",
-                table: "Rates",
+                name: "IX_PlayRecord_MapId",
+                table: "PlayRecord",
                 column: "MapId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rates_Username_MapId",
+                name: "IX_PlayRecord_Username",
+                table: "PlayRecord",
+                column: "Username");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rates_Username",
                 table: "Rates",
-                columns: new[] { "Username", "MapId" },
+                column: "Username");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rates_MapId_Username",
+                table: "Rates",
+                columns: new[] { "MapId", "Username" },
                 unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Favorite");
+
+            migrationBuilder.DropTable(
                 name: "LikeDislikes");
+
+            migrationBuilder.DropTable(
+                name: "PlayRecord");
 
             migrationBuilder.DropTable(
                 name: "Rates");

@@ -31,6 +31,7 @@ namespace bangbangboom.Data
         [MaxLength(100)]
         public string FileHash { get; set; }
         public bool Locked { get; set; } = false;
+        public bool Deleted { get; set; } = false;
 
         public virtual List<Map> Maps { get; set; }
     }

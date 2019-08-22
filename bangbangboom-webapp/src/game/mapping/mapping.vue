@@ -25,8 +25,12 @@
                 </md-button>
             </md-content>
             <meta-tab class="tab fade-in" v-show="tab === 'tab-meta'"></meta-tab>
-            <timing-tab class="tab fade-in" v-if="tab === 'tab-timing'"></timing-tab>
-            <mapping-tab class="tab fade-in" v-if="tab === 'tab-mapping'"></mapping-tab>
+            <keep-alive>
+                <timing-tab class="tab fade-in" v-if="tab === 'tab-timing'"></timing-tab>
+            </keep-alive>
+            <keep-alive>
+                <mapping-tab class="tab fade-in" v-if="tab === 'tab-mapping'"></mapping-tab>
+            </keep-alive>
             <player-bar></player-bar>
         </md-content>
     </div>

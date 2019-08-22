@@ -3,7 +3,7 @@
         <div class="timing">
             <div class="panel">
                 <div class="md-title">Time points</div>
-                <md-table class="dark-bg" v-model="timepoints" @md-selected="onselect" :md-selected-value="selected">
+                <md-table class="dark-bg" v-model="timepoints" :md-selected-value.sync="selected">
                     <md-table-empty-state md-description="No time points"></md-table-empty-state>
                     <md-table-row slot="md-table-row" slot-scope="{ item }" md-selectable="single">
                         <md-table-cell md-label="Time offset">{{item.time | time}}</md-table-cell>
@@ -135,9 +135,6 @@ export default Vue.extend({
         }
     },
     methods: {
-        onselect: function(item: TimePoint) {
-            this.selected = item;
-        },
         setoffset: function() {
             this.inputoffset = PlayState.position.toFixed(3);
         },
@@ -185,6 +182,12 @@ export default Vue.extend({
         },
         unselect: function() {
             this.selected = null;
+        },
+        addKeyListeners: function() {
+            addKeyDownListener(46 /* del */, this.remove, this);
+            addKeyDownListener(84 /* t */, this.measure, this);
+            addKeyDownListener(13 /* enter */, this.set, this);
+            addKeyDownListener(27 /* esc */, this.unselect, this);
         }
     },
     watch: {
@@ -197,11 +200,14 @@ export default Vue.extend({
         }
     },
     mounted: function() {
-        addKeyDownListener(46 /* del */, this.remove, this);
-        addKeyDownListener(84 /* t */, this.measure, this);
-        addKeyDownListener(13 /* enter */, this.set, this);
-        addKeyDownListener(27 /* esc */, this.unselect, this);
+        this.addKeyListeners();
         this.stopmeasure = debounce(3000, this.stopmeasure);
+    },
+    activated: function() {
+        this.addKeyListeners();
+    },
+    deactivated: function() {
+        removeKeyDownListeners(this);
     },
     beforeDestroy: function() {
         removeKeyDownListeners(this);
