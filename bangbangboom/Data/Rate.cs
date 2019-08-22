@@ -1,0 +1,23 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace bangbangboom.Data
+{
+
+    public class Rate
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long Id { get; set; }
+
+        public string Username { get; set; }
+        public virtual AppUser User { get; set; }
+
+        public long MapId { get; set; }
+        public virtual Map Map { get; set; }
+
+        public int RateScore { get; set; }
+    }
+}

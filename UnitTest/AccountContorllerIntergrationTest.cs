@@ -170,7 +170,7 @@ namespace UnitTest
             result.EnsureSuccessStatusCode();
 
             Assert.IsNotNull(TestEmailSender.Emails[email]);
-            GetGuidAndToken(TestEmailSender.Emails[email], out var guid, out var token);
+            GetGuidAndToken(TestEmailSender.Emails[email], out var guid, out _);
 
             var form2 = Form(new
             {
@@ -201,7 +201,7 @@ namespace UnitTest
             result.EnsureSuccessStatusCode();
 
             Assert.IsNotNull(TestEmailSender.Emails[email]);
-            GetGuidAndToken(TestEmailSender.Emails[email], out var guid, out var token);
+            GetGuidAndToken(TestEmailSender.Emails[email], out _, out var token);
 
             var form2 = Form(new
             {

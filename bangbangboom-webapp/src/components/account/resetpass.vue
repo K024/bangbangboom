@@ -1,30 +1,23 @@
 <template>
     <div class="flex center">
-        <div class="form-panel">
-            <el-alert v-if="sent" type="success" show-icon :closable="false">
-                <div style="font-size: 14px">{{$t('s.resetpasssuccess')}}</div>
-            </el-alert>
+        <div class="form-panel fade-in">
+            <md-empty-state v-if="sent" class="md-primary" md-icon="done" :md-description="$t('s.resetpasssuccess')"></md-empty-state>
             <template v-else>
-                <div>{{$t('l.resetpass')}}</div>
-                <div class="flex">
-                    <el-input :placeholder="$t('s.enterpass')" v-model="password" show-password class="input"></el-input>
-                    <i v-if="passwordValid" class="el-icon-success" style="color:#67c23a"></i>
-                    <el-tooltip v-else-if="password" effect="dark" :content="$t('s.validpass')" placement="top">
-                        <i class="el-icon-error" style="color:#f56c6c"></i>
-                    </el-tooltip>
-                </div>
-                <div class="flex">
-                    <el-input :placeholder="$t('s.enterpass2')" v-model="password2" show-password class="input"></el-input>
-                    <i v-if="password2 && password != password2" class="el-icon-error" style="color:#f56c6c"></i>
-                    <i v-if="password2 && password == password2" class="el-icon-success" style="color:#67c23a"></i>
-                </div>
-                <el-button
-                    type="primary"
-                    plain
-                    class="fill-w"
+                <div class="md-title">{{$t('l.resetpass')}}</div>
+                <md-field :class="{'md-invalid': password && !passwordValid}">
+                    <label>{{$t('s.enterpass')}}</label>
+                    <md-input v-model="password" type="password"></md-input>
+                    <span class="md-error">{{$t('s.validpass')}}</span>
+                </md-field>
+                <md-field :class="{'md-invalid': password2 && password != password2}">
+                    <label>{{$t('s.enterpass2')}}</label>
+                    <md-input v-model="password2" type="password"></md-input>
+                </md-field>
+                <md-button
+                    class="fill-w md-primary md-raised"
                     @click="confirm"
                     :disabled="!inputValid"
-                >{{$t('w.confirm')}}</el-button>
+                >{{$t('w.confirm')}}</md-button>
             </template>
         </div>
     </div>

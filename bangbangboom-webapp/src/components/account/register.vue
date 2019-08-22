@@ -1,39 +1,23 @@
 <template>
     <div class="flex center">
-        <div class="form-panel">
-            <el-alert v-if="sent" type="success" show-icon :closable="false">
-                <div style="font-size: 14px">{{$t('s.sentemail')}}</div>
-            </el-alert>
+        <div class="form-panel fade-in">
+            <md-empty-state v-if="sent" class="md-primary" md-icon="done" :md-description="$t('s.sentemail')"></md-empty-state>
             <template v-else>
-                <div>{{$t('w.register')}}</div>
-                <el-input v-model="email" :placeholder="$t('w.email')" style="display: block"></el-input>
-                <div class="flex">
-                    <el-alert
-                        class="inline"
-                        type="info"
-                        :closable="false"
-                        v-if="state == 'checking'"
-                    >{{$t('s.checking')}}</el-alert>
-                    <el-alert
-                        class="inline"
-                        type="warning"
-                        :closable="false"
-                        v-else-if="state == 'registered'"
-                    >{{$t('s.emialregistered')}}</el-alert>
-                    <el-alert
-                        class="inline"
-                        type="success"
-                        :closable="false"
-                        v-else-if="state == 'acceptable'"
-                    >{{$t('w.available')}}</el-alert>&nbsp;
-                </div>
-                <el-button
-                    type="primary"
-                    plain
-                    class="fill-w"
+                <div class="md-title">{{$t('w.register')}}</div>
+                <md-field :class="{'md-invalid': state == 'registered'}">
+                    <label>{{$t('w.email')}}</label>
+                    <md-input v-model="email"></md-input>
+                    <div v-if="state == 'checking'" class="md-input-action">
+                        <md-progress-spinner :md-diameter="20" :md-stroke="2" md-mode="indeterminate"></md-progress-spinner>
+                    </div>
+                    <span v-if="state == 'acceptable'" class="md-helper-text">{{$t('w.available')}}</span>
+                    <span class="md-error">{{$t('s.emialregistered')}}</span>
+                </md-field>
+                <md-button
+                    class="fill-w md-primary md-raised"
                     @click="confirm"
                     :disabled="state != 'acceptable'"
-                >{{$t('w.confirm')}}</el-button>
+                >{{$t('w.confirm')}}</md-button>
             </template>
         </div>
     </div>
@@ -79,7 +63,7 @@ export default Vue.extend({
                     else this.state = "registered";
                 } catch (error) {
                     this.state = "empty";
-                    this.$message.error(this.$t("s.neterror") as string);
+                    // this.$message.error(this.$t("s.neterror") as string);
                 }
             } else {
                 this.state = "empty";

@@ -17,6 +17,261 @@ namespace bangbangboom.Data.Migrations
                 .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("bangbangboom.Data.AppUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("AccessFailedCount");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken();
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256);
+
+                    b.Property<bool>("EmailConfirmed");
+
+                    b.Property<bool>("LockoutEnabled");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd");
+
+                    b.Property<string>("NickName")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("PasswordHash");
+
+                    b.Property<string>("PhoneNumber");
+
+                    b.Property<bool>("PhoneNumberConfirmed");
+
+                    b.Property<string>("ProfileFileHash")
+                        .HasMaxLength(100);
+
+                    b.Property<string>("SecurityStamp");
+
+                    b.Property<bool>("TwoFactorEnabled");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(256);
+
+                    b.Property<string>("WhatsUp")
+                        .HasMaxLength(300);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Comment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(200);
+
+                    b.Property<DateTime>("DateTime");
+
+                    b.Property<bool>("Locked");
+
+                    b.Property<long>("MapId");
+
+                    b.Property<long?>("ParentCommentId");
+
+                    b.Property<string>("Username")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MapId");
+
+                    b.HasIndex("ParentCommentId");
+
+                    b.HasIndex("Username");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Favorite", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("DateTime");
+
+                    b.Property<long>("MapId");
+
+                    b.Property<string>("Username")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username");
+
+                    b.HasIndex("MapId", "Username")
+                        .IsUnique();
+
+                    b.ToTable("Favorite");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.LikeDislike", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long>("CommentId");
+
+                    b.Property<bool>("IsDislike");
+
+                    b.Property<string>("Username")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username");
+
+                    b.HasIndex("CommentId", "Username")
+                        .IsUnique();
+
+                    b.ToTable("LikeDislikes");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Map", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<bool>("Deleted");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(400);
+
+                    b.Property<string>("ImageFileHash")
+                        .HasMaxLength(100);
+
+                    b.Property<bool>("Locked");
+
+                    b.Property<string>("MapContent");
+
+                    b.Property<string>("MapName")
+                        .HasMaxLength(100);
+
+                    b.Property<long>("MusicId");
+
+                    b.Property<bool>("Proved");
+
+                    b.Property<string>("UploaderName")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MusicId");
+
+                    b.HasIndex("UploaderName");
+
+                    b.ToTable("Maps");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Music", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Artist")
+                        .HasMaxLength(100);
+
+                    b.Property<string>("ArtistUnicode")
+                        .HasMaxLength(100);
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<bool>("Deleted");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(400);
+
+                    b.Property<string>("FileHash")
+                        .HasMaxLength(100);
+
+                    b.Property<bool>("Locked");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(100);
+
+                    b.Property<string>("TitleUnicode")
+                        .HasMaxLength(100);
+
+                    b.Property<string>("UploaderName")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UploaderName");
+
+                    b.ToTable("Musics");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.PlayRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("DateTime");
+
+                    b.Property<long>("MapId");
+
+                    b.Property<string>("Username")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MapId");
+
+                    b.HasIndex("Username");
+
+                    b.ToTable("PlayRecord");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Rate", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long>("MapId");
+
+                    b.Property<int>("RateScore");
+
+                    b.Property<string>("Username")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Username");
+
+                    b.HasIndex("MapId", "Username")
+                        .IsUnique();
+
+                    b.ToTable("Rates");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -57,56 +312,6 @@ namespace bangbangboom.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("AccessFailedCount");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken();
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256);
-
-                    b.Property<bool>("EmailConfirmed");
-
-                    b.Property<bool>("LockoutEnabled");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("PasswordHash");
-
-                    b.Property<string>("PhoneNumber");
-
-                    b.Property<bool>("PhoneNumberConfirmed");
-
-                    b.Property<string>("SecurityStamp");
-
-                    b.Property<bool>("TwoFactorEnabled");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasName("UserNameIndex");
-
-                    b.ToTable("AspNetUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -174,6 +379,103 @@ namespace bangbangboom.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("bangbangboom.Data.Comment", b =>
+                {
+                    b.HasOne("bangbangboom.Data.Map", "Map")
+                        .WithMany("Comments")
+                        .HasForeignKey("MapId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("bangbangboom.Data.Comment", "ParentComment")
+                        .WithMany("SubComments")
+                        .HasForeignKey("ParentCommentId");
+
+                    b.HasOne("bangbangboom.Data.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("Username")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Favorite", b =>
+                {
+                    b.HasOne("bangbangboom.Data.Map", "Map")
+                        .WithMany()
+                        .HasForeignKey("MapId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("bangbangboom.Data.AppUser", "User")
+                        .WithMany("Favorites")
+                        .HasForeignKey("Username")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.LikeDislike", b =>
+                {
+                    b.HasOne("bangbangboom.Data.Comment", "Comment")
+                        .WithMany("LikeDislikes")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("bangbangboom.Data.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("Username")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Map", b =>
+                {
+                    b.HasOne("bangbangboom.Data.Music", "Music")
+                        .WithMany("Maps")
+                        .HasForeignKey("MusicId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("bangbangboom.Data.AppUser", "Uploader")
+                        .WithMany("UploadedMaps")
+                        .HasForeignKey("UploaderName")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Music", b =>
+                {
+                    b.HasOne("bangbangboom.Data.AppUser", "Uploader")
+                        .WithMany("UploadedMusics")
+                        .HasForeignKey("UploaderName")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.PlayRecord", b =>
+                {
+                    b.HasOne("bangbangboom.Data.Map", "Map")
+                        .WithMany("PlayRecords")
+                        .HasForeignKey("MapId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("bangbangboom.Data.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("Username")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Rate", b =>
+                {
+                    b.HasOne("bangbangboom.Data.Map", "Map")
+                        .WithMany("Rates")
+                        .HasForeignKey("MapId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("bangbangboom.Data.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("Username")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole")
@@ -184,7 +486,7 @@ namespace bangbangboom.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser")
+                    b.HasOne("bangbangboom.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -192,7 +494,7 @@ namespace bangbangboom.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser")
+                    b.HasOne("bangbangboom.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -205,7 +507,7 @@ namespace bangbangboom.Data.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser")
+                    b.HasOne("bangbangboom.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -213,7 +515,7 @@ namespace bangbangboom.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser")
+                    b.HasOne("bangbangboom.Data.AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);

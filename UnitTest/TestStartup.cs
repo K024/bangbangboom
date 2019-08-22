@@ -15,10 +15,11 @@ namespace UnitTest
 {
     class TestStartup : Startup
     {
-        private string dbfilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        private readonly string dbfilename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             "Desktop", "test.sqlite");
 
-        public TestStartup(IConfiguration configuration) : base(configuration)
+        public TestStartup(IConfiguration configuration, IHostingEnvironment environment) 
+            : base(configuration, environment)
         {
             if (File.Exists(dbfilename)) File.Delete(dbfilename);
             configuration["Domain"] = "localhost:5001";

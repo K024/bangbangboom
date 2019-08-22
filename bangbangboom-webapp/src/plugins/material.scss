@@ -1,0 +1,16 @@
+@import "~vue-material/dist/theme/engine"; // Import the theme engine
+
+@include md-register-theme("default", (
+    theme: light,
+    background: #fff,
+    background-variant: #fafafa,
+));
+
+@include md-register-theme("dark", (
+    theme: dark,
+    background: rgba(0,0,0,0),
+    background-variant: rgba(0,0,0,0),
+    background-on-background: rgba(0,0,0,0)
+));
+
+@import "~vue-material/dist/theme/all"; // Apply the theme

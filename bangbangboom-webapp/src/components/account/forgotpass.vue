@@ -1,19 +1,18 @@
 <template>
     <div class="flex center">
-        <div class="form-panel">
-            <el-alert v-if="sent" type="success" show-icon :closable="false">
-                <div style="font-size: 14px">{{$t('s.sentemail')}}</div>
-            </el-alert>
+        <div class="form-panel fade-in">
+            <md-empty-state v-if="sent" class="md-primary" md-icon="done" :md-description="$t('s.sentemail')"></md-empty-state>
             <template v-else>
-                <div>{{$t('l.forgotpass')}}</div>
-                <el-input v-model="email" :placeholder="$t('w.email')" style="display: block"></el-input>
-                <el-button
-                    type="primary"
-                    plain
-                    class="fill-w"
+                <div class="md-title">{{$t('l.forgotpass')}}</div>
+                <md-field>
+                    <label>{{$t('w.email')}}</label>
+                    <md-input v-model="email"></md-input>
+                </md-field>
+                <md-button
+                    class="fill-w md-primary md-raised"
                     @click="confirm"
-                    :disabled="emailvalid"
-                >{{$t('w.confirm')}}</el-button>
+                    :disabled="!emailvalid"
+                >{{$t('w.confirm')}}</md-button>
             </template>
         </div>
     </div>

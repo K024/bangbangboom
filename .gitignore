@@ -13,6 +13,12 @@
 # nohup output file
 nohup*
 
+# hashfileprovider directory
+.hashfiles
+
+# Personal test file
+.Test.cs
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

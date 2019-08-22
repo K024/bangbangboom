@@ -35,7 +35,7 @@ namespace UnitTest
         public static async Task<HttpClient> GetClientWithCsrfAsync()
         {
             var client = Factory.CreateClient();
-            var token = await client.GetAsync("api/csrf");
+            var token = await client.GetAsync("api/xsrf");
             token.EnsureSuccessStatusCode();
             client.DefaultRequestHeaders.Add("X-CSRF-TOKEN", await token.Content.ReadAsStringAsync());
             return client;

@@ -1,8 +1,9 @@
 
 body {
     margin: 0;
-    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-        "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    min-height: 0;
+    font-family: "PingFang SC",
+        "Microsoft YaHei", Arial, sans-serif;
 }
 
 .icon-profile {
@@ -10,6 +11,7 @@ body {
     
     background-size:100% 100%;
     background-repeat:no-repeat;
+    fill: #505050;
 }
 
 .flex {
@@ -33,6 +35,32 @@ body {
 
 .form-panel > * {
     margin: 15px 0;
+}
+
+button.md-button {
+    text-transform: none;
+}
+
+.fade-in {
+    animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.94)
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1)
+    }
+}
+
+.dark-bg {
+    background-color: #80808040 !important;
 }
 
 /* smaller device */

@@ -1,8 +1,8 @@
 <template>
     <div class="home">
         <div>Home</div>
-        <el-button @click="$Progress.set(20)">progress start</el-button>
-        <el-button @click="$Progress.finish()">progress finish</el-button>
+        <md-button @click="$Progress.set(20)">progress start</md-button>
+        <md-button @click="$Progress.finish()">progress finish</md-button>
     </div>
 </template>
 

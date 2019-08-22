@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "es2015",
+    "module": "esNext",
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
@@ -10,6 +10,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+    "noImplicitAny": true,
     "baseUrl": ".",
     "types": [
       "webpack-env",

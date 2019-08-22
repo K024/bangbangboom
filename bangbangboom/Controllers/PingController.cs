@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using bangbangboom.Data;
@@ -32,6 +33,13 @@ namespace bangbangboom.Controllers
         public object Post()
         {
             return "pong";
+        }
+
+        // POST api/ping/echo
+        [HttpPost("echo")]
+        public object PostEcho([FromForm][Required] string message)
+        {
+            return message;
         }
     }
 }
