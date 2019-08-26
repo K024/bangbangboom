@@ -281,20 +281,17 @@ export default Vue.extend({
     mounted: function() {
         const p = this.$refs.panel as HTMLElement;
         this.$watch(
-            () => this.position * this.timeHeightFactor,
+            () => Math.floor(this.position * this.timeHeightFactor),
             n => {
                 if (!this.active) return;
-                p.style.transform = `translateY(${this.position *
-                    this.timeHeightFactor}px)`;
+                p.style.transform = `translateY(${n}px)`;
             },
             { immediate: true }
         );
         this.$watch(
             () => this.timeHeightFactor * this.paddedDuration,
             n => {
-                if (!this.active) return;
-                p.style.height =
-                    this.paddedDuration * this.timeHeightFactor + "px";
+                p.style.height = n + "px";
             },
             { immediate: true }
         );

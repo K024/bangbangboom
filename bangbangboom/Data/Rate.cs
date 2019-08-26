@@ -12,7 +12,7 @@ namespace bangbangboom.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
-        public string Username { get; set; }
+        public string UserId { get; set; }
         public virtual AppUser User { get; set; }
 
         public long MapId { get; set; }

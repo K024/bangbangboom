@@ -13,7 +13,7 @@ namespace bangbangboom.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
-        public string UploaderName { get; set; }
+        public string UploaderId { get; set; }
         public virtual AppUser Uploader { get; set; }
 
         public long MusicId { get; set; }
@@ -21,6 +21,9 @@ namespace bangbangboom.Data
 
         [MaxLength(100)]
         public string MapName { get; set; }
+
+        public double Difficulty { get; set; }
+
         [MaxLength(400)]
         public string Description { get; set; }
         public DateTime Date { get; set; }

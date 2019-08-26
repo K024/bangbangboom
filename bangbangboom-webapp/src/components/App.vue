@@ -106,10 +106,10 @@ export default Vue.extend({
     computed: {
         menus(): Menu[] {
             return [
-                { text: this.$t("w.search") as string, to: "search" },
-                { text: this.$t("w.ranking") as string, to: "ranking" },
-                { text: this.$t("w.favorites") as string, to: "favorites" },
-                { text: this.$t("w.mapping") as string, to: "mapping" }
+                { text: this.$t("w.search") as string, to: "/search" },
+                { text: this.$t("w.ranking") as string, to: "/ranking" },
+                { text: this.$t("w.favorites") as string, to: "/favorites" },
+                { text: this.$t("w.mapping") as string, to: "/mapping" }
             ];
         },
         locales(): Locale[] {

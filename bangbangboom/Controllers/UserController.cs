@@ -41,7 +41,7 @@ namespace bangbangboom.Controllers
             };
         }
 
-        [HttpGet("{username}")]
+        [HttpGet("info/{username}")]
         public async Task<object> GetUser(
             [Required]string username)
         {

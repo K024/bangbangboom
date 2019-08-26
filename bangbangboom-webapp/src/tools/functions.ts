@@ -72,17 +72,21 @@ export function lazyObject<Keys extends keyof any, Values>(obj: { [K in Keys]: (
     return o
 }
 
-const listenermap = new Map<object, Array<(e: KeyboardEvent) => void>>()
+const listenermap = new Map<object, Set<(e: KeyboardEvent) => void>>()
 
 export function addKeyDownListener(keycode: number, func: () => void, trackobj: object | null = null) {
     if (!trackobj) trackobj = func
     const listener = (e: KeyboardEvent) => {
         if (e.keyCode === keycode) func()
     }
-    window.addEventListener("keydown", listener)
     const list = listenermap.get(trackobj)
-    if (list) list.push(listener)
-    else listenermap.set(trackobj, [listener])
+    if (list) {
+        if (list.has(listener)) return
+        list.add(listener)
+    } else {
+        listenermap.set(trackobj, new Set([listener]))
+    }
+    window.addEventListener("keydown", listener)
 }
 
 export function addKeyDownListenerEx(keycode: (e: KeyboardEvent) => boolean, func: () => void, trackobj: object | null = null) {
@@ -90,15 +94,20 @@ export function addKeyDownListenerEx(keycode: (e: KeyboardEvent) => boolean, fun
     const listener = (e: KeyboardEvent) => {
         if (keycode(e)) func()
     }
-    window.addEventListener("keydown", listener)
     const list = listenermap.get(trackobj)
-    if (list) list.push(listener)
-    else listenermap.set(trackobj, [listener])
+    if (list) {
+        if (list.has(listener)) return
+        list.add(listener)
+    } else {
+        listenermap.set(trackobj, new Set([listener]))
+    }
+    window.addEventListener("keydown", listener)
 }
 
 export function removeKeyDownListeners(trackobj: object) {
     const list = listenermap.get(trackobj)
     if (list) {
         list.forEach(i => window.removeEventListener("keydown", i))
+        list.clear()
     }
 }

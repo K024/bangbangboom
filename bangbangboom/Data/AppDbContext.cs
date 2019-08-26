@@ -36,52 +36,21 @@ namespace bangbangboom.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ManyToAppUser<Music>(
-                m => m.UploaderName,
-                m => m.Uploader,
-                u => u.UploadedMusics);
-
-            modelBuilder.ManyToAppUser<Map>(
-                m => m.UploaderName,
-                m => m.Uploader,
-                u => u.UploadedMaps);
-
-            modelBuilder.ManyToAppUser<Rate>(
-                r => r.Username,
-                r => r.User);
-
-            modelBuilder.ManyToAppUser<Comment>(
-                r => r.Username,
-                r => r.User);
-
-            modelBuilder.ManyToAppUser<LikeDislike>(
-                r => r.Username,
-                r => r.User);
-
-            modelBuilder.ManyToAppUser<PlayRecord>(
-                r => r.Username,
-                r => r.User);
-
-            modelBuilder.ManyToAppUser<Favorite>(
-                r => r.Username,
-                r => r.User,
-                u => u.Favorites);
-
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.ParentComment)
                 .WithMany(c => c.SubComments)
                 .HasForeignKey(c => c.ParentCommentId);
 
             modelBuilder.Entity<LikeDislike>()
-                .HasIndex(l => new { l.CommentId, l.Username })
+                .HasIndex(l => new { l.CommentId, l.UserId })
                 .IsUnique();
 
             modelBuilder.Entity<Rate>()
-                .HasIndex(l => new { l.MapId, l.Username })
+                .HasIndex(l => new { l.MapId, l.UserId })
                 .IsUnique();
 
             modelBuilder.Entity<Favorite>()
-                .HasIndex(l => new { l.MapId, l.Username })
+                .HasIndex(l => new { l.MapId, l.UserId })
                 .IsUnique();
         }
 
@@ -92,30 +61,4 @@ namespace bangbangboom.Data
         public DbSet<Rate> Rates { get; set; }
     }
 
-    
-    static class ModelBuilderExtensions
-    {
-
-        public static void ManyToAppUser<TEntity>(
-            this ModelBuilder builder,
-            Expression<Func<TEntity, object>> ForeignKey,
-            Expression<Func<TEntity, AppUser>> NavProp = null,
-            Expression<Func<AppUser, IEnumerable<TEntity>>> RevNavProp = null)
-            where TEntity : class
-        {
-            var r1 = builder.Entity<TEntity>();
-
-            ReferenceNavigationBuilder<TEntity, AppUser> r2;
-            if (NavProp != null) r2 = r1.HasOne(NavProp);
-            else r2 = r1.HasOne<AppUser>();
-
-            ReferenceCollectionBuilder<AppUser, TEntity> r3;
-            if (RevNavProp != null) r3 = r2.WithMany(RevNavProp);
-            else r3 = r2.WithMany();
-
-            r3.HasForeignKey(ForeignKey)
-                .HasPrincipalKey(u => u.UserName)
-                .IsRequired();
-        }
-    }
 }

@@ -48,7 +48,7 @@ Message:
 
     public static class IEmailSenderExtentions
     {
-        public static string domain { get; set; }
+        public static string domain { get; set; } = "localhost";
 
         public static async Task SendRegisterConfirmEmailAsync(this IEmailSender sender, 
             string email, string guid, string token)

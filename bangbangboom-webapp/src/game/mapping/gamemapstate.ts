@@ -73,7 +73,9 @@ function MakeActions<T extends { [key: string]: (...args: any) => any }>(actions
 function comparator(a: Note, b: Note) {
     const i = a.getTime() - b.getTime()
     if (i !== 0) return i
-    return a.getLane() - b.getLane()
+    const l = a.getLane() - b.getLane()
+    if (l === 0) Vue.toasted.info("Same Location Notes!")
+    return l
 }
 
 export const Actions = MakeActions({

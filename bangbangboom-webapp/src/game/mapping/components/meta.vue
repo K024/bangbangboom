@@ -31,6 +31,10 @@
                 <md-switch v-model="metastate.lowPerformance">Lower Performance</md-switch>
                 <md-switch v-model="metastate.backgroundCover">Backgound Cover</md-switch>
             </div>
+            <div class="flex">
+                <md-button @click="download">Download current game map</md-button>
+                <md-button @click="load">Load map file (need to refresh)</md-button>
+            </div>
         </div>
     </div>
 </template>
@@ -38,6 +42,7 @@
 <script lang="ts">
 import Vue from "vue";
 import { MetaState } from "../state";
+import { GameMapState } from "../gamemapstate";
 export default Vue.extend({
     data: function() {
         return {
@@ -71,6 +76,38 @@ export default Vue.extend({
             } else {
                 MetaState.backgroundImageSrc = "";
             }
+        },
+        download() {
+            const str = GameMapState.s.toMapString();
+            const blob = new Blob([str], { type: "text/plain" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "map.txt";
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        },
+        load() {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "text/plain"
+            input.click();
+            input.addEventListener("change", () => {
+                if (input.files && input.files.length) {
+                    const file = input.files.item(0);
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.readAsText(file, "UTF-8");
+                    reader.onload = e => {
+                        if (e && e.target) {
+                            const content = (e.target as any).result as string;
+                            localStorage.setItem("gamemapstate", content);
+                            this.$toasted.success("Map loaded, please refresh");
+                        }
+                    };
+                }
+            });
         }
     }
 });

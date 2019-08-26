@@ -8,7 +8,7 @@
             <div class="layer">
                 <div class="timepoint" v-for="tp in timepoints" :key="tp.track" :style="{left:leftstyle(tp.time)}"></div>
             </div>
-            <div class="layer" v-if="playstate.music">
+            <div class="layer">
                 <div class="progress" ref="progress"></div>
             </div>
         </div>

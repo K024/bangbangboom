@@ -13,7 +13,7 @@ namespace bangbangboom.Data
         public long Id { get; set; }
 
         [MaxLength(50)]
-        public string UploaderName { get; set; }
+        public string UploaderId { get; set; }
         public virtual AppUser Uploader { get; set; }
 
         [MaxLength(100)]

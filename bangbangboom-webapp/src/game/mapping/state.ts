@@ -29,7 +29,7 @@ export function togglePlay() {
     const m = PlayState.music;
     if (m) {
         if (PlayState.playing) m.pause();
-        else m.play();
+        else m.play(PlayState.soundid);
     }
 }
 

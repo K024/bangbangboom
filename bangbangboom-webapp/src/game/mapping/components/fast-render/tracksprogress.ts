@@ -19,7 +19,8 @@ export default Vue.extend({
         return h("div")
     },
     mounted: function () {
-        this.$watch(() => this.progresstrans, n => (this.$el as HTMLElement).style.transform = n)
+        this.$watch(() => this.progresstrans, n => (this.$el as HTMLElement).style.transform = n,
+            { immediate: true })
     }
 })
 
