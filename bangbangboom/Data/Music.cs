@@ -26,6 +26,7 @@ namespace bangbangboom.Data
         public string ArtistUnicode { get; set; }
         [MaxLength(400)]
         public string Description { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime Date { get; set; }
 
         [MaxLength(100)]

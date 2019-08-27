@@ -59,6 +59,8 @@ namespace bangbangboom.Data
         public DbSet<Map> Maps { get; set; }
         public DbSet<Music> Musics { get; set; }
         public DbSet<Rate> Rates { get; set; }
+        public DbSet<Favorite> Favorites { get; set; }
+        public DbSet<PlayRecord> PlayRecords { get; set; }
     }
 
 }

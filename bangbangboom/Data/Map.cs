@@ -26,7 +26,10 @@ namespace bangbangboom.Data
 
         [MaxLength(400)]
         public string Description { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime Date { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime LastModified { get; set; }
 
         public string MapContent { get; set; }
         [MaxLength(100)]

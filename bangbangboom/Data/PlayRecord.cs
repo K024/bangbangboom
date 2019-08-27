@@ -17,6 +17,7 @@ namespace bangbangboom.Data
         public long MapId { get; set; }
         public virtual Map Map { get; set; }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime DateTime { get; set; }
     }
 }

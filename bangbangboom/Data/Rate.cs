@@ -19,5 +19,8 @@ namespace bangbangboom.Data
         public virtual Map Map { get; set; }
 
         public int RateScore { get; set; }
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public DateTime Date { get; set; }
     }
 }
