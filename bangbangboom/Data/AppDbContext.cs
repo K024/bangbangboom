@@ -54,13 +54,15 @@ namespace bangbangboom.Data
                 .IsUnique();
         }
 
+        public DbSet<AdminRecord> AdminRecords { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Favorite> Favorites { get; set; }
         public DbSet<LikeDislike> LikeDislikes { get; set; }
         public DbSet<Map> Maps { get; set; }
         public DbSet<Music> Musics { get; set; }
-        public DbSet<Rate> Rates { get; set; }
-        public DbSet<Favorite> Favorites { get; set; }
         public DbSet<PlayRecord> PlayRecords { get; set; }
+        public DbSet<Rate> Rates { get; set; }
+        public DbSet<Report> Reports { get; set; }
     }
 
 }

@@ -60,7 +60,7 @@ button.md-button {
 }
 
 .dark-bg {
-    background-color: #80808040 !important;
+    background-color: rgba(128,128,128,0.4) !important;
 }
 
 /* smaller device */

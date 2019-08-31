@@ -1,5 +1,5 @@
 <template>
-    <md-content id="app" md-theme="default">
+    <div id="app">
         <div class="header">
             <div class="content" style="height: 100%;position: relative;">
                 <div class="left flex header-part">
@@ -71,7 +71,7 @@
         </div>
         <vue-progress-bar></vue-progress-bar>
         <back-top></back-top>
-    </md-content>
+    </div>
 </template>
 
 <script lang='ts'>
@@ -192,11 +192,11 @@ export default Vue.extend({
     height: 50px;
     width: 100%;
     position: fixed;
-    background: #00000050;
+    background: rgba(0, 0, 0, 0.3);
     color: #ffffff;
     z-index: 100;
     backdrop-filter: blur(10px);
-    box-shadow: 0 5px 5px #aaaaaa;
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
 }
 
 .header:hover {

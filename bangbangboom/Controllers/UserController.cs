@@ -17,51 +17,41 @@ using System.Threading.Tasks;
 
 namespace bangbangboom.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UserManager<AppUser> userManager;
         public UserController(
             UserManager<AppUser> userManager)
         {
-            _userManager = userManager;
+            this.userManager = userManager;
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<object> Get()
+        public async Task<object> Me()
         {
-            var user = await _userManager.GetUserAsync(User);
-            return new
-            {
-                username = user.UserName,
-                nickname = user.NickName ?? "",
-                whatsup = user.WhatsUp ?? "",
-            };
+            var user = await userManager.GetUserAsync(User);
+            return AppUserDetailed.FromAppUser(user);
         }
 
-        [HttpGet("info/{username}")]
-        public async Task<object> GetUser(
+        [HttpGet("{username}")]
+        public async Task<object> Info(
             [Required]string username)
         {
-            var user = await _userManager.FindByNameAsync(username);
+            var user = await userManager.FindByNameAsync(username);
             if (user is null) return StatusCode(404);
-            return new
-            {
-                username,
-                nickname = user.NickName ?? "",
-                whatsup = user.WhatsUp ?? "",
-            };
+            return AppUserDetailed.FromAppUser(user);
         }
 
         [Authorize]
-        [HttpPost("[action]")]
+        [HttpPost]
         public async Task<object> SetNickName(
             [FromForm][MaxLength(20)] string nickname,
             [FromServices] AppDbContext context)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             nickname = nickname?.Trim();
             if (string.IsNullOrWhiteSpace(nickname))
                 nickname = null;
@@ -71,23 +61,23 @@ namespace bangbangboom.Controllers
         }
 
         [Authorize]
-        [HttpPost("[action]")]
+        [HttpPost]
         public async Task<object> SetWhatsUp(
             [FromForm][MaxLength(300)] string whatsup,
             [FromServices] AppDbContext context)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             user.WhatsUp = whatsup;
             await context.SaveChangesAsync();
             return Ok();
         }
 
-        [HttpGet("[action]/{username}")]
+        [HttpGet("{username}")]
         public async Task<object> Profile(
             [Required]string username,
             [FromServices] HashFileProvider fileProvider)
         {
-            var user = await _userManager.FindByNameAsync(username);
+            var user = await userManager.FindByNameAsync(username);
             var hash = user?.ProfileFileHash;
             if (hash == null)
                 return StatusCode(404);
@@ -97,9 +87,9 @@ namespace bangbangboom.Controllers
         }
 
         [Authorize]
-        [HttpPost("[action]")]
+        [HttpPost]
         public async Task<object> UploadProfile(
-            [Required]IFormFile file,
+            [Required] IFormFile file,
             [FromServices] HashFileProvider fileProvider,
             [FromServices] AppDbContext context,
             [FromServices] MediaFileProcessor processor)
@@ -107,12 +97,67 @@ namespace bangbangboom.Controllers
             if (!processor.TryProcessImage(file.OpenReadStream(), out var jpg,
                 maxsize: 200 * 1024))
                 return StatusCode(400);
-            var user = await _userManager.GetUserAsync(User);
+            var user = await userManager.GetUserAsync(User);
             var hash = await fileProvider.SaveFileAsync(jpg);
             fileProvider.DeleteFile(user.ProfileFileHash);
             user.ProfileFileHash = hash;
             await context.SaveChangesAsync();
             return Ok();
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        public async Task<object> AddFavorite(
+            [FromForm][Required] long mapId,
+            [FromServices] AppDbContext context)
+        {
+            var user = await userManager.GetUserAsync(User);
+            var map = await context.Maps.FindAsync(mapId);
+            if (map is null || map.Deleted) return StatusCode(404);
+
+            if (user.Favorites.Select(f => f.Map == map).Count() <= 0)
+            {
+                user.Favorites.Add(new Favorite() { Map = map });
+                await context.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        public async Task<object> RemoveFavorite(
+            [FromForm][Required] long mapId,
+            [FromServices] AppDbContext context)
+        {
+            var user = await userManager.GetUserAsync(User);
+            var favorite = context.Favorites.Where(f => f.MapId == mapId).FirstOrDefault();
+
+            if (favorite != null)
+            {
+                user.Favorites.Remove(favorite);
+                await context.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+
+
+        [Authorize]
+        [HttpGet]
+        public async Task<object> Favorites()
+        {
+            var user = await userManager.GetUserAsync(User);
+
+            var favorites =
+                from f in user.Favorites
+                where !f.Map.Deleted
+                orderby f.DateTime descending
+                select MapShort.FormMap(f.Map);
+
+            return favorites;
         }
 
     }

@@ -24,4 +24,39 @@ namespace bangbangboom.Data
         public virtual List<Favorite> Favorites { get; set; }
 
     }
+
+    public class AppUserShort
+    {
+        public string UserName { get; set; }
+        public string NickName { get; set; }
+
+        public static AppUserShort FromAppUser(AppUser u)
+        {
+            return new AppUserShort()
+            {
+                UserName = u.UserName,
+                NickName = u.NickName ?? u.UserName,
+            };
+        }
+    }
+
+    public class AppUserDetailed
+    {
+        public string username;
+        public string nickname;
+        public string whatsup;
+        public int uploadedmusics;
+        public int uploadedmaps;
+        public static AppUserDetailed FromAppUser(AppUser u)
+        {
+            return new AppUserDetailed()
+            {
+                username = u.UserName,
+                nickname = u.NickName ?? u.UserName,
+                whatsup = u.WhatsUp ?? "",
+                uploadedmusics = u.UploadedMusics.Count,
+                uploadedmaps = u.UploadedMaps.Count
+            };
+        }
+    }
 }

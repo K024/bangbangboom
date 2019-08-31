@@ -21,27 +21,35 @@ namespace bangbangboom.Controllers
     [Route("api/[controller]/[action]")]
     public class AccountController : Controller
     {
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> signInManager;
+        private readonly UserManager<AppUser> userManager;
         public AccountController(
             UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+        }
+
+        public class UserInfo
+        {
+            public string username;
+            public string email;
+            public IList<string> roles;
         }
 
         [Authorize]
         [HttpGet]
         public async Task<object> Current()
         {
-            var user = await _userManager.GetUserAsync(User);
-            return new
+            var user = await userManager.GetUserAsync(User);
+            return new UserInfo
             {
                 username = user.UserName,
-                emial = user.Email,
-                roles = await _userManager.GetRolesAsync(user)
+                email = user.Email,
+                roles = await userManager.GetRolesAsync(user)
             };
         }
+
 
         [HttpPost]
         public async Task<object> Login(
@@ -49,21 +57,21 @@ namespace bangbangboom.Controllers
             [FromForm][Required] string Password)
         {
             var user = (UserName.IndexOf('@') >= 0) ?
-                await _userManager.FindByEmailAsync(UserName) :
-                await _userManager.FindByNameAsync(UserName);
+                await userManager.FindByEmailAsync(UserName) :
+                await userManager.FindByNameAsync(UserName);
 
             if (user is null) return StatusCode(401);
-            var result = await _signInManager.PasswordSignInAsync(user, Password, true, true);
+            var result = await signInManager.PasswordSignInAsync(user, Password, true, true);
 
             if (result.Succeeded)
                 return Ok();
 
             if (result.IsLockedOut)
-                return StatusCode(403, "LockedOut" + 
-                    await _userManager.GetLockoutEndDateAsync(user));
+                return StatusCode(403, "lockedout" + 
+                    await userManager.GetLockoutEndDateAsync(user));
 
-            if (!await _userManager.IsEmailConfirmedAsync(user))
-                return StatusCode(403, "EmailNotConfirmed");
+            if (!await userManager.IsEmailConfirmedAsync(user))
+                return StatusCode(403, "emailnotconfirmed");
 
             return StatusCode(401);
         }
@@ -72,7 +80,7 @@ namespace bangbangboom.Controllers
         [HttpPost]
         public async Task<object> Logout()
         {
-            await _signInManager.SignOutAsync();
+            await signInManager.SignOutAsync();
             return Ok();
         }
 
@@ -82,10 +90,10 @@ namespace bangbangboom.Controllers
             [FromForm][Required] string Email,
             [FromServices] IEmailSender sender)
         {
-            var user = await _userManager.FindByEmailAsync(Email);
+            var user = await userManager.FindByEmailAsync(Email);
             if (user != null && user.UserName == UserName)
             {
-                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
                 _ = sender.SendResetPasswordEmailAsync(Email, UserName, user.Id, token);
                 return Ok();
             }
@@ -96,14 +104,14 @@ namespace bangbangboom.Controllers
         public async Task<object> ResetPassword(
             [FromForm][Required] string Guid,
             [FromForm][Required] string Token,
-            [FromForm][Required] string NewPassword)
+            [FromForm][Required][MaxLength(20)] string NewPassword)
         {
-            var user = await _userManager.FindByIdAsync(Guid);
+            var user = await userManager.FindByIdAsync(Guid);
             if (user is null) return StatusCode(401);
-            var result = await _userManager.ResetPasswordAsync(user, Token, NewPassword);
+            var result = await userManager.ResetPasswordAsync(user, Token, NewPassword);
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, true);
+                await signInManager.SignInAsync(user, true);
                 return Ok();
             }
             return StatusCode(401);
@@ -113,10 +121,10 @@ namespace bangbangboom.Controllers
         public async Task<object> TestEmail(
             [FromForm][Required] string Email)
         {
-            var user = await _userManager.FindByEmailAsync(Email);
+            var user = await userManager.FindByEmailAsync(Email);
             if (user == null)
-                return Ok("Acceptable");
-            return Ok("Registered");
+                return Ok("acceptable");
+            return Ok("registered");
         }
 
         [HttpPost]
@@ -131,10 +139,10 @@ namespace bangbangboom.Controllers
                 UserName = id.Replace('-', '_'),
                 Email = Email,
             };
-            var result = await _userManager.CreateAsync(user);
+            var result = await userManager.CreateAsync(user);
             if (result.Succeeded)
             {
-                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 _ = sender.SendRegisterConfirmEmailAsync(Email, id, token);
                 DeleteIfNotConfirmedAfter2h(user.Id);
                 return Ok();
@@ -142,14 +150,15 @@ namespace bangbangboom.Controllers
             return StatusCode(401);
         }
 
+
         [HttpPost]
         public async Task<object> TestUserName(
             [FromForm][Required] string UserName)
         {
-            var user = await _userManager.FindByNameAsync(UserName);
+            var user = await userManager.FindByNameAsync(UserName);
             if (user == null)
-                return Ok("Acceptable");
-            return Ok("Registered");
+                return Ok("acceptable");
+            return Ok("registered");
         }
 
         [HttpPost]
@@ -163,16 +172,16 @@ namespace bangbangboom.Controllers
             if (!Regex.IsMatch(UserName, "^[A-Za-z][A-Za-z0-9_]{3,}$")) return StatusCode(401);
             using (var transaction = appDbContext.Database.BeginTransaction())
             {
-                var user = await _userManager.FindByIdAsync(Guid);
+                var user = await userManager.FindByIdAsync(Guid);
                 if (user is null) return StatusCode(401);
-                var result = await _userManager.ConfirmEmailAsync(user, Token);
+                var result = await userManager.ConfirmEmailAsync(user, Token);
                 while (result.Succeeded)
                 {
-                    var result2 = await _userManager.SetUserNameAsync(user, UserName);
+                    var result2 = await userManager.SetUserNameAsync(user, UserName);
                     if (!result2.Succeeded) break;
-                    var result3 = await _userManager.AddPasswordAsync(user, Password);
+                    var result3 = await userManager.AddPasswordAsync(user, Password);
                     if (!result3.Succeeded) break;
-                    await _signInManager.SignInAsync(user, true);
+                    await signInManager.SignInAsync(user, true);
                     await appDbContext.SaveChangesAsync();
                     transaction.Commit();
                     return Ok();
@@ -188,10 +197,10 @@ namespace bangbangboom.Controllers
             Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromHours(2));
-                var user = await _userManager.FindByIdAsync(guid);
-                if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+                var user = await userManager.FindByIdAsync(guid);
+                if (user != null && !await userManager.IsEmailConfirmedAsync(user))
                 {
-                    await _userManager.DeleteAsync(user);
+                    await userManager.DeleteAsync(user);
                 }
             });
         }
