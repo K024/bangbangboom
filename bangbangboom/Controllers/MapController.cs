@@ -138,6 +138,9 @@ namespace bangbangboom.Controllers
             var music = await context.Musics.FindAsync(musicId);
             if (music is null || music.Deleted) return StatusCode(404);
 
+            if (mapName.Any(c => c > 127))
+                return StatusCode(400);
+
             var type = image.ContentType;
             if (!type.StartsWith("image") || image.Length > 1024 * 1024 * 5) return StatusCode(400);
             var hash = await fileProvider.SaveFileAsync(image.OpenReadStream());
@@ -176,6 +179,9 @@ namespace bangbangboom.Controllers
             if (map is null || map.Deleted) return StatusCode(404);
             if (map.Uploader != user) return StatusCode(403);
 
+            if (mapName != null && mapName.Any(c => c > 127))
+                return StatusCode(400);
+
             if (musicId != null)
             {
                 var music = await context.Musics.FindAsync(musicId);
@@ -194,6 +200,8 @@ namespace bangbangboom.Controllers
                 fileProvider.DeleteFile(map.ImageFileHashAndType.Split(':')[0]);
                 map.ImageFileHashAndType = hash + ":" + type;
             }
+
+            map.LastModified = DateTime.Now;
 
             await context.SaveChangesAsync();
             return Ok();

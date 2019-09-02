@@ -9,7 +9,7 @@ using bangbangboom.Data;
 namespace bangbangboom.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20190831114952_m01")]
+    [Migration("20190901123703_m01")]
     partial class m01
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -176,6 +176,9 @@ namespace bangbangboom.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<long>("CommentId");
+
+                    b.Property<DateTime>("DateTime")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<bool>("IsDislike");
 

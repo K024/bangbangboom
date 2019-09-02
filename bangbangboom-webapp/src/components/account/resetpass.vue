@@ -16,7 +16,7 @@
                 <md-button
                     class="fill-w md-primary md-raised"
                     @click="confirm"
-                    :disabled="!inputValid"
+                    :disabled="!inputValid || loading"
                 >{{$t('w.confirm')}}</md-button>
             </template>
         </div>
@@ -25,7 +25,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { passwordvalidate } from "./state";
+import { passwordvalidate, userstate, LoadCurrentUser } from "./state";
+import api, { Xform } from "../../tools/Axios";
+import { AccountInfo } from "@/tools/models";
 
 export default Vue.extend({
     data: function() {
@@ -34,7 +36,8 @@ export default Vue.extend({
             token: "",
             password: "",
             password2: "",
-            sent: false
+            sent: false,
+            loading: false
         };
     },
     computed: {
@@ -46,8 +49,24 @@ export default Vue.extend({
         }
     },
     methods: {
-        confirm: function() {
-            this.sent = true;
+        confirm: async function() {
+            try {
+                this.loading = true;
+                await api.post(
+                    "account/resetpassword",
+                    Xform({
+                        guid: this.guid,
+                        token: this.token,
+                        newpassword: this.password
+                    })
+                );
+                this.sent = true;
+                await LoadCurrentUser();
+            } catch (error) {
+                this.$toasted.error("Error: something wrong, please retry");
+            } finally {
+                this.loading = false;
+            }
         }
     },
     mounted: function() {

@@ -43,6 +43,7 @@
                         :md-active="loginpopup && $responsive.g"
                         @md-opened="loginpopup = true"
                         @md-closed="loginpopup = false"
+                        v-if="!userstate.loginstate"
                         md-align-trigger
                     >
                         <md-ripple class="flex" md-menu-trigger>{{$t('w.login')}}</md-ripple>
@@ -79,6 +80,7 @@ import Vue from "vue";
 import { HideLoader } from "@/tools/loader";
 import userlogin from "./account/userlogin.vue";
 import backtop from "./others/backtop.vue";
+import { userstate, LoadCurrentUser } from "./account/state";
 
 // tslint:disable-next-line
 interface Menu {
@@ -118,7 +120,8 @@ export default Vue.extend({
                 { id: "zh", text: "中文" },
                 { id: "ja", text: "日本語" }
             ];
-        }
+        },
+        userstate: () => userstate
     },
     methods: {
         changeLocale: function(locale: string) {
@@ -140,6 +143,7 @@ export default Vue.extend({
     },
     mounted: function() {
         HideLoader();
+        LoadCurrentUser();
     }
 });
 </script>

@@ -18,7 +18,7 @@ namespace bangbangboom.Services
         public EmailSender(IHostingEnvironment env, IConfiguration config)
         {
             isDev = env.IsDevelopment();
-            IEmailSenderExtentions.domain = config["Domain"];
+            IEmailSenderExtentions.domain = config["Domain"] ?? "localhost";
         }
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
@@ -57,7 +57,7 @@ Message:
             var message =
                 $"Dear {email},\n\n" +
                 $"To confirm your email in bangbangboom, click the link below:\n" +
-                $"https://{domain}/confirmemail?" +
+                $"https://{domain}/account/confirmemail?" +
                 $"guid={guid}&token={WebUtility.UrlEncode(token)}\n\n" +
                 $"If you are not attempting to register an account in bangbangboom, please ignore this email.";
             await sender.SendEmailAsync(email, subject, message);
@@ -70,7 +70,7 @@ Message:
             var message =
                 $"Dear {username},\n\n" +
                 $"To reset your password in bangbangboom, click the link below:\n" +
-                $"https://{domain}/resetpass?" +
+                $"https://{domain}/account/resetpass?" +
                 $"guid={guid}&token={WebUtility.UrlEncode(token)}\n\n" +
                 $"If you are not attempting to reset your password, please ignore this email.";
             await sender.SendEmailAsync(email, subject, message);

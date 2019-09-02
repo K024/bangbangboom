@@ -4,7 +4,13 @@ import i18n from "@/plugins/i18n"
 import home from '@/components/home.vue'
 import notfound from '@/components/others/notfound.vue'
 // import mapping from '@/game/mapping/mapping.vue'
-import { accountRoutes } from './components/account/routes';
+import { accountRoutes } from '@/components/account/routes';
+
+import favorites from "@/components/favorites.vue";
+import ranking from "@/components/ranking.vue";
+import search from "@/components/search.vue";
+import mapdetail from "@/components/mapdetail.vue";
+import musicdetail from "@/components/musicdetail.vue";
 
 Vue.use(Router);
 
@@ -18,6 +24,24 @@ export const router = new Router({
         },
         ...accountRoutes
         , {
+            path: '/favorites',
+            component: favorites,
+            meta: { title: "w.favorites" },
+        }, {
+            path: '/ranking',
+            component: ranking,
+            meta: { title: "w.ranking" },
+        }, {
+            path: '/search',
+            component: search,
+            meta: { title: "w.search" },
+        }, {
+            path: '/map/:id',
+            component: mapdetail,
+        }, {
+            path: '/music/:id',
+            component: musicdetail,
+        }, {
             path: '/mapping',
             // component: mapping,
             component: () => import("@/game/mapping/mapping.vue"),

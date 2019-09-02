@@ -10,7 +10,7 @@ namespace bangbangboom.Data
     public class Music
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public long Id { get; set; } = 10000;
 
         [Required]
         [MaxLength(50)]
@@ -33,7 +33,7 @@ namespace bangbangboom.Data
         [MaxLength(400)]
         public string Description { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
 
         [Required]
         [MaxLength(100)]

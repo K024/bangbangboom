@@ -16,7 +16,7 @@
                 <md-button
                     class="fill-w md-primary md-raised"
                     @click="confirm"
-                    :disabled="state != 'acceptable'"
+                    :disabled="state != 'acceptable' || loading"
                 >{{$t('w.confirm')}}</md-button>
             </template>
         </div>
@@ -28,11 +28,15 @@ import Vue from "vue";
 import { debounce, delay } from "@/tools/functions";
 import axios from "axios";
 import { emailvalidate } from "./state";
+import api, { Xform } from "../../tools/Axios";
 
 const checkEmail = debounce(300, async (email: string) => {
     try {
-        await delay(200);
-        return true;
+        const res = await api.post<string>(
+            "account/testemail",
+            Xform({ email })
+        );
+        return res.data === "acceptable";
     } catch (err) {
         return false;
     }
@@ -43,12 +47,24 @@ export default Vue.extend({
         return {
             email: "",
             sent: false,
-            state: "empty"
+            state: "empty",
+            loading: false
         };
     },
     methods: {
-        confirm: function() {
-            this.sent = true;
+        confirm: async function() {
+            try {
+                this.loading = true;
+                await api.post(
+                    "account/register",
+                    Xform({ email: this.email })
+                );
+                this.sent = true;
+            } catch (error) {
+                this.$toasted.error("Error: something wrong, please retry");
+            } finally {
+                this.loading = false;
+            }
         }
     },
     watch: {
@@ -63,7 +79,6 @@ export default Vue.extend({
                     else this.state = "registered";
                 } catch (error) {
                     this.state = "empty";
-                    // this.$message.error(this.$t("s.neterror") as string);
                 }
             } else {
                 this.state = "empty";

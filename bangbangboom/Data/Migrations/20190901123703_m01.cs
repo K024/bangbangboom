@@ -284,7 +284,9 @@ namespace bangbangboom.Data.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<string>(nullable: false),
                     CommentId = table.Column<long>(nullable: false),
-                    IsDislike = table.Column<bool>(nullable: false)
+                    IsDislike = table.Column<bool>(nullable: false),
+                    DateTime = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
                 },
                 constraints: table =>
                 {

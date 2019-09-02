@@ -39,6 +39,10 @@ namespace bangbangboom.Controllers
 
             if (music is null || music.Deleted) return StatusCode(404);
 
+            if ((title != null && title.Any(c => c > 127)) ||
+                (artist != null && artist.Any(c => c > 127)))
+                return StatusCode(400);
+
             if (title != null) music.Title = title;
             if (artist != null) music.Artist = artist;
             if (titleUnicode != null) music.TitleUnicode = titleUnicode;
@@ -95,6 +99,9 @@ namespace bangbangboom.Controllers
             var map = await context.Maps.FindAsync(id);
             if (map is null || map.Deleted) return StatusCode(404);
 
+            if (mapName != null && mapName.Any(c => c > 127))
+                return StatusCode(400);
+
             if (mapName != null) map.MapName = mapName;
             if (difficulty != null) map.Difficulty = difficulty ?? 20;
             if (description != null) map.Description = description;
@@ -107,6 +114,7 @@ namespace bangbangboom.Controllers
                 AffectType = "map",
                 AffectId = id.ToString()
             });
+            map.LastModified = DateTime.Now;
 
             await context.SaveChangesAsync();
             return Ok();
@@ -220,6 +228,7 @@ namespace bangbangboom.Controllers
             report.Handled = true;
             report.HandledBy = await userManager.GetUserAsync(User);
             report.Additional = additional;
+            report.LastModified = DateTime.Now;
 
             await context.SaveChangesAsync();
 

@@ -140,6 +140,10 @@ namespace bangbangboom.Controllers
             if (music is null || music.Deleted) return StatusCode(404);
             if (music.Uploader != user) return StatusCode(403);
 
+            if ((title != null && title.Any(c => c > 127)) ||
+                (artist != null && artist.Any(c => c > 127)))
+                return StatusCode(400);
+
             if (title != null) music.Title = title;
             if (artist != null) music.Artist = artist;
             if (titleUnicode != null) music.TitleUnicode = titleUnicode;

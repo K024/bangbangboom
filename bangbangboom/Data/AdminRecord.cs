@@ -10,14 +10,14 @@ namespace bangbangboom.Data
     public class AdminRecord
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public long Id { get; set; } = 10000;
 
         [Required]
         public string AdminId { get; set; }
         public virtual AppUser Admin { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; } = DateTime.Now;
 
         [Required]
         [MaxLength(100)]

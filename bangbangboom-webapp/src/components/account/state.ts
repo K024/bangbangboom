@@ -1,18 +1,12 @@
 import Vue from 'vue'
-import axios, { AxiosError } from 'axios'
+import { AccountInfo } from '@/tools/models';
+import api from '@/tools/Axios';
 
-export class User {
-    username = ""
-    email = ""
-    roles: string[] = []
-}
 
-const userstate = Vue.observable({
+export const userstate = Vue.observable({
     loginstate: false,
-    currentuser: new User(),
-    message: ""
+    currentuser: new AccountInfo(),
 })
-export default userstate
 
 export const emailvalidate = (email: string) =>
     email && /^.+@.+$/.test(email) || false
@@ -22,3 +16,13 @@ export const usernamevalidate = (username: string) =>
 
 export const passwordvalidate = (pass: string) =>
     pass && pass.length >= 8 && /[a-z]/.test(pass) && /[0-9]/.test(pass) || false;
+
+export async function LoadCurrentUser() {
+    try {
+        const res = await api.get<AccountInfo>("account/current");
+        userstate.currentuser = res.data;
+        userstate.loginstate = true;
+    } catch (error) {
+        userstate.loginstate = false;
+    }
+}

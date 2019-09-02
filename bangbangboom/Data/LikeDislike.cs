@@ -10,7 +10,7 @@ namespace bangbangboom.Data
     public class LikeDislike
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public long Id { get; set; } = 10000;
 
         [Required]
         public string UserId { get; set; }
@@ -20,5 +20,8 @@ namespace bangbangboom.Data
         public virtual Comment Comment { get; set; }
 
         public bool IsDislike { get; set; } = false;
+
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public DateTime DateTime { get; set; } = DateTime.Now;
     }
 }

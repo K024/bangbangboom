@@ -11,7 +11,7 @@ namespace bangbangboom.Data
     public class Map
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public long Id { get; set; } = 10000;
 
         [Required]
         public string UploaderId { get; set; }
@@ -30,9 +30,9 @@ namespace bangbangboom.Data
         [MaxLength(400)]
         public string Description { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public DateTime LastModified { get; set; }
+        public DateTime LastModified { get; set; } = DateTime.Now;
 
         [Required]
         public string MapContent { get; set; }
@@ -78,14 +78,41 @@ namespace bangbangboom.Data
         }
 
     }
+
+    public class RateDetail
+    {
+        public int r1;
+        public int r2;
+        public int r3;
+        public int r4;
+        public int r5;
+
+        public static RateDetail FromRates(IEnumerable<Rate> rates)
+        {
+            var groups = rates.GroupBy(r => r.RateScore);
+            var d = new RateDetail();
+            foreach(var g in groups)
+            {
+                switch(g.Key)
+                {
+                    case 1: d.r1 = g.Count(); break;
+                    case 2: d.r2 = g.Count(); break;
+                    case 3: d.r3 = g.Count(); break;
+                    case 4: d.r4 = g.Count(); break;
+                    case 5: d.r5 = g.Count(); break;
+                }
+            }
+            return d;
+        }
+    }
     public class MapDetailed
     {
         public long id;
         public string mapname;
         public double difficulty;
         public bool proved;
-        public string descrption;
-        public double rate;
+        public string description;
+        public RateDetail rate;
         public long plays;
         public DateTime date;
         public DateTime lastmodified;
@@ -101,8 +128,8 @@ namespace bangbangboom.Data
                 mapname = m.MapName,
                 difficulty = m.Difficulty,
                 proved = m.Proved,
-                descrption = m.Description,
-                rate = m.Rates.Average(r => r.RateScore),
+                description = m.Description,
+                rate = RateDetail.FromRates(m.Rates),
                 plays = m.PlayRecords.Count,
                 date = m.Date,
                 lastmodified = m.LastModified,

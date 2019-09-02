@@ -86,15 +86,14 @@ namespace bangbangboom.Controllers
 
         [HttpPost]
         public async Task<object> ForgotPassword(
-            [FromForm][Required] string UserName,
             [FromForm][Required] string Email,
             [FromServices] IEmailSender sender)
         {
             var user = await userManager.FindByEmailAsync(Email);
-            if (user != null && user.UserName == UserName)
+            if (user != null)
             {
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
-                _ = sender.SendResetPasswordEmailAsync(Email, UserName, user.Id, token);
+                _ = sender.SendResetPasswordEmailAsync(Email, user.UserName, user.Id, token);
                 return Ok();
             }
             return StatusCode(401);

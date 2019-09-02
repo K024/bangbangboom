@@ -8,12 +8,11 @@
             <label>{{$t('w.password')}}</label>
             <md-input v-model="password" type="password"></md-input>
         </md-field>
-        <div v-if="userstate.message">{{userstate.message}}</div>
         <md-button
             @click="login"
             class="fill-w md-primary md-raised"
             style="margin: 12px 0"
-            :disabled="!username || !password"
+            :disabled="!username || !password || loading"
         >
             <span>{{$t('w.login')}}</span>
         </md-button>
@@ -26,21 +25,43 @@
 
 <script lang="ts">
 import Vue from "vue";
-import userstate from "./state";
+import { userstate, LoadCurrentUser } from "./state";
+import api, { Xform, HandleErr } from "../../tools/Axios";
+import { AccountInfo } from "../../tools/models";
 
 export default Vue.extend({
     data: () => {
         return {
             username: "",
-            password: ""
+            password: "",
+            loading: false
         };
     },
     computed: {
         userstate: () => userstate
     },
     methods: {
-        login: function() {
-            // login
+        login: async function() {
+            try {
+                this.loading = true;
+                await api.post(
+                    "account/login",
+                    Xform({ username: this.username, password: this.password })
+                );
+                await LoadCurrentUser();
+                this.$emit("close");
+            } catch (error) {
+                const res = HandleErr<string>(error);
+                if (!res) this.$toasted.error("Net error");
+                else if (res.status === 401)
+                    this.$toasted.error("Username or password is wrong");
+                else if (res.data.startsWith("lockedout"))
+                    this.$toasted.error("Account locked out");
+                else if (res.data === "emailnotconfirmed")
+                    this.$toasted.error("Email not confirmed");
+            } finally {
+                this.loading = false;
+            }
         },
         register: function() {
             this.$router.push("/account/register");

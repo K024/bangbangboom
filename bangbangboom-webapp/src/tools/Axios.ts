@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig, AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 
 /**
@@ -26,28 +26,27 @@ export default api
  * 构建x-www-form-urlencoded表单（用于一般请求）
  * @param form 表单对象
  */
-export function Xform(form: object): AxiosRequestConfig {
-    return {
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        data: qs.stringify(form),
-    }
+export function Xform(form: object): string {
+    return qs.stringify(form)
 }
 
 /**
  * 构建form-data表单（用于携带二进制数据的表单）
  * @param form 
  */
-export function Form(form: { [k: string]: string | Blob }): AxiosRequestConfig {
+export function Form(form: { [k: string]: string | Blob }): FormData {
     const data = new FormData()
     for (const key in form) data.append(key, form[key])
-    return { data }
+    return data
 }
 
 /**
- * 如果请求有响应，返回相应，否则抛出错误
+ * 如果请求有响应，返回相应，否则返回undefined
  */
 export function HandleErr<T>(err: AxiosError<T>) {
-    if (!err.response) throw err
+    if (!err.response) {
+        return
+    }
     return err.response
 }
 

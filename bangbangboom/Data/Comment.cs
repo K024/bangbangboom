@@ -10,7 +10,7 @@ namespace bangbangboom.Data
 
     public class Comment
     {
-        public long Id { get; set; }
+        public long Id { get; set; } = 10000;
 
         [Required]
         public string UserId { get; set; }
@@ -24,7 +24,7 @@ namespace bangbangboom.Data
         public virtual List<Comment> SubComments { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; } = DateTime.Now;
 
         [Required]
         [MaxLength(200)]

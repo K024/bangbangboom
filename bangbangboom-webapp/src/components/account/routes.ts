@@ -1,9 +1,14 @@
 import { RouteConfig } from 'vue-router';
-import account from '@/components/account/account.vue'
-import register from '@/components/account/register.vue'
-import confirmemail from '@/components/account/confirmemail.vue'
-import forgotpass from '@/components/account/forgotpass.vue'
-import resetpass from '@/components/account/resetpass.vue'
+import account from './account.vue'
+import register from './register.vue'
+import confirmemail from './confirmemail.vue'
+import forgotpass from './forgotpass.vue'
+import resetpass from './resetpass.vue'
+
+import mapupload from '@/components/mapupload.vue'
+import musicupload from '@/components/musicupload.vue'
+import { userstate } from './state';
+
 
 export const accountRoutes: RouteConfig[] = [{
     path: '/account',
@@ -25,5 +30,19 @@ export const accountRoutes: RouteConfig[] = [{
     path: '/account/resetpass',
     component: resetpass,
     meta: { title: "w.forgotpass" },
+}, {
+    path: '/uploadmap',
+    component: mapupload,
+    beforeEnter: (to, from, next) => {
+        if (!userstate.loginstate) next("/account")
+        else next()
+    }
+}, {
+    path: '/uploadmusic',
+    component: musicupload,
+    beforeEnter: (to, from, next) => {
+        if (!userstate.loginstate) next("/account")
+        else next()
+    }
 },
 ]

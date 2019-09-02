@@ -175,6 +175,9 @@ namespace bangbangboom.Data.Migrations
 
                     b.Property<long>("CommentId");
 
+                    b.Property<DateTime>("DateTime")
+                        .ValueGeneratedOnAdd();
+
                     b.Property<bool>("IsDislike");
 
                     b.Property<string>("UserId")

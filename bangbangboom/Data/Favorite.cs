@@ -10,7 +10,7 @@ namespace bangbangboom.Data
     public class Favorite
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public long Id { get; set; } = 10000;
 
         [Required]
         public string UserId { get; set; }
@@ -20,6 +20,6 @@ namespace bangbangboom.Data
         public virtual Map Map { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; } = DateTime.Now;
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 
 namespace bangbangboom.Data
 {
@@ -17,7 +18,7 @@ namespace bangbangboom.Data
         public string WhatsUp { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime Date { get; set; }
+        public DateTime Date { get; set; } = DateTime.Now;
 
         public virtual List<Music> UploadedMusics { get; set; }
         public virtual List<Map> UploadedMaps { get; set; }
@@ -27,15 +28,15 @@ namespace bangbangboom.Data
 
     public class AppUserShort
     {
-        public string UserName { get; set; }
-        public string NickName { get; set; }
+        public string username;
+        public string nickname;
 
         public static AppUserShort FromAppUser(AppUser u)
         {
             return new AppUserShort()
             {
-                UserName = u.UserName,
-                NickName = u.NickName ?? u.UserName,
+                username = u.UserName,
+                nickname = u.NickName ?? u.UserName,
             };
         }
     }
@@ -45,6 +46,7 @@ namespace bangbangboom.Data
         public string username;
         public string nickname;
         public string whatsup;
+        public bool hasprofile;
         public int uploadedmusics;
         public int uploadedmaps;
         public static AppUserDetailed FromAppUser(AppUser u)
@@ -54,6 +56,7 @@ namespace bangbangboom.Data
                 username = u.UserName,
                 nickname = u.NickName ?? u.UserName,
                 whatsup = u.WhatsUp ?? "",
+                hasprofile = !string.IsNullOrEmpty(u.ProfileFileHash),
                 uploadedmusics = u.UploadedMusics.Count,
                 uploadedmaps = u.UploadedMaps.Count
             };

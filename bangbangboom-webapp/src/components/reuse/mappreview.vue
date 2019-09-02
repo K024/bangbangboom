@@ -1,65 +1,56 @@
 <template>
-    <md-content class="md-elevation-3 card">
-        <div class="image">
-            <div class="proved">Proved</div>
-            <div class="plays">233</div>
-            <div class="title"></div>
+    <md-card class="map-preview">
+        <md-card-media>
+            <img v-lazy="'/api/map/image/' + mapShort.id" :alt="mapShort.mapname" />
+        </md-card-media>
+
+        <md-card-header>
+            <div class="md-title">{{mapShort.music.title}}</div>
+            <div class="md-subhead">{{mapShort.music.artist}}</div>
+            <div class="md-subhead">{{mapShort.mapname}}</div>
+        </md-card-header>
+
+        <div class="proved" v-if="mapShort.proved">Proved</div>
+
+        <div class="plays">
+            {{mapShort.plays}}
+            <md-icon>meplay_circle_fillednu</md-icon>
         </div>
-        <div class="content"></div>
-    </md-content>
+    </md-card>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-
-interface map {
-    id: number;
-}
+import { MapShort } from "@/tools/models";
 
 export default Vue.extend({
-    props: {}
+    props: {
+        mapShort: { type: MapShort, required: true }
+    }
 });
 </script>
 
 <style scoped>
-.card {
-    display: flex;
-    transition: transform 0.4s;
-    border-radius: 2px;
+.map-preview {
+    transition: all 0.3s;
 }
-.card :hover {
-    transform: scale(1.05) rotate(5deg) translateX(5px);
+.map-preview :hover {
+    transform: scale(1.1) rotate(5deg);
 }
-.image {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%;
-}
-.image-content {
+
+.proved {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-}
-.content {
-    flex-grow: 1;
+    left: 10px;
+    top: 10px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
 }
 
-/* smaller device */
-@media only screen and (max-width: 768px) {
-    .card {
-        flex-direction: column;
-    }
-}
-
-/* bigger device */
-@media only screen and (min-width: 769px) {
-    .card {
-        flex-direction: row;
-    }
-    .image {
-        max-width: 400px;
-    }
+.plays {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    color: white;
 }
 </style>
