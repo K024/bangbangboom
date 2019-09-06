@@ -29,11 +29,13 @@ namespace bangbangboom.Controllers
         }
 
         [HttpGet]
-        public async Task<object> Info(
+        public object Info(
             [FromQuery][Required]long id,
             [FromServices] AppDbContext context)
         {
-            var music = await context.Musics.FindAsync(id);
+            var music = context.Musics.Include(m => m.Uploader).Include(m => m.Maps)
+                .Where(m => m.Id == id)
+                .FirstOrDefault();
             if (music is null || music.Deleted) return StatusCode(404);
             return MusicDetailed.FromMusic(music);
         }
@@ -45,13 +47,12 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var musics =
-                from m in context.Musics
+                from m in context.Musics.Include(m => m.Uploader)
                 where (m.Artist.Contains(key) || m.ArtistUnicode.Contains(key)
                 || m.Title.Contains(key) || m.TitleUnicode.Contains(key)
                 || m.Description.Contains(key)) && !m.Deleted
                 select MusicShort.FromMusic(m);
-            var p = page ?? 1 - 1;
-            return musics.Skip(p * 48).Take(48);
+            return musics.Page(page ?? 1);
         }
 
 
@@ -61,12 +62,11 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var musics =
-                from m in context.Musics
+                from m in context.Musics.Include(m => m.Uploader)
                 where !m.Deleted
                 orderby m.Date descending
                 select MusicShort.FromMusic(m);
-            var p = page ?? 1 - 1;
-            return musics.Skip(p * 48).Take(48);
+            return musics.Page(page ?? 1);
         }
 
 
@@ -91,7 +91,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> UpLoad(
-            [FromForm][Required]IFormFile file,
+            [Required] IFormFile file,
             [FromForm][Required][MaxLength(100)]string title,
             [FromForm][Required][MaxLength(100)]string artist,
             [FromForm][Required][MaxLength(100)]string titleUnicode,
@@ -102,7 +102,7 @@ namespace bangbangboom.Controllers
         {
             var user = await userManager.GetUserAsync(User);
             if (file.ContentType != "audio/mp3" ||
-                file.Length > 1024 * 1024 * 5 ||
+                file.Length > 1024 * 1024 * 10 ||
                 title.Any(c => c > 127) ||
                 artist.Any(c => c > 127))
                 return StatusCode(400);

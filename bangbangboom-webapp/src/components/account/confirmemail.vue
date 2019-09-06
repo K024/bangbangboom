@@ -101,7 +101,7 @@ export default Vue.extend({
                 this.sent = true;
                 await LoadCurrentUser();
             } catch (error) {
-                this.$toasted.error("Error: something wrong, please retry");
+                this.$toasted.error(this.$t('s.toastedError') as string );
             } finally {
                 this.loading = false;
             }

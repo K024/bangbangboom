@@ -59,6 +59,7 @@ namespace bangbangboom.Services
             }
         }
 
+#pragma warning disable CS0649
         private class Response
         {
             public bool success;
@@ -68,6 +69,7 @@ namespace bangbangboom.Services
             public string hostname;
             public string[] errorCodes;
         }
+#pragma warning restore CS0649
 
         public class BanRecord
         {

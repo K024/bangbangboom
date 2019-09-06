@@ -24,13 +24,12 @@ export function clearCombo() {
     isFullCombo = true
 }
 
-hitTypeEvent.add((n) => {
+export const handleHit = (n: hitType) => {
     if (n === hitType.miss || n === hitType.bad) {
         combo = 0
         isFullCombo = false
         hitScoreEvent.emit(combo)
-    }
-    else {
+    } else {
         combo++
         if (maxCombo < combo)
             maxCombo = combo
@@ -59,4 +58,4 @@ hitTypeEvent.add((n) => {
             missCombo++
             break;
     }
-})
+}

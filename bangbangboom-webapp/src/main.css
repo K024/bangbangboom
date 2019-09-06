@@ -1,4 +1,3 @@
-
 body {
     margin: 0;
     min-height: 0;
@@ -7,10 +6,8 @@ body {
 }
 
 .icon-profile {
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48cGF0aCBkPSJNNTEyIDk4MS4zMzNDMjUxLjczMyA5ODEuMzMzIDQyLjY2NyA3NzIuMjY3IDQyLjY2NyA1MTJTMjUxLjczMyA0Mi42NjcgNTEyIDQyLjY2NyA5ODEuMzMzIDI1MS43MzMgOTgxLjMzMyA1MTIgNzcyLjI2NyA5ODEuMzMzIDUxMiA5ODEuMzMzem0yMDkuMDY3LTI2Ni42NjdjLTEwLjY2Ny03Mi41MzMtNTcuNi0xMzIuMjY3LTEyMy43MzMtMTYyLjEzMyA0OS4wNjctMjkuODY3IDgzLjItODMuMiA4My4yLTE0Ny4yIDAtOTMuODY3LTc2LjgtMTcwLjY2Ny0xNzAuNjY3LTE3MC42NjdTMzM5LjIgMzExLjQ2NyAzMzkuMiA0MDUuMzMzYzAgNjEuODY3IDM0LjEzMyAxMTcuMzMzIDgzLjIgMTQ3LjItNjYuMTMzIDI5Ljg2Ny0xMTMuMDY3IDg5LjYtMTIzLjczMyAxNjIuMTMzIDIuMTMzIDQuMjY3IDAgNi40IDAgMTAuNjY3IDAgMTIuOCA4LjUzMyAyMS4zMzMgMjEuMzMzIDIxLjMzMyAxMC42NjcgMCAyMS4zMzMtMTAuNjY3IDIxLjMzMy0yMS4zMzNoMi4xMzNDMzU0LjEzMyA2NDIuMTMzIDQyNC41MzMgNTc2IDUxMiA1NzZzMTU3Ljg2NyA2Ni4xMzMgMTY4LjUzMyAxNDkuMzMzaDIuMTMzYzAgMTIuOCA4LjUzMyAyMS4zMzMgMjEuMzMzIDIxLjMzM3MyMS4zMzMtMTAuNjY3IDIxLjMzMy0yMS4zMzNjMC00LjI2Ny0yLjEzMy04LjUzMy00LjI2Ny0xMC42Njd6TTM4NCA0MDUuMzMzYzAtNzAuNCA1Ny42LTEyOCAxMjgtMTI4czEyOCA1Ny42IDEyOCAxMjgtNTcuNiAxMjgtMTI4IDEyOC0xMjgtNTcuNi0xMjgtMTI4eiIgZmlsbD0iIzcwNzA3MCIvPjwvc3ZnPg==);
-    
-    background-size:100% 100%;
-    background-repeat:no-repeat;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
     fill: #505050;
 }
 
@@ -33,7 +30,7 @@ body {
     margin: 10vh 10px;
 }
 
-.form-panel > * {
+.form-panel>* {
     margin: 15px 0;
 }
 
@@ -50,9 +47,11 @@ button.md-button {
         opacity: 0;
         transform: scale(0.94)
     }
+
     50% {
         opacity: 1;
     }
+
     100% {
         opacity: 1;
         transform: scale(1)
@@ -60,14 +59,27 @@ button.md-button {
 }
 
 .dark-bg {
-    background-color: rgba(128,128,128,0.4) !important;
+    background-color: rgba(128, 128, 128, 0.4) !important;
+}
+
+.ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.ellipsis * {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 /* smaller device */
 @media only screen and (max-width: 768px) {
     .only-g {
-        display: none!important;
+        display: none !important;
     }
+
     .form-panel {
         margin: 20px 10px;
     }
@@ -76,6 +88,6 @@ button.md-button {
 /* bigger device */
 @media only screen and (min-width: 769px) {
     .only-s {
-        display: none!important;
+        display: none !important;
     }
 }

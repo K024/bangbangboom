@@ -15,6 +15,7 @@ export class SingleSprite extends Pixi.Container {
         super()
 
         const loader = MainGame.loader
+        // tslint:disable-next-line: no-string-literal
         const note0Texture: any = loader.resources['note'].textures;
 
         if (this.info.onbeat) {

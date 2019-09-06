@@ -18,12 +18,10 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { PlayState, seekPercent, SecondToString } from "../../state";
+import { PlayState, seekPercent } from "../../state";
 import { GameMapState } from "../../gamemapstate";
+import { SecondToString } from '@/tools/functions';
 export default Vue.extend({
-    filters: {
-        time: SecondToString
-    },
     computed: {
         playstate: () => PlayState,
         timepoints: () => GameMapState.s.timepoints

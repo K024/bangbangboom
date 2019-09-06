@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -23,11 +24,13 @@ namespace bangbangboom.Controllers
         }
 
         [HttpGet]
-        public async Task<object> Info(
+        public object Info(
             [FromQuery][Required] long id,
             [FromServices] AppDbContext context)
         {
-            var comment = await context.Comments.FindAsync(id);
+            var comment = context.Comments
+                .Include(c => c.User).Include(c => c.LikeDislikes)
+                .Where(c => c.Id == id).FirstOrDefault();
             if (comment is null) return StatusCode(404);
 
             return CommentDetail.FromComment(comment);
@@ -41,7 +44,9 @@ namespace bangbangboom.Controllers
             var map = await context.Maps.FindAsync(MapId);
             if (map is null || map.Deleted) return StatusCode(404);
 
-            return map.Comments.Select(c => CommentDetail.FromComment(c));
+            return map.Comments.AsQueryable()
+                .Include(c => c.User).Include(c => c.LikeDislikes)
+                .Select(c => CommentDetail.FromComment(c, false));
         }
 
         [Authorize]
@@ -131,6 +136,27 @@ namespace bangbangboom.Controllers
             }
             await context.SaveChangesAsync();
             return Ok();
+        }
+
+        public class MyLikeDislikeInfo
+        {
+            public long id;
+            public bool isdislike = false;
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<object> MyLikeDislikes(
+            [FromQuery][Required] long MapId,
+            [FromServices] AppDbContext context)
+        {
+            var user = await userManager.GetUserAsync(User);
+            var lds =
+                from l in context.LikeDislikes.Include(l => l.Comment)
+                where l.User == user && l.Comment.MapId == MapId
+                select new MyLikeDislikeInfo() { id = l.CommentId, isdislike = l.IsDislike };
+
+            return lds;
         }
 
         [Authorize]

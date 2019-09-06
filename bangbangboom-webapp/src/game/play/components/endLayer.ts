@@ -3,6 +3,7 @@ import { layerWidth, layerHeight } from "../constants";
 import { whiteBg } from "./endLayer/whiteBg";
 import { backToBegin } from "./endLayer/backToBegin";
 
+// tslint:disable-next-line: class-name
 export class endLayer extends fixRatioContainer {
 
     /**
@@ -22,12 +23,12 @@ export class endLayer extends fixRatioContainer {
         w.y = layerHeight * 0.5 - w.height * 0.5
 
         const b = new backToBegin()
-        b.x = layerWidth/2 - b.width/2
+        b.x = layerWidth / 2 - b.width / 2
         b.y = w.y + w.height + b.y
 
         this.addChild(w)
         this.addChild(b)
-        
+
     }
 
 

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { AccountInfo } from '@/tools/models';
-import api from '@/tools/Axios';
+import api, { GetXSRFHeader } from '@/tools/Axios';
 
 
 export const userstate = Vue.observable({
@@ -19,6 +19,7 @@ export const passwordvalidate = (pass: string) =>
 
 export async function LoadCurrentUser() {
     try {
+        await GetXSRFHeader()
         const res = await api.get<AccountInfo>("account/current");
         userstate.currentuser = res.data;
         userstate.loginstate = true;

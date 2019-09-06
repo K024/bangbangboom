@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
@@ -125,7 +126,7 @@ namespace bangbangboom.Controllers
             var map = await context.Maps.FindAsync(mapId);
             if (map is null || map.Deleted) return StatusCode(404);
 
-            if (user.Favorites.Select(f => f.Map == map).Count() <= 0)
+            if (user.Favorites.AsQueryable().Where(f => f.Map == map).Count() <= 0)
             {
                 user.Favorites.Add(new Favorite() { Map = map });
                 await context.SaveChangesAsync();
@@ -142,7 +143,7 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var user = await userManager.GetUserAsync(User);
-            var favorite = context.Favorites.Where(f => f.MapId == mapId).FirstOrDefault();
+            var favorite = context.Favorites.AsQueryable().Where(f => f.MapId == mapId).FirstOrDefault();
 
             if (favorite != null)
             {
@@ -156,17 +157,44 @@ namespace bangbangboom.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<object> Favorites()
+        public async Task<object> Favorites(
+            [FromQuery][Range(1, 10000)] int? page)
         {
             var user = await userManager.GetUserAsync(User);
 
             var favorites =
-                from f in user.Favorites
+                from f in user.Favorites.AsQueryable()
                 where !f.Map.Deleted
                 orderby f.DateTime descending
                 select MapShort.FormMap(f.Map);
 
-            return favorites;
+            return favorites.Page(page ?? 1);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<object> MyMusics(
+            [FromQuery][Range(1, 10000)] int? page)
+        {
+            var user = await userManager.GetUserAsync(User);
+
+            return user.UploadedMusics.AsQueryable()
+                .OrderByDescending(m => m.Date)
+                .Select(m => MusicShort.FromMusic(m))
+                .Page(page ?? 1);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<object> MyMaps(
+            [FromQuery][Range(1, 10000)] int? page)
+        {
+            var user = await userManager.GetUserAsync(User);
+
+            return user.UploadedMaps.AsQueryable()
+                .OrderByDescending(m => m.Date)
+                .Select(m => MapShort.FormMap(m))
+                .Page(page ?? 1);
         }
 
     }

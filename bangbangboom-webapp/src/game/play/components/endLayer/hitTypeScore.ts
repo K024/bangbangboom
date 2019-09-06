@@ -12,6 +12,7 @@ const lineTexture = Pixi.Texture.from((() => {
     c.width = 420
     c.height = 2
     const ctx = c.getContext("2d")
+    if (!ctx) throw new Error("ctx null")
     const g = ctx.createLinearGradient(0, 0, c.width, 0)
     g.addColorStop(0, "rgba(0,0,0,0)")
     g.addColorStop(0.1, "rgba(0,0,0,1)")
@@ -22,6 +23,7 @@ const lineTexture = Pixi.Texture.from((() => {
     return c
 })())
 
+// tslint:disable-next-line: class-name
 export class hitTypeScore extends Pixi.Container {
 
     bannerPosY: number[] = []
@@ -60,7 +62,7 @@ export class hitTypeScore extends Pixi.Container {
         this.addChild(miss)
         this.addChild(maxcombo)
 
-        if(isFullCombo){
+        if (isFullCombo) {
             const fullcombo = new fullComboBanner()
             fullcombo.x = 480
             fullcombo.y = this.bannerPosY[3]

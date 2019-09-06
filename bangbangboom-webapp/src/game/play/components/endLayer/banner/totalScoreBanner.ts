@@ -6,6 +6,7 @@ import * as Pixi from 'pixi.js'
 import { chooseLayer, chooseState } from "../../chooseLayer";
 
 
+// tslint:disable-next-line: class-name
 export class totalScoreBanner extends Pixi.Container {
 
     constructor() {
@@ -33,7 +34,7 @@ export class totalScoreBanner extends Pixi.Container {
 
         num.x = 600 - num.width
         autoplay.x = 600 - autoplay.width
-        
+
         if (gameState === chooseState.autoPlay)
             this.addChild(autoplay)
         else if (gameState === chooseState.normalPlay)

@@ -16,6 +16,7 @@ export class SlideSprite extends Pixi.Container {
 
         const loader = MainGame.loader
         this.addChild(this.barlayer)
+        // tslint:disable-next-line: no-string-literal
         const note0Texture: any = loader.resources['note'].textures;
         this.info.notes.forEach((n, i) => {
             const s = (i === 0 || i === this.info.notes.length - 1) ?
@@ -80,7 +81,7 @@ export class SlideSprite extends Pixi.Container {
                 i++;
 
             } else {
-                if (i == 0) i = 1;
+                if (i === 0) i = 1;
                 lastZ = zlist[i - 1]
                 lastX = notes_x_collection[this.info.notes[i - 1].lane]
                 const nextZ = zlist[i]
@@ -210,14 +211,14 @@ export class SlideSprite extends Pixi.Container {
         }
     }
 
-    slideCircle: { move(x: number): void, miss(): void } | null
+    slideCircle: { move(x: number): void, miss(): void } | null = null
 
     setHolding(holding: boolean, x: number) {
         if (holding && !this.holding) {
             this.slideCircle = holdSlide(x)
             this.holding = true
         } else if (!holding && this.holding) {
-            this.slideCircle.miss()
+            if (this.slideCircle) this.slideCircle.miss()
             this.holding = false
         }
     }

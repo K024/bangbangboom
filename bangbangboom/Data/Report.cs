@@ -10,7 +10,7 @@ namespace bangbangboom.Data
     public class Report
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } = 10000;
+        public long Id { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime Date { get; set; } = DateTime.Now;

@@ -7,6 +7,7 @@ import { GameEvent } from "../../utils/event";
 export const loadingBgEvent = new GameEvent<[]>()
 
 // 该类并没有被使用
+// tslint:disable-next-line: class-name
 export class loadingBg extends Pixi.Container {
 
     readonly snow: snowParticle[] = []
@@ -27,7 +28,7 @@ export class loadingBg extends Pixi.Container {
     }
 
     update = () => {
-        for (let n of this.snow) {
+        for (const n of this.snow) {
             const m = Math.random() * 2 * Math.PI
             n.x += 0.1 * Math.sin(m)
             n.y += m * 0.0001
@@ -39,7 +40,7 @@ export class loadingBg extends Pixi.Container {
         }
     }
 
-    deleteUpdate = ()=>{
+    deleteUpdate = () => {
         updateEvent.remove(this.update)
     }
 }

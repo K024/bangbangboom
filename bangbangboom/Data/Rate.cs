@@ -11,7 +11,7 @@ namespace bangbangboom.Data
     public class Rate
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } = 10000;
+        public long Id { get; set; } 
 
         [Required]
         public string UserId { get; set; }

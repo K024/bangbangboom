@@ -1,5 +1,6 @@
 import { GameMap, Single, Flick, Slide } from "../../core/MapCore";
 
+// tslint:disable: interface-name class-name
 
 export interface single {
     type: "single"
@@ -17,7 +18,7 @@ export interface slide {
     flickend: boolean,
     time: number,
     lane: number,
-    notes: { time: number, lane: number }[]
+    notes: Array<{ time: number, lane: number }>
 }
 
 export type note = single | flick | slide
@@ -36,27 +37,27 @@ export function convert(map: GameMap) {
     for (const tp of map.timepoints) {
         const off = tp.time
         const dt = tp.beatTime() / 24
-        for (const note of tp.notes) {
-            if (note instanceof Single) {
+        for (const n of tp.notes) {
+            if (n instanceof Single) {
                 list.push({
                     type: "single",
-                    time: off + note.time * dt,
-                    lane: note.lane,
-                    onbeat: note.time % 24 === 0
+                    time: off + n.time * dt,
+                    lane: n.lane,
+                    onbeat: n.time % 24 === 0
                 })
-            } else if (note instanceof Flick) {
+            } else if (n instanceof Flick) {
                 list.push({
                     type: "flick",
-                    time: off + note.time * dt,
-                    lane: note.lane
+                    time: off + n.time * dt,
+                    lane: n.lane
                 })
-            } else if (note instanceof Slide) {
+            } else if (n instanceof Slide) {
                 list.push({
                     type: "slide",
-                    flickend: note.flickend,
-                    time: off + note.notes[0].time * dt,
-                    lane: note.notes[0].lane,
-                    notes: note.notes.map(s => ({ time: off + s.time * dt, lane: s.lane }))
+                    flickend: n.flickend,
+                    time: off + n.notes[0].time * dt,
+                    lane: n.notes[0].lane,
+                    notes: n.notes.map(s => ({ time: off + s.time * dt, lane: s.lane }))
                 })
             }
         }

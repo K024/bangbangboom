@@ -4,7 +4,8 @@ import { normalPlay } from "./chooseLayer/normalPlay";
 import { layerWidth, layerHeight } from "../constants";
 import { fixRatioContainer } from "../utils/fixRatioContainer";
 
-export enum chooseState {normalPlay,autoPlay}
+export enum chooseState { normalPlay, autoPlay }
+// tslint:disable-next-line: class-name
 export class chooseLayer extends fixRatioContainer {
 
     constructor() {

@@ -9,6 +9,7 @@ import { hitTypeSprite } from "./mainlayer/hitType";
 import { particleLayer } from "./mainlayer/particleLayer";
 import { isoLineLayer } from "./mainlayer/isoLineLayer";
 
+// tslint:disable-next-line: class-name
 export class mainLayer extends fixRatioContainer {
 
     readonly combo = new comboSprite()

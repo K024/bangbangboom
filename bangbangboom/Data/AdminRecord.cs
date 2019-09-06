@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using System.Linq;
 
 namespace bangbangboom.Data
 {
     public class AdminRecord
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } = 10000;
+        public long Id { get; set; } 
 
         [Required]
         public string AdminId { get; set; }

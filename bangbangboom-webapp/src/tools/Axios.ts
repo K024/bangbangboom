@@ -9,7 +9,7 @@ const api = axios.create({
     timeout: 3000,
 })
 
-const GetXSRFHeader = async () => {
+export const GetXSRFHeader = async () => {
 
     try {
         const result = await api.get<string>('xsrf')

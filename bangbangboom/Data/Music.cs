@@ -10,7 +10,7 @@ namespace bangbangboom.Data
     public class Music
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } = 10000;
+        public long Id { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -41,7 +41,7 @@ namespace bangbangboom.Data
         public bool Locked { get; set; } = false;
         public bool Deleted { get; set; } = false;
 
-        public virtual List<Map> Maps { get; set; }
+        public virtual IList<Map> Maps { get; set; }
     }
 
     public class MusicShort
@@ -95,7 +95,7 @@ namespace bangbangboom.Data
                 artistunicode = m.ArtistUnicode,
                 description = m.Description,
                 locked = m.Locked,
-                mapscount = m.Maps.Count(),
+                mapscount = m.Maps.AsQueryable().Count(),
                 date = m.Date
             };
         }

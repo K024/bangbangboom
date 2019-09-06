@@ -9,7 +9,8 @@ import { lightBaseParticle } from "../components/mainlayer/particle/lightBasePar
 import { hitParticalEvent } from "../components/mainlayer/particleLayer";
 
 
-type judgeBasic = {
+// tslint:disable-next-line: interface-name class-name
+interface judgeBasic {
     time: number,
     lane: number,
     perfect: () => void,
@@ -49,6 +50,7 @@ export const intereactEvent = new GameEvent<[number, string, number, { x: number
 /**
  * 有 slide among 的情况下 slide end 会提前判定
  */
+// tslint:disable-next-line: class-name
 export class judger {
 
     private pre_notes: judges[] = []
@@ -71,6 +73,7 @@ export class judger {
         if (n.type === "slide_among" || n.type === "slide_start") {
             n.miss()
             if (n.next.type === "slide_among") {
+                // tslint:disable: no-shadowed-variable
                 const nn = n.next as any
                 nn.type = "slide_start"
             } else if (n.next.type === "slide_end") {
@@ -172,8 +175,7 @@ export class judger {
                     n.miss()
                 } else if (n.type === "slide_among") {
                     this.slideMiss(n)
-                }
-                else if (n.type === "slide_end") {
+                } else if (n.type === "slide_end") {
                     const dt = Math.abs(n.time - t)
                     if (dt <= perfectLatency) n.perfect()
                     else if (dt <= greatLatency) n.great()

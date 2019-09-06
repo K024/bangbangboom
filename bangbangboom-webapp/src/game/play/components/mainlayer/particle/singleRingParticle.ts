@@ -31,14 +31,16 @@ export class singleRingParticle extends Pixi.Container {
     async init() {
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const particleTexture = loader.resources['particles'].textures;
+        if (!particleTexture) throw new Error()
 
         const ring = new Pixi.Sprite(particleTexture["ring.png"])
-        
-        this.addChild(ring)
-        this.scale.set(this.initScale,this.initScale/1.5)
 
-        
+        this.addChild(ring)
+        this.scale.set(this.initScale, this.initScale / 1.5)
+
+
         // 255 255 255
         // to  255 105 180
         const filter = new Pixi.filters.ColorMatrixFilter()
@@ -55,8 +57,8 @@ export class singleRingParticle extends Pixi.Container {
     update(dt: number) {
         let s = this.scale.x
         let a = this.alpha
-        if (s < this.finalScale && a>0) {
-            s += dt / particleTransTime * (this.finalScale-s) * 3 + 0.01
+        if (s < this.finalScale && a > 0) {
+            s += dt / particleTransTime * (this.finalScale - s) * 3 + 0.01
             a -= dt / particleTransTime * (1 - a) * 3 + 0.01
             if (s > this.finalScale) {
                 s = 1
@@ -66,7 +68,7 @@ export class singleRingParticle extends Pixi.Container {
                 this.alpha = 0
                 this.shouldRemove = true;
             }
-            this.scale.set(s,s/1.5)
+            this.scale.set(s, s / 1.5)
             this.alpha = a
         }
     }

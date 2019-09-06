@@ -4,11 +4,12 @@ import { resizeEvent } from "../globalEvents";
 import * as Pixi from 'pixi.js'
 
 
+// tslint:disable-next-line: class-name
 export class endStage extends Pixi.Container {
 
     private background = new backgroundSprite()
     private end = new endLayer()
-    constructor(){
+    constructor() {
         super()
         this.addChild(this.background)
         this.addChild(this.end)
@@ -17,14 +18,14 @@ export class endStage extends Pixi.Container {
         resizeEvent.add(this.resize)
     }
 
-    
+
     resize = (x: number, y: number) => {
         this.background.resize(x, y, true)
         this.end.resize(x, y)
     }
 
-    destroy(){
-        super.destroy()
+    destroy() {
+        super.destroy({ children: true })
         resizeEvent.remove(this.resize)
     }
 

@@ -14,6 +14,7 @@ export const hitTypeEvent = new GameEvent<[number]>();
 
 
 // 如果为auotoplay 则不显示
+// tslint:disable-next-line: class-name
 export class hitTypeSprite extends Pixi.Container {
     private readonly hitWord: Pixi.Sprite[] = []
 
@@ -23,9 +24,10 @@ export class hitTypeSprite extends Pixi.Container {
 
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const hitType_textures = loader.resources['hitType'].textures;
 
-        if (!hitType_textures) return
+        if (!hitType_textures) throw new Error()
 
         // 顺序不可变
         this.hitWord.push(new Pixi.Sprite(hitType_textures["perfect.png"]))
@@ -34,7 +36,7 @@ export class hitTypeSprite extends Pixi.Container {
         this.hitWord.push(new Pixi.Sprite(hitType_textures["bad.png"]))
         this.hitWord.push(new Pixi.Sprite(hitType_textures["miss.png"]))
 
-        for (let i of this.hitWord) {
+        for (const i of this.hitWord) {
             i.visible = false;
             this.addChild(i);
         }
@@ -54,7 +56,7 @@ export class hitTypeSprite extends Pixi.Container {
 
     showEffect = (type: number) => {
         // todo
-        for (let i of this.hitWord) {
+        for (const i of this.hitWord) {
             i.visible = false;
         }
         this.hitWord[type].visible = true;
@@ -74,7 +76,7 @@ export class hitTypeSprite extends Pixi.Container {
         if (this.timeCounter > 1000) this.visible = false
         else this.visible = true
     }
-    destroy(){
+    destroy() {
         super.destroy()
         if (gameState === chooseState.normalPlay) {
             hitTypeEvent.remove(this.showEffect)

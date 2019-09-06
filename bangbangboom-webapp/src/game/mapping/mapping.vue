@@ -19,6 +19,9 @@
                     <md-button class="md-icon-button" @click="save">
                         <md-icon>save_alt</md-icon>
                     </md-button>
+                    <md-button class="md-icon-button" @click="testplay" title="Test play">
+                        <md-icon>build</md-icon>
+                    </md-button>
                 </div>
                 <md-button class="md-icon-button" @click="$router.back()">
                     <md-icon>navigate_before</md-icon>
@@ -98,6 +101,10 @@ export default Vue.extend({
         save: function() {
             saveState();
             this.$toasted.success("Saved in local store");
+        },
+        testplay() {
+            this.save();
+            this.$router.push("/play/local");
         }
     },
     mounted: function() {
@@ -127,6 +134,7 @@ export default Vue.extend({
     },
     beforeDestroy: function() {
         ticker.Stop();
+        if (PlayState.music) PlayState.music.pause();
         removeKeyDownListeners(this);
     }
 });

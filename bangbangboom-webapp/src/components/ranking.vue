@@ -1,5 +1,5 @@
 <template>
-    <h1>Ranking</h1>
+    <div class="md-headline" style="padding: 10px">Comming soon...(</div>
 </template>
 
 <script lang="ts">

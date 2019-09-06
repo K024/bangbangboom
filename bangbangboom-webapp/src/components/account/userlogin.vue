@@ -54,11 +54,11 @@ export default Vue.extend({
                 const res = HandleErr<string>(error);
                 if (!res) this.$toasted.error("Net error");
                 else if (res.status === 401)
-                    this.$toasted.error("Username or password is wrong");
+                    this.$toasted.error(this.$t('s.userNameOrPasswordWrong') as string );
                 else if (res.data.startsWith("lockedout"))
-                    this.$toasted.error("Account locked out");
+                    this.$toasted.error(this.$t('s.accountLockOut') as string );
                 else if (res.data === "emailnotconfirmed")
-                    this.$toasted.error("Email not confirmed");
+                    this.$toasted.error(this.$t('s.emailNotConfirmed') as string );
             } finally {
                 this.loading = false;
             }

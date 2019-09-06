@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import Vue, { VNode } from "vue";
-import { PlayState, SecondToString } from "../../state";
+import { PlayState } from "../../state";
 import {
     SelectPosition,
     timelist,
@@ -73,9 +73,6 @@ import notes from "./noteslayer";
 import progressbar from "./tracksprogress";
 
 export default Vue.extend({
-    filters: {
-        time: SecondToString
-    },
     components: {
         notes: notes,
         progressbar

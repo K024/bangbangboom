@@ -12,7 +12,7 @@ namespace bangbangboom.Data.Migrations
                 name: "Date",
                 table: "AspNetUsers",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified))
+                defaultValue: DateTime.Now)
                 .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
             migrationBuilder.AddColumn<string>(
@@ -387,6 +387,16 @@ namespace bangbangboom.Data.Migrations
                 name: "IX_Reports_HandledById",
                 table: "Reports",
                 column: "HandledById");
+
+            migrationBuilder.Sql("ALTER TABLE AdminRecords AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Comments AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Favorites AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE LikeDislikes AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Maps AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Musics AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE PlayRecords AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Rates AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Reports AUTO_INCREMENT=10000;");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

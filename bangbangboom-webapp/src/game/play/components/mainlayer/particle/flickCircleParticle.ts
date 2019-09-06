@@ -27,13 +27,13 @@ export class flickCircleParticle extends Pixi.Container {
     constructor(lane: number) {
         super()
         this.lane = lane
-        this.init()
-    }
 
-    async init() {
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const particleTexture = loader.resources['particles'].textures;
+
+        if (!particleTexture) throw new Error()
 
         const circle1 = new Pixi.Sprite(particleTexture["circle.png"])
         this.circleBelow = new Pixi.Sprite(particleTexture["circle.png"])
@@ -52,14 +52,14 @@ export class flickCircleParticle extends Pixi.Container {
         this.addChild(circle1)
         this.addChild(this.circleBelow)
 
-        this.position.set(notes_x_collection[this.lane],lanePos_y)
+        this.position.set(notes_x_collection[this.lane], lanePos_y)
 
     }
 
     update(dt: number) {
         let s = this.circleBelow.scale.y
         let a = this.alpha
-        if (s < this.finalScale && a>0) {
+        if (s < this.finalScale && a > 0) {
             s += dt / particleTransTime * (this.finalScale - this.initScale)
             a -= dt / particleTransTime
             if (s > this.finalScale) {
@@ -70,7 +70,7 @@ export class flickCircleParticle extends Pixi.Container {
                 a = 0
                 this.shouldRemove = true;
             }
-            this.circleBelow.scale.y=s
+            this.circleBelow.scale.y = s
             this.alpha = a
 
         }

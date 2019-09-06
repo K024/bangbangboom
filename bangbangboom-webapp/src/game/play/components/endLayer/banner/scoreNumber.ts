@@ -1,14 +1,14 @@
 import * as Pixi from 'pixi.js'
-import { resolveTxt } from 'dns';
 
 export enum scoreNumType { normal, normalGrey, red }
 // 普通黑 普通黑加灰色0  红色
 
+// tslint:disable-next-line: class-name
 export class scoreNumber extends Pixi.Container {
 
     private num: number
 
-    private count: number
+    private count = 0
 
     private numType: number
 
@@ -23,7 +23,7 @@ export class scoreNumber extends Pixi.Container {
     setNumText() {
         const size = 36
         const redSize = 48
-        let numString: string = this.num.toString()
+        const numString: string = this.num.toString()
         let x = 0
 
         const styleGrey = new Pixi.TextStyle({
@@ -38,11 +38,11 @@ export class scoreNumber extends Pixi.Container {
             fontWeight: 'bold',
             fill: ['#DC143C', '#DC143C']
         })
-        const n = "0"
-        const testString1 = new Pixi.Text(n, styleGrey)
-        let width1 = testString1.width
-        const testStirng2 = new Pixi.Text(n,styleRed)
-        let width2 = testStirng2.width
+        const num = "0"
+        const testString1 = new Pixi.Text(num, styleGrey)
+        const width1 = testString1.width
+        const testStirng2 = new Pixi.Text(num, styleRed)
+        const width2 = testStirng2.width
 
         switch (this.numType) {
             case scoreNumType.normal:
@@ -52,8 +52,8 @@ export class scoreNumber extends Pixi.Container {
                     fontFamily: "Saira",
                     fontWeight: 'bold'
                 })
-                for (let i = 0; i < numString.length; i++) {
-                    const n = numString[i]
+                for (
+                    const n of numString) {
                     const blackText = new Pixi.Text(n, style)
                     blackText.x = x
                     x += width1
@@ -64,12 +64,6 @@ export class scoreNumber extends Pixi.Container {
             case scoreNumType.normalGrey:
                 x = 0
                 if (this.count < 4) {
-                    const styleGrey = new Pixi.TextStyle({
-                        fontSize: size,
-                        fontFamily: "Saira",
-                        fontWeight: 'bold',
-                        fill: ['#A0A0A0', '#A0A0A0']
-                    })
                     for (let i = 0; i < 4 - this.count; i++) {
                         const n = "0"
                         const headString = new Pixi.Text(n, styleGrey)
@@ -94,14 +88,7 @@ export class scoreNumber extends Pixi.Container {
 
             case scoreNumType.red:
                 x = 0;
-                const styleRed = new Pixi.TextStyle({
-                    fontSize: redSize,
-                    fontFamily: "Saira",
-                    fontWeight: 'bold',
-                    fill: ['#DC143C', '#DC143C']
-                })
-                for (let i = 0; i < numString.length; i++) {
-                    const n = numString[i]
+                for (const n of numString) {
                     const redText = new Pixi.Text(n, styleRed)
                     redText.x = x
                     x += width2

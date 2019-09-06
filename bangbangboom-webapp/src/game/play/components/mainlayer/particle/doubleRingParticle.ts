@@ -34,15 +34,17 @@ export class doubleRingParticle extends Pixi.Container {
     async init() {
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const particleTexture = loader.resources['particles'].textures;
 
+        if (!particleTexture) throw new Error("texture null")
         const ring1 = new Pixi.Sprite(particleTexture["ring.png"])
         const ring2 = new Pixi.Sprite(particleTexture["ring.png"])
         ring1.scale.set(this.initScale1)
         ring2.scale.set(this.initScale2)
         this.addChild(ring1)
         this.addChild(ring2)
-        this.scale.set(this.initScale,this.initScale/1.5)
+        this.scale.set(this.initScale, this.initScale / 1.5)
 
 
 
@@ -55,7 +57,7 @@ export class doubleRingParticle extends Pixi.Container {
         let s = this.scale.x
         let a = this.alpha
         if (s < this.finalScale && a > 0) {
-            s += dt / particleTransTime * (this.finalScale-s) * 3 + 0.01
+            s += dt / particleTransTime * (this.finalScale - s) * 3 + 0.01
             a -= dt / particleTransTime * (1 - a) * 3 + 0.01
             if (s > this.finalScale) {
                 s = 1
@@ -65,10 +67,8 @@ export class doubleRingParticle extends Pixi.Container {
                 this.alpha = 0
                 this.shouldRemove = true;
             }
-            this.scale.set(s,s/1.5)
+            this.scale.set(s, s / 1.5)
             this.alpha = a
         }
     }
-
-
 }

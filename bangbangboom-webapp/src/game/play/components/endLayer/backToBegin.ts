@@ -3,12 +3,13 @@ import { stageSwitchEvent } from "../../globalEvents";
 import { chooseStage } from "../../stages/chooseStage";
 import { clearCombo } from "../../stages/hitScore";
 
-export class backToBegin extends Pixi.Container{
+// tslint:disable-next-line: class-name
+export class backToBegin extends Pixi.Container {
 
-    constructor(){
+    constructor() {
         super()
         const textStyle = new Pixi.TextStyle({
-            fontSize:52,
+            fontSize: 52,
             fill: "white",
             stroke: '#4a1850',
             strokeThickness: 5,
@@ -20,16 +21,16 @@ export class backToBegin extends Pixi.Container{
             wordWrap: true,
             wordWrapWidth: 440,
         })
-        const text = new Pixi.Text("Try again",textStyle)
+        const text = new Pixi.Text("Try again", textStyle)
 
         const g = new Pixi.Graphics()
         g.beginFill(0x000000)
-        g.drawRect(0,0,text.width,text.height)
+        g.drawRect(0, 0, text.width, text.height)
         g.endFill()
-        g.alpha=0
+        g.alpha = 0
 
-        g.interactive=true
-        g.on("pointerdown",()=>{
+        g.interactive = true
+        g.on("pointerdown", () => {
             clearCombo()
             stageSwitchEvent.emit(new chooseStage())
         })

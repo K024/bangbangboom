@@ -2,29 +2,29 @@
     <div>
         <md-empty-state v-if="sent" class="md-primary" md-icon="done" md-description="Uploaded"></md-empty-state>
         <template v-else>
-            <div class="md-title">Upload Music</div>
+            <div class="md-title">{{$t('l.uploadMap')}}</div>
             <md-field>
-                <label>Map name (only ascii charactors)</label>
+                <label>{{$t('l.mapNameAscii')}}</label>
                 <md-input v-model="mapname" md-counter="100"></md-input>
             </md-field>
             <md-field>
-                <label>Music id</label>
+                <label>{{$t('l.musicId')}}</label>
                 <md-input type="number" v-model="musicid"></md-input>
             </md-field>
             <md-field>
-                <label>Difficulty</label>
+                <label>{{$t('s.difficulty')}}</label>
                 <md-input type="number" v-model="difficulty"></md-input>
             </md-field>
             <md-field>
-                <label>Image File</label>
+                <label>{{$t('l.imageFile')}}</label>
                 <md-file placeholder="Local" accept="image/*" @change="loadfile"></md-file>
             </md-field>
             <md-field>
-                <label>Description</label>
+                <label>{{$t('w.description')}}</label>
                 <md-textarea v-model="description" md-autogrow md-counter="400"></md-textarea>
             </md-field>
-            <div>Notice: Map content will be loaded from local storage saved from mapping page</div>
-            <md-button :disabled="!formvalid || loading" @click="submit">Submit</md-button>
+            <div>{{$t('s.mapUploadNotice')}}</div>
+            <md-button :disabled="!formvalid || loading" @click="submit">{{$t('w.submit')}}</md-button>
         </template>
     </div>
 </template>
@@ -32,6 +32,7 @@
 <script lang="ts">
 import Vue from "vue";
 import api, { Form } from "../tools/Axios";
+import { delay } from "../tools/functions";
 
 function allAscii(s: string) {
     return /^[\x00-\x7F]*$/.test(s);
@@ -74,13 +75,13 @@ export default Vue.extend({
             if (!this.image || !this.formvalid) return;
             const content = localStorage.getItem("gamemapstate");
             if (!content) {
-                this.$toasted.error("Local storage is empty");
+                this.$toasted.error(this.$t('s.localStorageEmpty') as string );
                 return;
             }
             try {
                 this.loading = true;
-                await api.post(
-                    "music/upload",
+                const res = await api.post<string>(
+                    "map/upload",
                     Form({
                         musicid: this.musicid,
                         mapname: this.mapname,
@@ -91,8 +92,10 @@ export default Vue.extend({
                     })
                 );
                 this.sent = true;
+                await delay(3000);
+                this.$router.push("/map/" + res.data);
             } catch (error) {
-                this.$toasted.error("Error: something wrong, please retry");
+                this.$toasted.error(this.$t('s.toastedError') as string );
             } finally {
                 this.loading = false;
             }

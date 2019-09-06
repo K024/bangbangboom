@@ -4,6 +4,7 @@ import { singleRingParticle } from "./singleRingParticle";
 import { flickCircleParticle } from "./flickCircleParticle";
 import { lightBaseParticle } from "./lightBaseParticle";
 
+// tslint:disable-next-line: class-name
 export class flickSpriteParticle extends Pixi.Container {
     shouldRemove: boolean = false
 
@@ -26,12 +27,12 @@ export class flickSpriteParticle extends Pixi.Container {
         })
         this.removeChild(...removeChildren)
 
-        if (this.children.length == 0) {
+        if (this.children.length === 0) {
             this.shouldRemove = true;
         }
     }
 
-    destroy(){
+    destroy() {
         super.destroy()
         updateEvent.remove(this.update)
     }

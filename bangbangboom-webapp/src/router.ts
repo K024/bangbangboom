@@ -9,8 +9,11 @@ import { accountRoutes } from '@/components/account/routes';
 import favorites from "@/components/favorites.vue";
 import ranking from "@/components/ranking.vue";
 import search from "@/components/search.vue";
+import musics from "@/components/musics.vue"
+import settings from "@/components/settings.vue"
 import mapdetail from "@/components/mapdetail.vue";
 import musicdetail from "@/components/musicdetail.vue";
+import userdetail from "@/components/userdetail.vue";
 
 Vue.use(Router);
 
@@ -36,18 +39,27 @@ export const router = new Router({
             component: search,
             meta: { title: "w.search" },
         }, {
+            path: '/musics',
+            component: musics,
+        }, {
+            path: '/settings',
+            component: settings,
+        }, {
             path: '/map/:id',
             component: mapdetail,
         }, {
             path: '/music/:id',
             component: musicdetail,
         }, {
+            path: '/user/:id',
+            component: userdetail,
+        }, {
             path: '/mapping',
             // component: mapping,
             component: () => import("@/game/mapping/mapping.vue"),
             meta: { title: "w.mapping" },
         }, {
-            path: '/play',
+            path: '/play/:id',
             // component: mapping,
             component: () => import("@/game/play/play.vue"),
         }, {

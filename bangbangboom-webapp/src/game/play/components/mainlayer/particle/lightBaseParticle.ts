@@ -16,13 +16,15 @@ export class lightBaseParticle extends Pixi.Container {
     constructor(lane: number) {
         super()
         this.lane = lane
-        
+
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const particleTexture = loader.resources['particles'].textures;
+        if (!particleTexture) throw new Error()
         this.addChild(new Pixi.Sprite(particleTexture["light_base.png"]))
 
-        this.position.set(notes_x_collection[this.lane],lanePos_y)
+        this.position.set(notes_x_collection[this.lane], lanePos_y)
 
         this.scale.set(noteInitScale)
 

@@ -17,8 +17,8 @@ import { chooseState } from "../components/chooseLayer";
 
 
 export const MainGame = {
-    loader: null as Loader,
-    audios: null as audios,
+    loader: null as any as Loader,
+    audios: null as any as audios,
     notes: [] as note[],
 }
 
@@ -36,7 +36,7 @@ export const endEvent = new GameEvent()
 export let musicId = 0
 
 export let gameState = 0
-export class mainStage extends Container {
+export class MainStage extends Container {
     private background = new backgroundSprite()
     private main: mainLayer
     private minticker = new MinTicker()
@@ -53,7 +53,7 @@ export class mainStage extends Container {
             case chooseState.normalPlay:
                 this.juder = new judger()
                 break;
-            case chooseState.autoPlay:
+            default:
                 this.juder = new autoPlayJudger()
                 break;
         }
@@ -62,7 +62,7 @@ export class mainStage extends Container {
 
         this.addChild(this.background)
         this.addChild(this.main)
-        this.main.alpha=0
+        this.main.alpha = 0
 
         updateEvent.add(this.enterTrans)
 
@@ -97,25 +97,25 @@ export class mainStage extends Container {
         endEvent.add(this.endTrans)
     }
 
-    endTrans =()=>{
+    endTrans = () => {
         updateEvent.add(this.hideMain)
     }
 
     private lastNoteId = 0
     update = () => {
-        let note = MainGame.notes[this.lastNoteId]
-        while (note && note.time < musicTime + farlineZ / zspeed) {
+        let n = MainGame.notes[this.lastNoteId]
+        while (n && n.time < musicTime + farlineZ / zspeed) {
 
-            if (note.type === "flick") {
-                addNoteEvent.emit(new FlickSprite(note))
-            } else if (note.type === "single") {
-                addNoteEvent.emit(new SingleSprite(note))
-            } else if (note.type === "slide") {
-                addNoteEvent.emit(new SlideSprite(note))
+            if (n.type === "flick") {
+                addNoteEvent.emit(new FlickSprite(n))
+            } else if (n.type === "single") {
+                addNoteEvent.emit(new SingleSprite(n))
+            } else if (n.type === "slide") {
+                addNoteEvent.emit(new SlideSprite(n))
             }
 
             this.lastNoteId++;
-            note = MainGame.notes[this.lastNoteId]
+            n = MainGame.notes[this.lastNoteId]
         }
     }
 
@@ -141,18 +141,17 @@ export class mainStage extends Container {
 
     enterTrans = (dt: number) => {
         let a = this.main.alpha
-        a += (1-a) * dt / 5000 +0.01
-        if(a>1)
-        a=1
-        this.main.alpha=a
-        if(a>=1){
+        a += (1 - a) * dt / 5000 + 0.01
+        if (a > 1)
+            a = 1
+        this.main.alpha = a
+        if (a >= 1) {
             updateEvent.remove(this.enterTrans)
-            console.log("remove entertrans")
         }
     }
 
-    destroy(){
-        super.destroy()
+    destroy() {
+        super.destroy({ children: true })
         resizeEvent.remove(this.resize)
         updateEvent.remove(this.update)
         endEvent.remove(this.endTrans)

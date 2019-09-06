@@ -1,9 +1,11 @@
 ﻿
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace bangbangboom.Data
@@ -20,9 +22,9 @@ namespace bangbangboom.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime Date { get; set; } = DateTime.Now;
 
-        public virtual List<Music> UploadedMusics { get; set; }
-        public virtual List<Map> UploadedMaps { get; set; }
-        public virtual List<Favorite> Favorites { get; set; }
+        public virtual IList<Music> UploadedMusics { get; set; }
+        public virtual IList<Map> UploadedMaps { get; set; }
+        public virtual IList<Favorite> Favorites { get; set; }
 
     }
 
@@ -30,6 +32,7 @@ namespace bangbangboom.Data
     {
         public string username;
         public string nickname;
+        public string whatsup;
 
         public static AppUserShort FromAppUser(AppUser u)
         {
@@ -37,6 +40,7 @@ namespace bangbangboom.Data
             {
                 username = u.UserName,
                 nickname = u.NickName ?? u.UserName,
+                whatsup = u.WhatsUp,
             };
         }
     }
@@ -57,8 +61,8 @@ namespace bangbangboom.Data
                 nickname = u.NickName ?? u.UserName,
                 whatsup = u.WhatsUp ?? "",
                 hasprofile = !string.IsNullOrEmpty(u.ProfileFileHash),
-                uploadedmusics = u.UploadedMusics.Count,
-                uploadedmaps = u.UploadedMaps.Count
+                uploadedmusics = u.UploadedMusics.AsQueryable().Count(),
+                uploadedmaps = u.UploadedMaps.AsQueryable().Count()
             };
         }
     }

@@ -47,7 +47,6 @@ import Vue from "vue";
 import { assets } from "../../assets/assetsmap";
 import { GameMapState } from "../gamemapstate";
 import { TimePoint } from "@/game/core/MapCore";
-import { SecondToString } from "../state";
 import scrollbar from "./fast-render/scrollbar.vue";
 import tracks from "./fast-render/tracks.vue";
 import { SelectPosition } from "./fast-render/state";
@@ -57,9 +56,6 @@ import {
 } from "../../../tools/functions";
 
 export default Vue.extend({
-    filters: {
-        time: SecondToString
-    },
     components: {
         scrollbar,
         tracks

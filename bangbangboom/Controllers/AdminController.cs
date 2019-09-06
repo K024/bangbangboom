@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -89,7 +90,7 @@ namespace bangbangboom.Controllers
 
         [HttpPost]
         public async Task<object> ModifyMapInfo(
-            [FromForm][Required] int id,
+            [FromForm][Required] long id,
             [FromForm][MaxLength(100)] string mapName,
             [FromForm][Range(0, 100)] int? difficulty,
             [FromForm][MaxLength(400)] string description,
@@ -195,11 +196,10 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var reports =
-                from r in context.Reports
+                from r in context.Reports.Include(r => r.HandledBy)
                 orderby r.Date descending
                 select ReportDetail.FromReport(r);
-            var p = page ?? 1 - 1;
-            return reports.Skip(p * 48).Take(48);
+            return reports.Page(page ?? 1);
         }
 
         [HttpGet]
@@ -208,12 +208,11 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var reports =
-                from r in context.Reports
+                from r in context.Reports.Include(r => r.HandledBy)
                 where !r.Handled
                 orderby r.Date descending
                 select ReportDetail.FromReport(r);
-            var p = page ?? 1 - 1;
-            return reports.Skip(p * 48).Take(48);
+            return reports.Page(page ?? 1);
         }
 
         [HttpPost]

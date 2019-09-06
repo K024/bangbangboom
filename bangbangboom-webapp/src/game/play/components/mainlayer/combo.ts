@@ -16,8 +16,9 @@ class combonumbers extends Pixi.Container {
     async init() {
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const common_textures = loader.resources['common'].textures;
-        if (!common_textures) return
+        if (!common_textures) throw new Error()
         for (let i = 0; i < 10; i++) {
             this.numberTextures.push(common_textures[i + ".png"])
         }
@@ -33,7 +34,7 @@ class combonumbers extends Pixi.Container {
             const digit = combo % 10
             combo = Math.floor(combo / 10)
             const d = new Pixi.Sprite(this.numberTextures[digit])
-            this.children.forEach(c => c.x += half*2)
+            this.children.forEach(c => c.x += half * 2)
             this.x -= half
             this.addChild(d)
         }
@@ -45,8 +46,9 @@ export class comboSprite extends Pixi.Container {
     constructor() {
         super()
         const loader = MainGame.loader
+        // tslint:disable-next-line: no-string-literal
         const common_textures = loader.resources['common'].textures;
-        if (!common_textures) return
+        if (!common_textures) throw new Error()
         const common_word = new Pixi.Sprite(common_textures["combo.png"]);
         common_word.x = 0
         common_word.y = 0
@@ -56,7 +58,7 @@ export class comboSprite extends Pixi.Container {
 
         this.visible = false
 
-        this.position.set(0.75*layerWidth,0.5*layerHeight)
+        this.position.set(0.75 * layerWidth, 0.5 * layerHeight)
 
         hitScoreEvent.add(this.setCombo)
         updateEvent.add(this.update)
@@ -64,12 +66,11 @@ export class comboSprite extends Pixi.Container {
 
     private combonumber = new combonumbers()
 
-    setCombo=(combo: number) =>{
+    setCombo = (combo: number) => {
         if (combo <= 0) {
             this.visible = false
             return
-        }
-        else {
+        } else {
             this.scale.set(0.8)
             this.visible = true
             this.combonumber.setCombo(combo)
@@ -85,7 +86,7 @@ export class comboSprite extends Pixi.Container {
         }
     }
 
-    destroy(){
+    destroy() {
         super.destroy()
         hitScoreEvent.remove(this.setCombo)
         updateEvent.remove(this.update)

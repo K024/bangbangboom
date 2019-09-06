@@ -4,6 +4,7 @@ import { lightBaseParticle } from "./lightBaseParticle";
 import { updateEvent } from "../../../globalEvents";
 import { lightNormalParticle } from "./lightNormalParticle";
 
+// tslint:disable-next-line: class-name
 export class singleSpriteParticle extends Pixi.Container {
 
 
@@ -17,7 +18,7 @@ export class singleSpriteParticle extends Pixi.Container {
 
         updateEvent.add(this.update)
 
-        
+
         // 255 255 255
         // to 160 200 255
         const filter = new Pixi.filters.ColorMatrixFilter()
@@ -38,12 +39,12 @@ export class singleSpriteParticle extends Pixi.Container {
         })
         this.removeChild(...removeChildren)
 
-        if (this.children.length == 0) {
+        if (this.children.length === 0) {
             this.shouldRemove = true;
         }
     }
 
-    destroy(){
+    destroy() {
         super.destroy()
         updateEvent.remove(this.update)
     }

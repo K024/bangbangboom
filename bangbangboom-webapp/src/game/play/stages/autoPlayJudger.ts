@@ -1,11 +1,12 @@
-import {  addNoteEvent, musicTimeUpdateEvent } from "./mainStage";
-import {  missLatency, perfectLatency } from "../constants";
+import { addNoteEvent, musicTimeUpdateEvent } from "./mainStage";
+import { missLatency, perfectLatency } from "../constants";
 import { SingleSprite } from "../components/mainlayer/note/single";
 import { FlickSprite } from "../components/mainlayer/note/flick";
 import { SlideSprite } from "../components/mainlayer/note/slide";
 
 
 
+// tslint:disable: interface-over-type-literal
 type judgeBasic = {
     time: number,
     lane: number,
@@ -39,10 +40,9 @@ type judges = ({
     downPos: { x: number, y: number },
 }) & judgeNeedPointer)) & judgeBasic
 
+// tslint:disable-next-line: class-name
 export class autoPlayJudger {
     private pre_notes: judges[] = []
-
-    private in_notes: judges[] = []
 
     constructor() {
         addNoteEvent.add(this.addNote)
@@ -51,29 +51,10 @@ export class autoPlayJudger {
 
     musicTimeUpdate = (t: number) => {
         let n = this.pre_notes[0]
-        while (n && n.time - t <= missLatency) {
+        while (n && n.time - t <= 0) {
             this.pre_notes.shift()
-            this.in_notes.push(n)
+            n.perfect()
             n = this.pre_notes[0]
-        }
-        n = this.in_notes[0]
-        while (n && n.time - t < -missLatency) {
-            this.in_notes.shift()
-            n.miss()
-            n = this.in_notes[0]
-        }
-        const list: judges[] = []
-        for (const a of this.in_notes) {
-            const dt = t - a.time
-            if (Math.abs(dt) < perfectLatency) {
-                a.perfect()
-                list.push(a)
-            }
-
-        }
-        if (list.length > 0) {
-            this.pre_notes = this.pre_notes.filter(n => !list.find(n2 => n === n2))
-            this.in_notes = this.in_notes.filter(n => !list.find(n2 => n === n2))
         }
     }
 
@@ -107,6 +88,7 @@ export class autoPlayJudger {
             let i = notes.length - 1
             let end: judgeNeedPointer & judges
             if (flickend) {
+                // tslint:disable: no-shadowed-variable
                 const j = i
                 end = {
                     type: "slide_flick",

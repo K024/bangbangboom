@@ -2,15 +2,16 @@
 import * as Pixi from "pixi.js"
 
 
+// tslint:disable-next-line: class-name
 export class loadingText extends Pixi.Container {
 
     constructor(w: string) {
         super()
         const word_style = new Pixi.TextStyle({
-            fontSize:48,
+            fontSize: 48,
             fill: "white"
         })
-        const word = new Pixi.Text("Loading: "+w, word_style)
+        const word = new Pixi.Text("Loading: " + w, word_style)
         this.addChild(word);
     }
 

@@ -47,7 +47,7 @@ export default Vue.extend({
                 );
                 this.sent = true;
             } catch (error) {
-                this.$toasted.error("Email not found");
+                this.$toasted.error(this.$t('s.emailNotFound') as string );
             } finally {
                 this.loading = false;
             }

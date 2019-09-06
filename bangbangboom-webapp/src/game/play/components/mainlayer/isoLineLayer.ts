@@ -8,6 +8,7 @@ import { updateEvent } from "../../globalEvents";
 import { isoLineSprite } from "./note/isoLine";
 
 type ns = SingleSprite | FlickSprite | SlideSprite
+// tslint:disable-next-line: class-name
 export class isoLineLayer extends Pixi.Container {
 
     constructor() {
@@ -17,51 +18,51 @@ export class isoLineLayer extends Pixi.Container {
         updateEvent.add(this.update)
     }
 
-    map = new Map<number, {note: ns, end: boolean}>()
+    map = new Map<number, { note: ns, end: boolean }>()
 
     addNote = (note: ns) => {
-        if(note instanceof SingleSprite || note instanceof FlickSprite) {
-            if (this.map.has(note.info.time)){
-                const n = this.map.get(note.info.time)
+        if (note instanceof SingleSprite || note instanceof FlickSprite) {
+            if (this.map.has(note.info.time)) {
+                const n = this.map.get(note.info.time) as { note: ns, end: boolean }
                 let lane = n.note.info.lane
 
                 if (n.end) {
                     const sn = (n.note as SlideSprite).info
-                    lane = sn.notes[sn.notes.length-1].lane
+                    lane = sn.notes[sn.notes.length - 1].lane
                 }
 
                 this.addChild(new isoLineSprite(note, n.note, note.info.time, lane, note.info.lane))
             } else {
-                this.map.set(note.info.time, {note, end: false})
+                this.map.set(note.info.time, { note, end: false })
             }
-            
+
         } else {
             if (this.map.has(note.info.time)) {
-                const n = this.map.get(note.info.time)
+                const n = this.map.get(note.info.time) as { note: ns, end: boolean }
                 let lane = n.note.info.lane
 
                 if (n.end) {
                     const sn = (n.note as SlideSprite).info
-                    lane = sn.notes[sn.notes.length-1].lane
+                    lane = sn.notes[sn.notes.length - 1].lane
                 }
 
                 this.addChild(new isoLineSprite(note, n.note, note.info.time, lane, note.info.lane))
             } else {
-                this.map.set(note.info.time, {note, end: false})
+                this.map.set(note.info.time, { note, end: false })
             }
             const end = note.info.notes[note.info.notes.length - 1]
             if (this.map.has(end.time)) {
-                const n = this.map.get(end.time)
+                const n = this.map.get(end.time) as { note: ns, end: boolean }
                 let lane = n.note.info.lane
 
                 if (n.end) {
                     const sn = (n.note as SlideSprite).info
-                    lane = sn.notes[sn.notes.length-1].lane
+                    lane = sn.notes[sn.notes.length - 1].lane
                 }
 
                 this.addChild(new isoLineSprite(note, n.note, end.time, lane, end.lane))
             } else {
-                this.map.set(end.time, {note, end: true})
+                this.map.set(end.time, { note, end: true })
             }
         }
     }

@@ -20,7 +20,7 @@ export const hitParticalEvent = new GameEvent<[PIXI.Container]>()
 // 增加colormatrix 从开始到结束 颜色由白色变为蓝色 
 
 // flick
-//一个圆环  1
+// 一个圆环  1
 // 白色circle 纵向拉伸   
 // colormatrix 颜色从白到粉 
 
@@ -37,11 +37,13 @@ export function holdSlide(x: number) {
     const s = new slideCircleParticle(x)
     hitParticalEvent.emit(s)
     return {
+        // tslint:disable-next-line: no-shadowed-variable
         move: (x: number) => { s.x = x },
         miss: () => { s.shouldRemove = true }
     }
 }
 
+// tslint:disable-next-line: class-name
 export class particleLayer extends Pixi.Container {
 
     constructor() {

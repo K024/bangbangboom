@@ -10,7 +10,7 @@ namespace bangbangboom.Data
 
     public class Comment
     {
-        public long Id { get; set; } = 10000;
+        public long Id { get; set; }
 
         [Required]
         public string UserId { get; set; }
@@ -21,7 +21,6 @@ namespace bangbangboom.Data
 
         public long? ParentCommentId { get; set; }
         public virtual Comment ParentComment { get; set; }
-        public virtual List<Comment> SubComments { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime DateTime { get; set; } = DateTime.Now;
@@ -58,8 +57,8 @@ namespace bangbangboom.Data
                 datetime = c.DateTime,
                 content = c.Locked && !admin ? "" : c.Content,
                 locked = c.Locked,
-                like = c.LikeDislikes.Select(l => !l.IsDislike).Count(),
-                dislike = c.LikeDislikes.Select(l => l.IsDislike).Count()
+                like = c.LikeDislikes.AsQueryable().Where(l => !l.IsDislike).Count(),
+                dislike = c.LikeDislikes.AsQueryable().Where(l => l.IsDislike).Count()
             };
         }
     }

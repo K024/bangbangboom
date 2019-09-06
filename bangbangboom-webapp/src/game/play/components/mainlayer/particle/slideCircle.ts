@@ -21,13 +21,12 @@ export class slideCircleParticle extends Pixi.Container {
         super()
         this.x = x
         this.y = lanePos_y
-        this.init()
-    }
 
-    async init() {
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const particleTexture = loader.resources['particles'].textures;
+        if (!particleTexture) throw new Error()
 
         const ringLong = new Pixi.Sprite(particleTexture["ring_long.png"])
         this.spin1 = new Pixi.Sprite(particleTexture["spin.png"])
@@ -55,6 +54,4 @@ export class slideCircleParticle extends Pixi.Container {
         this.spin1.rotation += dt / particleTransTime * 1
         this.spin2.rotation -= dt / particleTransTime * 1
     }
-
-
 }

@@ -38,7 +38,7 @@ namespace bangbangboom.Data
 
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.ParentComment)
-                .WithMany(c => c.SubComments)
+                .WithMany()
                 .HasForeignKey(c => c.ParentCommentId);
 
             modelBuilder.Entity<LikeDislike>()
@@ -63,6 +63,15 @@ namespace bangbangboom.Data
         public DbSet<PlayRecord> PlayRecords { get; set; }
         public DbSet<Rate> Rates { get; set; }
         public DbSet<Report> Reports { get; set; }
+    }
+
+    public static class PageExtension
+    {
+        public static IQueryable<T> Page<T>(this IQueryable<T> q,int page = 1, int pagesize = 24)
+        {
+            var p = page - 1;
+            return q.Skip(p * pagesize).Take(pagesize);
+        }
     }
 
 }

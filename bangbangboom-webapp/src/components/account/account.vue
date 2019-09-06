@@ -1,5 +1,5 @@
 <template>
-    <div class="containder">
+    <div class="container">
         <template v-if="!userstate.loginstate">
             <div class="only-g flex center login">{{$t('s.pleaselogin')}}</div>
             <div class="login fade-in" v-if="$responsive.s">
@@ -7,33 +7,31 @@
             </div>
         </template>
         <template v-else>
-            <md-tabs md-swipeable class="fade-in">
-                <md-tab md-label="Info">
+            <md-tabs md-swipeable class="fade-in" md-dynamic-height>
+                <md-tab :md-label="$t('w.info')">
                     <span class="md-title">{{appuser.username}}</span>
                     <div class="flex">
-                        <md-avatar v-if="appuser.hasprofile" class="md-avatar-icon md-large">
-                            <img :src="'/api/user/profile/'+appuser.username" alt="None" />
-                        </md-avatar>
-                        <div v-else>No profile</div>
-                        <md-button @click="uploadprofile">Upload Profile</md-button>
+                        <avatar v-if="appuser.hasprofile" class="md-avatar-icon md-large" :username="appuser.username"></avatar>
+                        <div v-else>{{$t('l.noProfile')}}</div>
+                        <md-button @click="uploadprofile">{{$t('l.uploadProfile')}}</md-button>
                     </div>
                     <md-field>
-                        <label>Nick name</label>
+                        <label>{{$t('l.nickName')}}</label>
                         <md-input @change="setnickname" v-model="appuser.nickname" md-counter="20"></md-input>
                     </md-field>
                     <md-field>
-                        <label>Whats up</label>
+                        <label>{{$t('l.whatsUp')}}</label>
                         <md-textarea @change="setwhatsup" v-model="appuser.whatsup" md-autogrow md-counter="300"></md-textarea>
                     </md-field>
-                    <md-button class="md-accent right" @click="logout">Logout</md-button>
+                    <md-button class="md-accent right" @click="logout">{{$t('w.logout')}}</md-button>
                 </md-tab>
-                <md-tab md-label="Musics">
+                <md-tab :md-label="$t('w.musics')">
                     <music-tab />
                 </md-tab>
-                <md-tab md-label="Maps">
+                <md-tab :md-label="$t('w.maps')">
                     <map-tab />
                 </md-tab>
-                <md-tab md-label="Admin" v-if="userstate.currentuser.roles.indexOf('admin') >= 0">
+                <md-tab :md-label="$t('w.admin')" v-if="userstate.currentuser.roles.indexOf('admin') >= 0">
                     <admin-tab />
                 </md-tab>
             </md-tabs>
@@ -46,7 +44,7 @@ import Vue from "vue";
 import userlogin from "./userlogin.vue";
 import { userstate } from "./state";
 import { AppUserDetailed } from "@/tools/models";
-import api, { Xform, Form } from "@/tools/Axios";
+import api, { Xform, Form, GetXSRFHeader } from "@/tools/Axios";
 import { debounce } from "@/tools/functions";
 import maptab from "./maptab.vue";
 import musictab from "./musictab.vue";
@@ -100,13 +98,14 @@ export default Vue.extend({
                 const res = await api.get<AppUserDetailed>("user/me");
                 this.appuser = res.data;
             } catch (error) {
-                this.$toasted.error("Error: something wrong, please retry");
+                this.$toasted.error(this.$t('s.toastedError') as string );
             }
         },
         logout() {
-            api.post("account/logout").then(
-                () => (userstate.loginstate = false)
-            );
+            api.post("account/logout").then(() => {
+                userstate.loginstate = false;
+                GetXSRFHeader();
+            });
         },
         setnickname() {
             setNickName(this.appuser.nickname);
@@ -128,7 +127,7 @@ export default Vue.extend({
                         this.load();
                     } catch (error) {
                         this.$toasted.error(
-                            "Error: something wrong, please retry"
+                            this.$t('s.toastedError') as string 
                         );
                     }
                 }

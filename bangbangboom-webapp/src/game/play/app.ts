@@ -1,8 +1,13 @@
 import * as Pixi from 'pixi.js'
 import { Ticker } from '../core/Ticker';
 import { updateEvent, resizeEvent, stageSwitchEvent, rawPointerEvent } from './globalEvents';
-import { loadingStage, gameoptions } from './stages/loadingStage';
+import { loadingStage, gameoptions, audios } from './stages/loadingStage';
 import 'pepjs'
+import { ClearEvents } from './utils/event';
+import { MainGame } from './stages/mainStage';
+import { note } from './utils/gamemap';
+import { clearCombo } from './stages/hitScore';
+import { apply } from './constants';
 export class App {
 
     private readonly renderer: Pixi.Renderer;
@@ -36,18 +41,19 @@ export class App {
         this.resizeCanvas();
 
         this.stage = new loadingStage(options)
+        apply(options.config)
     }
 
-    createNewStage = (newStage: Pixi.Container) =>{
+    createNewStage = (newStage: Pixi.Container) => {
         this.stage.destroy()
-        this.stage=newStage
+        this.stage = newStage
     }
 
     setLowPerformance(low: boolean = true) {
         this.ticker.SkipFrame = low ? 1 : 0
     }
 
-    setCanvasListener(canvas: HTMLCanvasElement){
+    setCanvasListener(canvas: HTMLCanvasElement) {
         canvas.addEventListener("pointerdown", e => rawPointerEvent.emit(e))
         canvas.addEventListener("pointercancel", e => rawPointerEvent.emit(e))
         canvas.addEventListener("pointermove", e => rawPointerEvent.emit(e))
@@ -66,9 +72,14 @@ export class App {
 
     destroy() {
         this.ticker.Stop()
-        this.stage = null
+        this.stage.destroy()
         this.renderer.destroy(false)
-        stageSwitchEvent.remove(this.createNewStage)
+        ClearEvents()
+        clearCombo()
+        Pixi.utils.destroyTextureCache()
+        MainGame.loader.destroy()
+        MainGame.audios.song.unload()
+        MainGame.notes = [] as note[]
     }
 
 }

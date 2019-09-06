@@ -8,6 +8,7 @@ export class AccountInfo {
 export class AppUserShort {
     username = ''
     nickname = ''
+    whatsup = ''
 }
 
 export class AppUserDetailed {
@@ -17,6 +18,11 @@ export class AppUserDetailed {
     hasprofile = false
     uploadedmusics = ''
     uploadedmaps = ''
+}
+
+export class MyLikeDislikeInfo {
+    id = 0
+    isdislike = false
 }
 
 export class CommentDetail {
@@ -56,7 +62,7 @@ export class MusicDetailed {
 }
 
 export class MapShort {
-    id = ''
+    id = 0
     mapname = ''
     difficulty = 0
     proved = false
@@ -65,6 +71,12 @@ export class MapShort {
     music = new MusicShort()
     uploader = new AppUserShort()
     locked = false
+}
+
+export class MyRateInfo {
+    rated = false
+    score = 0
+    favorite = false
 }
 
 export class RateDetail {

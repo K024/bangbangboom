@@ -4,7 +4,7 @@ import { flick } from "../../../utils/gamemap";
 import { projection } from "../../../utils/projection";
 import { MainGame } from "../../../stages/mainStage";
 import { flickSpriteParticle } from "../particle/flickSpriteParticle";
-import {  flickSoundEvent } from "../../../stages/soundEffect";
+import { flickSoundEvent } from "../../../stages/soundEffect";
 import { hitType, hitTypeEvent } from "../hitType";
 import { hitParticalEvent } from "../particleLayer";
 
@@ -14,13 +14,14 @@ export class FlickSprite extends Pixi.Container {
     constructor(public info: flick) {
         super()
         const loader = MainGame.loader
+        // tslint:disable-next-line: no-string-literal
         const note0Texture: any = loader.resources['note'].textures;
         this.top = new Pixi.Sprite(note0Texture["note_flick_top.png"])
         this.addChild(new Pixi.Sprite(note0Texture["note_flick_" + this.info.lane + ".png"]))
         this.addChild(this.top)
     }
 
-    top: Pixi.Sprite | null
+    top: Pixi.Sprite
 
     shouldRemove = false
 

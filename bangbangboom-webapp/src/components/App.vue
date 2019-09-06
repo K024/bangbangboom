@@ -53,7 +53,7 @@
                     </md-menu>
                     <router-link tag="div" class="menu-item" to="/account">
                         <md-ripple class="flex profile" style="border-radius: 50%;padding: 0">
-                            <i class="icon-profile profile"></i>
+                            <avatar :username="userstate.loginstate?userstate.currentuser.username:''"></avatar>
                         </md-ripple>
                     </router-link>
                     <div class="menu-item only-s" @click="$router.back()">
@@ -66,7 +66,9 @@
         </div>
         <div class="content">
             <div class="main">
-                <router-view></router-view>
+                <keep-alive include="search">
+                    <router-view></router-view>
+                </keep-alive>
             </div>
             <div class="footer">footer</div>
         </div>
@@ -111,7 +113,9 @@ export default Vue.extend({
                 { text: this.$t("w.search") as string, to: "/search" },
                 { text: this.$t("w.ranking") as string, to: "/ranking" },
                 { text: this.$t("w.favorites") as string, to: "/favorites" },
-                { text: this.$t("w.mapping") as string, to: "/mapping" }
+                { text: this.$t("w.musics") as string, to: "/musics" },
+                { text: this.$t("w.mapping") as string, to: "/mapping" },
+                { text: this.$t("w.settings") as string, to: "/settings" }
             ];
         },
         locales(): Locale[] {
@@ -208,7 +212,7 @@ export default Vue.extend({
 }
 
 .header + * {
-    margin-top: 55px;
+    padding-top: 50px;
 }
 
 .footer {

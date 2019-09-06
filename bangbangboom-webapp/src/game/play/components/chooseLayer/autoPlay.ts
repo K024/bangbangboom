@@ -1,8 +1,9 @@
 import * as Pixi from "pixi.js"
 import { stageSwitchEvent } from "../../globalEvents";
-import { mainStage } from "../../stages/mainStage";
+import { MainStage } from "../../stages/mainStage";
 import { chooseState } from "../chooseLayer";
 
+// tslint:disable-next-line: class-name
 export class autoPlay extends Pixi.Container {
 
     constructor() {
@@ -29,7 +30,7 @@ export class autoPlay extends Pixi.Container {
         g.alpha = 0
 
         g.interactive = true
-        g.on("pointerdown", () => { stageSwitchEvent.emit(new mainStage(chooseState.autoPlay)) })
+        g.on("pointerdown", () => { stageSwitchEvent.emit(new MainStage(chooseState.autoPlay)) })
 
         this.addChild(text)
         this.addChild(g)

@@ -6,6 +6,7 @@ import { addNoteEvent, getMusicTime } from "../../stages/mainStage";
 import { updateEvent } from "../../globalEvents";
 
 
+// tslint:disable-next-line: class-name
 export class notesSprite extends Pixi.Container {
 
     constructor() {

@@ -1,5 +1,5 @@
 import * as Pixi from "pixi.js"
-import { zspeed, notes_x_collection, noteInitScale, farlineZ} from "../../../constants";
+import { zspeed, notes_x_collection, noteInitScale, farlineZ } from "../../../constants";
 import { projection } from "../../../utils/projection";
 import { MainGame } from "../../../stages/mainStage";
 import { SingleSprite } from "./single";
@@ -8,15 +8,17 @@ import { SlideSprite } from "./slide";
 
 
 type ns = SingleSprite | FlickSprite | SlideSprite
+// tslint:disable-next-line: class-name
 export class isoLineSprite extends Pixi.Container {
 
     constructor(public n1: ns, public n2: ns, public time: number, lane1: number, lane2: number) {
         super()
         const loader = MainGame.loader
+        // tslint:disable-next-line: no-string-literal
         const note0Texture: any = loader.resources['note'].textures;
         const s = new Pixi.Sprite(note0Texture["simultaneous_line.png"])
         s.width = Math.abs(notes_x_collection[lane1] - notes_x_collection[lane2])
-        
+
         this.addChild(s)
         this.lanex = Math.min(notes_x_collection[lane1], notes_x_collection[lane2])
         this.visible = false
@@ -26,7 +28,7 @@ export class isoLineSprite extends Pixi.Container {
     lanex: number
 
     update(musicTime: number) {
-        if(this.n1.shouldRemove || this.n2.shouldRemove) {
+        if (this.n1.shouldRemove || this.n2.shouldRemove) {
             this.shouldRemove = true
             this.visible = false
             return

@@ -22,10 +22,12 @@ export class lightNormalParticle extends Pixi.Container {
     async init() {
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const particleTexture = loader.resources['particles'].textures;
+        if (!particleTexture) throw new Error()
         this.addChild(new Pixi.Sprite(particleTexture["light_normal.png"]))
 
-        this.position.set(notes_x_collection[this.lane],lanePos_y)
+        this.position.set(notes_x_collection[this.lane], lanePos_y)
 
     }
 

@@ -9,4 +9,3 @@ export const resizeEvent = new GameEvent<[number, number]>()
 
 export const rawPointerEvent = new GameEvent<[PointerEvent]>()
 
-

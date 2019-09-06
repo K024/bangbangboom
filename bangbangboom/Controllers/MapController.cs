@@ -29,11 +29,13 @@ namespace bangbangboom.Controllers
         }
 
         [HttpGet]
-        public async Task<object> Info(
+        public object Info(
             [FromQuery][Required]long id,
             [FromServices] AppDbContext context)
         {
-            var map = await context.Maps.FindAsync(id);
+            var map = context.Maps.IncludeAll()
+                .Where(m => m.Id == id)
+                .FirstOrDefault();
             if (map is null || map.Deleted) return StatusCode(404);
             return MapDetailed.FormMap(map);
         }
@@ -45,15 +47,14 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var maps =
-               from m in context.Maps
+               from m in context.Maps.IncludeAll()
                where (m.Music.Title.Contains(key) || m.Music.TitleUnicode.Contains(key)
                || m.Music.Artist.Contains(key) || m.Music.ArtistUnicode.Contains(key)
                || m.MapName.Contains(key) || m.Uploader.UserName.Contains(key) || m.Uploader.NickName.Contains(key)
                || m.Music.Description.Contains(key) || m.Description.Contains(key)) && !m.Deleted
                select MapShort.FormMap(m);
-            var p = page ?? 1 - 1;
 
-            return maps.Skip(p * 48).Take(48);
+            return maps.Page(page ?? 1);
         }
 
         [HttpGet]
@@ -62,12 +63,11 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var maps =
-                from m in context.Maps
+                from m in context.Maps.IncludeAll()
                 where !m.Deleted
                 orderby m.Date descending
                 select MapShort.FormMap(m);
-            var p = page ?? 1 - 1;
-            return maps.Skip(p * 48).Take(48);
+            return maps.Page(page ?? 1);
         }
 
 
@@ -77,17 +77,17 @@ namespace bangbangboom.Controllers
             [FromServices] AppDbContext context)
         {
             var maps =
-                from m in context.Maps
+                from m in context.Maps.IncludeAll()
                 where !m.Deleted && m.Proved
                 orderby m.Date descending
                 select MapShort.FormMap(m);
             var p = page ?? 1 - 1;
-            return maps.Skip(p * 48).Take(48);
+            return maps.Page(page ?? 1);
         }
 
         [HttpGet("{id}")]
         public async Task<object> Content(
-            [Required]int id,
+            [Required]long id,
             [FromServices] AppDbContext context)
         {
             var map = await context.Maps.FindAsync(id);
@@ -106,7 +106,7 @@ namespace bangbangboom.Controllers
 
         [HttpGet("{id}")]
         public async Task<object> Image(
-            [Required]int id,
+            [Required]long id,
             [FromServices] AppDbContext context,
             [FromServices] HashFileProvider fileProvider)
         {
@@ -120,17 +120,28 @@ namespace bangbangboom.Controllers
             return File(file, hashAndType[1], null,
                 EntityTagHeaderValue.Parse(new StringSegment('"' + hashAndType[0] + '"')), true);
         }
+        [HttpGet("{id}")]
+        public async Task<object> Music(
+            [Required] long id,
+            [FromServices] AppDbContext context)
+        {
+            var map = await context.Maps.FindAsync(id);
+            if (map is null || map.Deleted) return StatusCode(404);
+            if (map.Locked) return StatusCode(403);
+
+            return RedirectToAction("File", "Music", new { id = map.MusicId });
+        }
 
 
         [Authorize]
         [HttpPost]
         public async Task<object> Upload(
-            [FromForm][Required] int musicId,
+            [FromForm][Required] long musicId,
             [FromForm][Required][MaxLength(100)] string mapName,
             [FromForm][Required][Range(0, 100)] int difficulty,
             [FromForm][Required][MaxLength(400)] string description,
             [FromForm][Required] string content,
-            [FromForm][Required] IFormFile image,
+            [Required] IFormFile image,
             [FromServices] HashFileProvider fileProvider,
             [FromServices] AppDbContext context)
         {
@@ -164,13 +175,13 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Modify(
-            [FromForm] int id,
-            [FromForm] int? musicId,
+            [FromForm] long id,
+            [FromForm] long? musicId,
             [FromForm][MaxLength(100)] string mapName,
             [FromForm][Range(0, 100)] int? difficulty,
             [FromForm][MaxLength(400)] string description,
             [FromForm] string content,
-            [FromForm] IFormFile image,
+            IFormFile image,
             [FromServices] HashFileProvider fileProvider,
             [FromServices] AppDbContext context)
         {
@@ -230,6 +241,37 @@ namespace bangbangboom.Controllers
             }
             await context.SaveChangesAsync();
             return Ok();
+        }
+
+        public class MyRateInfo
+        {
+            public bool rated = false;
+            public int score = 0;
+            public bool favorite = false;
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<object> MyRate(
+            [FromQuery][Required] long id,
+            [FromServices] AppDbContext context)
+        {
+            var user = await userManager.GetUserAsync(User);
+            var rate = await context.Rates.Where(r => r.MapId == id && r.User == user).FirstOrDefaultAsync();
+            var favorite = user.Favorites.AsQueryable().Where(f => f.MapId == id).FirstOrDefault();
+            if (rate is null) return new MyRateInfo() { favorite = favorite != null};
+            return new MyRateInfo() { rated = true, score = rate.RateScore, favorite = favorite != null };
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<object> MyFavorite(
+            [FromQuery][Required] long id)
+        {
+            var user = await userManager.GetUserAsync(User);
+            var r = user.Favorites.AsQueryable().Where(f => f.MapId == id).FirstOrDefault();
+            if (r is null) return "false";
+            return "true";
         }
 
         [Authorize]

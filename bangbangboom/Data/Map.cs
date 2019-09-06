@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,7 +12,7 @@ namespace bangbangboom.Data
     public class Map
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } = 10000;
+        public long Id { get; set; } 
 
         [Required]
         public string UploaderId { get; set; }
@@ -41,12 +42,21 @@ namespace bangbangboom.Data
         public string ImageFileHashAndType { get; set; }
 
         public bool Proved { get; set; } = false;
-        public virtual List<Rate> Rates { get; set; }
-        public virtual List<PlayRecord> PlayRecords { get; set; }
-        public virtual List<Comment> Comments { get; set; }
+        public virtual IList<Rate> Rates { get; set; }
+        public virtual IList<PlayRecord> PlayRecords { get; set; }
+        public virtual IList<Comment> Comments { get; set; }
 
         public bool Locked { get; set; } = false;
         public bool Deleted { get; set; } = false;
+    }
+
+    public static class MapExtension
+    {
+        public static IQueryable<Map> IncludeAll(this IQueryable<Map> q) =>
+            q.Include(m => m.Music).ThenInclude(m => m.Uploader)
+            .Include(m => m.Uploader)
+            .Include(m => m.Rates)
+            .Include(m => m.PlayRecords);
     }
 
     public class MapShort
@@ -69,8 +79,8 @@ namespace bangbangboom.Data
                 mapname = m.MapName,
                 difficulty = m.Difficulty,
                 proved = m.Proved,
-                rate = m.Rates.Average(r => r.RateScore),
-                plays = m.PlayRecords.Count,
+                rate = m.Rates.AsQueryable().DefaultIfEmpty(new Rate()).Average(r => r.RateScore),
+                plays = m.PlayRecords.AsQueryable().Count(),
                 music = MusicShort.FromMusic(m.Music),
                 uploader = AppUserShort.FromAppUser(m.Uploader),
                 locked = m.Locked,
@@ -130,7 +140,7 @@ namespace bangbangboom.Data
                 proved = m.Proved,
                 description = m.Description,
                 rate = RateDetail.FromRates(m.Rates),
-                plays = m.PlayRecords.Count,
+                plays = m.PlayRecords.AsQueryable().Count(),
                 date = m.Date,
                 lastmodified = m.LastModified,
                 music = MusicDetailed.FromMusic(m.Music),

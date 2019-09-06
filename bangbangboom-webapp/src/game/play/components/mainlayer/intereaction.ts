@@ -9,6 +9,7 @@ const dw = linePos_x_collection[1] - linePos_x_collection[0]
 const rectangleWidth = dw * 7.4;
 const rectangleHeight = layerHeight;
 
+// tslint:disable-next-line: class-name
 export class intereactionSprite extends Pixi.Container {
 
     private rect: Pixi.Container

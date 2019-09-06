@@ -1,6 +1,7 @@
 import * as Pixi from "pixi.js"
 import { MainGame } from "../../stages/mainStage";
 
+// tslint:disable-next-line: class-name
 export class laneEffectSprite extends Pixi.Container {
     private readonly laneEffects: Pixi.Sprite[] = []
 
@@ -10,9 +11,10 @@ export class laneEffectSprite extends Pixi.Container {
 
         const loader = MainGame.loader
 
+        // tslint:disable-next-line: no-string-literal
         const common_textures = loader.resources['common'].textures;
 
-        if (!common_textures) return
+        if (!common_textures) throw new Error()
 
         this.laneEffects.push(new Pixi.Sprite(common_textures["lane_effect_0.png"]));
         this.laneEffects.push(new Pixi.Sprite(common_textures["lane_effect_1.png"]));

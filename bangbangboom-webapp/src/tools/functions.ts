@@ -46,6 +46,15 @@ export function throttle<Args extends any[], Ret>(ms: number, func: (...a: Args)
     }
 }
 
+export function once<Args extends any[], Ret>(func: (...a: Args) => Ret) {
+    let called = false
+    return function (this: any, ...a: Args) {
+        if (called) return
+        called = true
+        func.apply(this, a)
+    }
+}
+
 /**
  * 延迟
  * @param ms 毫秒数
@@ -111,3 +120,19 @@ export function removeKeyDownListeners(trackobj: object) {
         list.clear()
     }
 }
+
+export function SecondToString(s: number) {
+    function padZero(n: number, len: number) {
+        const str = n.toString();
+        if (str.length >= len) return str;
+        return ("000000" + n).slice(-len);
+    }
+    s = Math.abs(s);
+    const minutes = Math.floor(s / 60);
+    s -= minutes * 60;
+    const seconds = Math.floor(s);
+    s -= seconds;
+    const milis = Math.floor(s * 1000);
+    return `${padZero(minutes, 2)}:${padZero(seconds, 2)}.${padZero(milis, 3)}`;
+}
+

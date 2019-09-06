@@ -44,9 +44,41 @@ export let noteInitScale = 0.8;
 export let visualOffset = -30
 export let judgeOffset = 0
 export let barOpacity = 1;
+export let backgroundDim = 0.7
 
 // 在 gameOption 里应该添加能更改 zspeed 和judgeoffset 的数字
 
+export class Config {
+    speed = 10
+    visualOffset = 0
+    judgeOffset = 0
+    barOpacity = 1
+    noteScale = 1
+    backgroundDim = 0.7
 
+}
+
+
+export function apply(c: Config) {
+    if (c.speed > 15) c.speed = 15
+    else if (c.speed < 1) c.speed = 1
+    if (c.noteScale > 2) c.noteScale = 2
+    else if (c.noteScale < 0.1) c.noteScale = 0.1
+    if (c.visualOffset > 300) c.visualOffset = 300
+    else if (c.visualOffset < -300) c.visualOffset = -300
+    if (c.judgeOffset > 300) c.judgeOffset = 300
+    else if (c.judgeOffset < -300) c.judgeOffset = -300
+    if (c.barOpacity > 1) c.barOpacity = 1
+    else if (c.barOpacity < 0) c.barOpacity = 0
+    if (c.backgroundDim > 1) c.backgroundDim = 1
+    else if (c.backgroundDim < 0) c.backgroundDim = 0
+
+    zspeed = c.speed * 2
+    noteInitScale = c.noteScale
+    visualOffset = c.visualOffset
+    judgeOffset = c.judgeOffset
+    barOpacity = c.barOpacity
+    backgroundDim = c.backgroundDim
+}
 
 

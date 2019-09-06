@@ -61,7 +61,7 @@ export default Vue.extend({
                 );
                 this.sent = true;
             } catch (error) {
-                this.$toasted.error("Error: something wrong, please retry");
+                this.$toasted.error(this.$t('s.toastedError') as string );
             } finally {
                 this.loading = false;
             }
