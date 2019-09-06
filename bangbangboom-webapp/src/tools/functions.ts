@@ -46,6 +46,15 @@ export function throttle<Args extends any[], Ret>(ms: number, func: (...a: Args)
     }
 }
 
+export function once<Args extends any[], Ret>(func: (...a: Args) => Ret) {
+    let called = false
+    return function (this: any, ...a: Args) {
+        if (called) return
+        called = true
+        func.apply(this, a)
+    }
+}
+
 /**
  * 延迟
  * @param ms 毫秒数
@@ -72,17 +81,21 @@ export function lazyObject<Keys extends keyof any, Values>(obj: { [K in Keys]: (
     return o
 }
 
-const listenermap = new Map<object, Array<(e: KeyboardEvent) => void>>()
+const listenermap = new Map<object, Set<(e: KeyboardEvent) => void>>()
 
 export function addKeyDownListener(keycode: number, func: () => void, trackobj: object | null = null) {
     if (!trackobj) trackobj = func
     const listener = (e: KeyboardEvent) => {
         if (e.keyCode === keycode) func()
     }
-    window.addEventListener("keydown", listener)
     const list = listenermap.get(trackobj)
-    if (list) list.push(listener)
-    else listenermap.set(trackobj, [listener])
+    if (list) {
+        if (list.has(listener)) return
+        list.add(listener)
+    } else {
+        listenermap.set(trackobj, new Set([listener]))
+    }
+    window.addEventListener("keydown", listener)
 }
 
 export function addKeyDownListenerEx(keycode: (e: KeyboardEvent) => boolean, func: () => void, trackobj: object | null = null) {
@@ -90,15 +103,36 @@ export function addKeyDownListenerEx(keycode: (e: KeyboardEvent) => boolean, fun
     const listener = (e: KeyboardEvent) => {
         if (keycode(e)) func()
     }
-    window.addEventListener("keydown", listener)
     const list = listenermap.get(trackobj)
-    if (list) list.push(listener)
-    else listenermap.set(trackobj, [listener])
+    if (list) {
+        if (list.has(listener)) return
+        list.add(listener)
+    } else {
+        listenermap.set(trackobj, new Set([listener]))
+    }
+    window.addEventListener("keydown", listener)
 }
 
 export function removeKeyDownListeners(trackobj: object) {
     const list = listenermap.get(trackobj)
     if (list) {
         list.forEach(i => window.removeEventListener("keydown", i))
+        list.clear()
     }
 }
+
+export function SecondToString(s: number) {
+    function padZero(n: number, len: number) {
+        const str = n.toString();
+        if (str.length >= len) return str;
+        return ("000000" + n).slice(-len);
+    }
+    s = Math.abs(s);
+    const minutes = Math.floor(s / 60);
+    s -= minutes * 60;
+    const seconds = Math.floor(s);
+    s -= seconds;
+    const milis = Math.floor(s * 1000);
+    return `${padZero(minutes, 2)}:${padZero(seconds, 2)}.${padZero(milis, 3)}`;
+}
+

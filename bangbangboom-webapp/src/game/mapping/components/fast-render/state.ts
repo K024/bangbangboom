@@ -30,8 +30,8 @@ export function beatline1() {
         const bt = tp.beatTime();
         let beat = 1;
         while (off + bt * beat < endtime) {
-            const bar = Math.floor(beat / 4) + 1;
-            const innerbeat = (beat % 4) + 1;
+            const bar = Math.floor(beat / tp.bpb) + 1;
+            const innerbeat = (beat % tp.bpb) + 1;
             list.push({
                 time: off + bt * beat,
                 name: `${bar} : ${innerbeat}`

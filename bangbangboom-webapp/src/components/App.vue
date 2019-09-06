@@ -1,5 +1,5 @@
 <template>
-    <md-content id="app" md-theme="default">
+    <div id="app">
         <div class="header">
             <div class="content" style="height: 100%;position: relative;">
                 <div class="left flex header-part">
@@ -43,6 +43,7 @@
                         :md-active="loginpopup && $responsive.g"
                         @md-opened="loginpopup = true"
                         @md-closed="loginpopup = false"
+                        v-if="!userstate.loginstate"
                         md-align-trigger
                     >
                         <md-ripple class="flex" md-menu-trigger>{{$t('w.login')}}</md-ripple>
@@ -52,7 +53,7 @@
                     </md-menu>
                     <router-link tag="div" class="menu-item" to="/account">
                         <md-ripple class="flex profile" style="border-radius: 50%;padding: 0">
-                            <i class="icon-profile profile"></i>
+                            <avatar :username="userstate.loginstate?userstate.currentuser.username:''"></avatar>
                         </md-ripple>
                     </router-link>
                     <div class="menu-item only-s" @click="$router.back()">
@@ -65,13 +66,15 @@
         </div>
         <div class="content">
             <div class="main">
-                <router-view></router-view>
+                <keep-alive include="search">
+                    <router-view></router-view>
+                </keep-alive>
             </div>
             <div class="footer">footer</div>
         </div>
         <vue-progress-bar></vue-progress-bar>
         <back-top></back-top>
-    </md-content>
+    </div>
 </template>
 
 <script lang='ts'>
@@ -79,6 +82,7 @@ import Vue from "vue";
 import { HideLoader } from "@/tools/loader";
 import userlogin from "./account/userlogin.vue";
 import backtop from "./others/backtop.vue";
+import { userstate, LoadCurrentUser } from "./account/state";
 
 // tslint:disable-next-line
 interface Menu {
@@ -106,10 +110,12 @@ export default Vue.extend({
     computed: {
         menus(): Menu[] {
             return [
-                { text: this.$t("w.search") as string, to: "search" },
-                { text: this.$t("w.ranking") as string, to: "ranking" },
-                { text: this.$t("w.favorites") as string, to: "favorites" },
-                { text: this.$t("w.mapping") as string, to: "mapping" }
+                { text: this.$t("w.search") as string, to: "/search" },
+                { text: this.$t("w.ranking") as string, to: "/ranking" },
+                { text: this.$t("w.favorites") as string, to: "/favorites" },
+                { text: this.$t("w.musics") as string, to: "/musics" },
+                { text: this.$t("w.mapping") as string, to: "/mapping" },
+                { text: this.$t("w.settings") as string, to: "/settings" }
             ];
         },
         locales(): Locale[] {
@@ -118,7 +124,8 @@ export default Vue.extend({
                 { id: "zh", text: "中文" },
                 { id: "ja", text: "日本語" }
             ];
-        }
+        },
+        userstate: () => userstate
     },
     methods: {
         changeLocale: function(locale: string) {
@@ -140,6 +147,7 @@ export default Vue.extend({
     },
     mounted: function() {
         HideLoader();
+        LoadCurrentUser();
     }
 });
 </script>
@@ -192,11 +200,11 @@ export default Vue.extend({
     height: 50px;
     width: 100%;
     position: fixed;
-    background: #00000050;
+    background: rgba(0, 0, 0, 0.3);
     color: #ffffff;
     z-index: 100;
     backdrop-filter: blur(10px);
-    box-shadow: 0 5px 5px #aaaaaa;
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.2);
 }
 
 .header:hover {
@@ -204,7 +212,7 @@ export default Vue.extend({
 }
 
 .header + * {
-    margin-top: 55px;
+    padding-top: 50px;
 }
 
 .footer {

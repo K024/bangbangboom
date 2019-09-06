@@ -36,15 +36,25 @@
 import Vue from "vue";
 import { debounce, delay } from "@/tools/functions";
 import axios from "axios";
-import { usernamevalidate, passwordvalidate } from "./state";
+import {
+    usernamevalidate,
+    passwordvalidate,
+    userstate,
+    LoadCurrentUser
+} from "./state";
+import api, { Xform } from "../../tools/Axios";
+import { AccountInfo } from "@/tools/models";
 
 /**
  * 检查用户名
  */
 const checkUserName = debounce(300, async (userName: string) => {
     try {
-        await delay(2000);
-        return true;
+        const res = await api.post<string>(
+            "account/testusername",
+            Xform({ username: userName })
+        );
+        return res.data === "acceptable";
     } catch (error) {
         return false;
     }
@@ -59,7 +69,8 @@ export default Vue.extend({
             unstate: "empty",
             password: "",
             password2: "",
-            sent: false
+            sent: false,
+            loading: false
         };
     },
     computed: {
@@ -75,8 +86,25 @@ export default Vue.extend({
         }
     },
     methods: {
-        confirm: function() {
-            this.sent = true;
+        confirm: async function() {
+            try {
+                this.loading = true;
+                await api.post(
+                    "account/confirmemail",
+                    Xform({
+                        guid: this.guid,
+                        token: this.token,
+                        username: this.userName,
+                        password: this.password
+                    })
+                );
+                this.sent = true;
+                await LoadCurrentUser();
+            } catch (error) {
+                this.$toasted.error(this.$t('s.toastedError') as string );
+            } finally {
+                this.loading = false;
+            }
         }
     },
     watch: {

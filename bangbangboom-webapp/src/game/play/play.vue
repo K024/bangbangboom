@@ -3,13 +3,17 @@
         <md-button class="md-icon-button back" @click="$router.back()" md-theme="dark">
             <md-icon>navigate_before</md-icon>
         </md-button>
-        <canvas ref="canvas"></canvas>
+        <canvas ref="canvas" touch-action="none"></canvas>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 import { App } from "./app";
+import { MetaState } from "../mapping/state";
+import { Config } from "./constants";
+import { GameConfig } from "./config";
+
 export default Vue.extend({
     data: function() {
         return {
@@ -20,16 +24,43 @@ export default Vue.extend({
     methods: {
         resizeCanvas: function() {
             if (this.app) this.app.resizeCanvas();
+        },
+        load() {
+            const mapid = this.$route.params.id;
+            if (!mapid) {
+                this.$router.back();
+                this.$toasted.error("Invalid map id");
+                return;
+            }
+            let mapsource = "";
+            let songurl = "";
+            let background = "";
+            if (mapid === "local") {
+                songurl = MetaState.musicSrc;
+                background = MetaState.backgroundImageSrc;
+                mapsource = "local";
+            } else {
+                mapsource = "/api/map/content/" + mapid;
+                songurl = "/api/map/music/" + mapid;
+                background = "/api/map/image/" + mapid;
+            }
+            this.canvas = this.$refs.canvas as HTMLCanvasElement;
+            if (!this.canvas) throw new Error();
+            this.app = new App(this.canvas, {
+                songurl,
+                mapsource,
+                background,
+                skin: "skin0",
+                config: GameConfig.config
+            });
         }
     },
     mounted: function() {
-        this.canvas = this.$refs.canvas as HTMLCanvasElement;
-        this.app = new App(this.canvas);
+        this.load();
         window.addEventListener("resize", this.resizeCanvas);
     },
     beforeDestroy: function() {
-        if (!this.app) return;
-        this.app.destroy();
+        if (this.app) this.app.destroy();
         window.removeEventListener("resize", this.resizeCanvas);
     }
 });
@@ -42,7 +73,7 @@ export default Vue.extend({
     top: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 10000;
+    z-index: 100;
     display: flex;
     flex-direction: column;
     align-items: stretch;

@@ -27,8 +27,8 @@ namespace UnitTest
 
         protected override void ConfigureDatabase(DbContextOptionsBuilder options)
         {
-            options.UseSqlite("DataSource=" + dbfilename);
-            // options.UseMySql(Configuration.GetConnectionString("MySql"));
+            //options.UseSqlite("DataSource=" + dbfilename);
+            options.UseMySql(Configuration.GetConnectionString("MySql"));
         }
 
         protected override void ConfiureProductionServices(IServiceCollection services)

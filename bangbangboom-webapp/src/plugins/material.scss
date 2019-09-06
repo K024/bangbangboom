@@ -2,8 +2,8 @@
 
 @include md-register-theme("default", (
     theme: light,
-    background: #fff,
-    background-variant: #fafafa,
+    background: rgba(255,255,255),
+    background-variant: rgba(255,255,255, 0.5),
 ));
 
 @include md-register-theme("dark", (

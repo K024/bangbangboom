@@ -10,11 +10,12 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { PlayState, SecondToString } from "../../state";
+import { PlayState } from "../../state";
 import { SelectPosition, timelist, beatline1 } from "./state";
 import { GameMapState } from "../../gamemapstate";
 import { Slide, Single, Flick } from "@/game/core/MapCore";
 import progressbar from "./tracksprogress";
+import { SecondToString } from '@/tools/functions';
 
 const barTimeHeightFactor = 30; // 1s => n px height
 

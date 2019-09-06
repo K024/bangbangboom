@@ -37,7 +37,7 @@ namespace UnitTest
             var client = Factory.CreateClient();
             var token = await client.GetAsync("api/xsrf");
             token.EnsureSuccessStatusCode();
-            client.DefaultRequestHeaders.Add("X-CSRF-TOKEN", await token.Content.ReadAsStringAsync());
+            client.DefaultRequestHeaders.Add("X-XSRF-TOKEN", await token.Content.ReadAsStringAsync());
             return client;
         }
 
@@ -52,11 +52,11 @@ namespace UnitTest
 
         public static string UniqueEmail()
         {
-            return Guid.NewGuid().ToString().Substring(0, 8) + "@test.com";
+            return "testuser" + Guid.NewGuid().ToString().Substring(0, 8) + "@test.com";
         }
         public static string UniqueUserName()
         {
-            return Guid.NewGuid().ToString().Substring(0, 8);
+            return "testuser" + Guid.NewGuid().ToString().Substring(0, 8);
         }
     }
 }

@@ -17,6 +17,40 @@ namespace bangbangboom.Data.Migrations
                 .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
+            modelBuilder.Entity("bangbangboom.Data.AdminRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("AdminId")
+                        .IsRequired();
+
+                    b.Property<string>("AffectId")
+                        .IsRequired()
+                        .HasMaxLength(50);
+
+                    b.Property<string>("AffectType")
+                        .IsRequired()
+                        .HasMaxLength(20);
+
+                    b.Property<DateTime>("DateTime")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(100);
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasMaxLength(100);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminId");
+
+                    b.ToTable("AdminRecords");
+                });
+
             modelBuilder.Entity("bangbangboom.Data.AppUser", b =>
                 {
                     b.Property<string>("Id")
@@ -26,6 +60,9 @@ namespace bangbangboom.Data.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
+
+                    b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Email")
                         .HasMaxLength(256);
@@ -59,7 +96,6 @@ namespace bangbangboom.Data.Migrations
                     b.Property<bool>("TwoFactorEnabled");
 
                     b.Property<string>("UserName")
-                        .IsRequired()
                         .HasMaxLength(256);
 
                     b.Property<string>("WhatsUp")
@@ -83,9 +119,11 @@ namespace bangbangboom.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Content")
+                        .IsRequired()
                         .HasMaxLength(200);
 
-                    b.Property<DateTime>("DateTime");
+                    b.Property<DateTime>("DateTime")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Locked");
 
@@ -93,7 +131,7 @@ namespace bangbangboom.Data.Migrations
 
                     b.Property<long?>("ParentCommentId");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UserId")
                         .IsRequired();
 
                     b.HasKey("Id");
@@ -102,7 +140,7 @@ namespace bangbangboom.Data.Migrations
 
                     b.HasIndex("ParentCommentId");
 
-                    b.HasIndex("Username");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Comments");
                 });
@@ -112,21 +150,22 @@ namespace bangbangboom.Data.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("DateTime");
+                    b.Property<DateTime>("DateTime")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<long>("MapId");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UserId")
                         .IsRequired();
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("MapId", "Username")
+                    b.HasIndex("MapId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("Favorite");
+                    b.ToTable("Favorites");
                 });
 
             modelBuilder.Entity("bangbangboom.Data.LikeDislike", b =>
@@ -136,16 +175,19 @@ namespace bangbangboom.Data.Migrations
 
                     b.Property<long>("CommentId");
 
+                    b.Property<DateTime>("DateTime")
+                        .ValueGeneratedOnAdd();
+
                     b.Property<bool>("IsDislike");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UserId")
                         .IsRequired();
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("CommentId", "Username")
+                    b.HasIndex("CommentId", "UserId")
                         .IsUnique();
 
                     b.ToTable("LikeDislikes");
@@ -156,35 +198,45 @@ namespace bangbangboom.Data.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("Date");
+                    b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Deleted");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(400);
 
-                    b.Property<string>("ImageFileHash")
+                    b.Property<double>("Difficulty");
+
+                    b.Property<string>("ImageFileHashAndType")
+                        .IsRequired()
                         .HasMaxLength(100);
+
+                    b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAddOrUpdate();
 
                     b.Property<bool>("Locked");
 
-                    b.Property<string>("MapContent");
+                    b.Property<string>("MapContent")
+                        .IsRequired();
 
                     b.Property<string>("MapName")
+                        .IsRequired()
                         .HasMaxLength(100);
 
                     b.Property<long>("MusicId");
 
                     b.Property<bool>("Proved");
 
-                    b.Property<string>("UploaderName")
+                    b.Property<string>("UploaderId")
                         .IsRequired();
 
                     b.HasKey("Id");
 
                     b.HasIndex("MusicId");
 
-                    b.HasIndex("UploaderName");
+                    b.HasIndex("UploaderId");
 
                     b.ToTable("Maps");
                 });
@@ -195,36 +247,43 @@ namespace bangbangboom.Data.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Artist")
+                        .IsRequired()
                         .HasMaxLength(100);
 
                     b.Property<string>("ArtistUnicode")
+                        .IsRequired()
                         .HasMaxLength(100);
 
-                    b.Property<DateTime>("Date");
+                    b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<bool>("Deleted");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(400);
 
                     b.Property<string>("FileHash")
+                        .IsRequired()
                         .HasMaxLength(100);
 
                     b.Property<bool>("Locked");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasMaxLength(100);
 
                     b.Property<string>("TitleUnicode")
+                        .IsRequired()
                         .HasMaxLength(100);
 
-                    b.Property<string>("UploaderName")
+                    b.Property<string>("UploaderId")
                         .IsRequired()
                         .HasMaxLength(50);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UploaderName");
+                    b.HasIndex("UploaderId");
 
                     b.ToTable("Musics");
                 });
@@ -234,20 +293,21 @@ namespace bangbangboom.Data.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("DateTime");
+                    b.Property<DateTime>("DateTime")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<long>("MapId");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UserId")
                         .IsRequired();
 
                     b.HasKey("Id");
 
                     b.HasIndex("MapId");
 
-                    b.HasIndex("Username");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("PlayRecord");
+                    b.ToTable("PlayRecords");
                 });
 
             modelBuilder.Entity("bangbangboom.Data.Rate", b =>
@@ -255,21 +315,65 @@ namespace bangbangboom.Data.Migrations
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAddOrUpdate();
+
                     b.Property<long>("MapId");
 
                     b.Property<int>("RateScore");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("UserId")
                         .IsRequired();
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("MapId", "Username")
+                    b.HasIndex("MapId", "UserId")
                         .IsUnique();
 
                     b.ToTable("Rates");
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Report", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Additional")
+                        .HasMaxLength(200);
+
+                    b.Property<DateTime>("Date")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("From")
+                        .IsRequired()
+                        .HasMaxLength(30);
+
+                    b.Property<bool>("Handled");
+
+                    b.Property<string>("HandledById");
+
+                    b.Property<DateTime>("LastModified")
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(400);
+
+                    b.Property<string>("Target")
+                        .IsRequired()
+                        .HasMaxLength(30);
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HandledById");
+
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -379,6 +483,14 @@ namespace bangbangboom.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("bangbangboom.Data.AdminRecord", b =>
+                {
+                    b.HasOne("bangbangboom.Data.AppUser", "Admin")
+                        .WithMany()
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("bangbangboom.Data.Comment", b =>
                 {
                     b.HasOne("bangbangboom.Data.Map", "Map")
@@ -392,8 +504,7 @@ namespace bangbangboom.Data.Migrations
 
                     b.HasOne("bangbangboom.Data.AppUser", "User")
                         .WithMany()
-                        .HasForeignKey("Username")
-                        .HasPrincipalKey("UserName")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -406,8 +517,7 @@ namespace bangbangboom.Data.Migrations
 
                     b.HasOne("bangbangboom.Data.AppUser", "User")
                         .WithMany("Favorites")
-                        .HasForeignKey("Username")
-                        .HasPrincipalKey("UserName")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -420,8 +530,7 @@ namespace bangbangboom.Data.Migrations
 
                     b.HasOne("bangbangboom.Data.AppUser", "User")
                         .WithMany()
-                        .HasForeignKey("Username")
-                        .HasPrincipalKey("UserName")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -434,8 +543,7 @@ namespace bangbangboom.Data.Migrations
 
                     b.HasOne("bangbangboom.Data.AppUser", "Uploader")
                         .WithMany("UploadedMaps")
-                        .HasForeignKey("UploaderName")
-                        .HasPrincipalKey("UserName")
+                        .HasForeignKey("UploaderId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -443,8 +551,7 @@ namespace bangbangboom.Data.Migrations
                 {
                     b.HasOne("bangbangboom.Data.AppUser", "Uploader")
                         .WithMany("UploadedMusics")
-                        .HasForeignKey("UploaderName")
-                        .HasPrincipalKey("UserName")
+                        .HasForeignKey("UploaderId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -457,8 +564,7 @@ namespace bangbangboom.Data.Migrations
 
                     b.HasOne("bangbangboom.Data.AppUser", "User")
                         .WithMany()
-                        .HasForeignKey("Username")
-                        .HasPrincipalKey("UserName")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
@@ -471,9 +577,15 @@ namespace bangbangboom.Data.Migrations
 
                     b.HasOne("bangbangboom.Data.AppUser", "User")
                         .WithMany()
-                        .HasForeignKey("Username")
-                        .HasPrincipalKey("UserName")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("bangbangboom.Data.Report", b =>
+                {
+                    b.HasOne("bangbangboom.Data.AppUser", "HandledBy")
+                        .WithMany()
+                        .HasForeignKey("HandledById");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

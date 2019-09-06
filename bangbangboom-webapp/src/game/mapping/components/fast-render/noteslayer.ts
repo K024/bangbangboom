@@ -204,6 +204,7 @@ export default Vue.extend({
                             staticClass: "note",
                             on: {
                                 click: (e: MouseEvent) => {
+                                    e.stopPropagation()
                                     if (this.tool !== 'delete')
                                         Actions.setFlickEnd(tp.track, note.track, !note.flickend)
                                     else

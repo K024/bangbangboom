@@ -11,7 +11,7 @@
                 <md-button
                     class="fill-w md-primary md-raised"
                     @click="confirm"
-                    :disabled="!emailvalid"
+                    :disabled="!emailvalid || loading"
                 >{{$t('w.confirm')}}</md-button>
             </template>
         </div>
@@ -22,12 +22,14 @@
 import Vue from "vue";
 import axios from "axios";
 import { emailvalidate } from "./state";
+import api, { Xform } from "../../tools/Axios";
 
 export default Vue.extend({
     data: function() {
         return {
             email: "",
-            sent: false
+            sent: false,
+            loading: false
         };
     },
     computed: {
@@ -36,8 +38,19 @@ export default Vue.extend({
         }
     },
     methods: {
-        confirm: function() {
-            this.sent = true;
+        confirm: async function() {
+            try {
+                this.loading = true;
+                await api.post(
+                    "account/forgotpassword",
+                    Xform({ email: this.email })
+                );
+                this.sent = true;
+            } catch (error) {
+                this.$toasted.error(this.$t('s.emailNotFound') as string );
+            } finally {
+                this.loading = false;
+            }
         }
     }
 });

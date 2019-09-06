@@ -1,6 +1,10 @@
 /* Set the theme color of the component */
 $themeColor: #448aff;
-$bgColor: #448aff30 ;
+$bgColor: rgba(68,138,255, 0.3);
+
+.vue-slider-dot-tooltip .vue-slider-dot-tooltip-top {
+    pointer-events: none;
+}
 
 /* import theme style */
 @import '~vue-slider-component/lib/theme/material.scss';

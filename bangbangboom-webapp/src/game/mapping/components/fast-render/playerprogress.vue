@@ -8,7 +8,7 @@
             <div class="layer">
                 <div class="timepoint" v-for="tp in timepoints" :key="tp.track" :style="{left:leftstyle(tp.time)}"></div>
             </div>
-            <div class="layer" v-if="playstate.music">
+            <div class="layer">
                 <div class="progress" ref="progress"></div>
             </div>
         </div>
@@ -18,12 +18,10 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { PlayState, seekPercent, SecondToString } from "../../state";
+import { PlayState, seekPercent } from "../../state";
 import { GameMapState } from "../../gamemapstate";
+import { SecondToString } from '@/tools/functions';
 export default Vue.extend({
-    filters: {
-        time: SecondToString
-    },
     computed: {
         playstate: () => PlayState,
         timepoints: () => GameMapState.s.timepoints

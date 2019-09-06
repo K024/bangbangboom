@@ -47,15 +47,15 @@ import Vue from "vue";
 import { assets } from "../../assets/assetsmap";
 import { GameMapState } from "../gamemapstate";
 import { TimePoint } from "@/game/core/MapCore";
-import { SecondToString } from "../state";
 import scrollbar from "./fast-render/scrollbar.vue";
 import tracks from "./fast-render/tracks.vue";
 import { SelectPosition } from "./fast-render/state";
+import {
+    addKeyDownListener,
+    removeKeyDownListeners
+} from "../../../tools/functions";
 
 export default Vue.extend({
-    filters: {
-        time: SecondToString
-    },
     components: {
         scrollbar,
         tracks
@@ -64,7 +64,8 @@ export default Vue.extend({
         return {
             selected: "none",
             division: "1",
-            factor: 400
+            factor: 400,
+            active: true
         };
     },
     computed: {
@@ -95,7 +96,45 @@ export default Vue.extend({
                 if (f > 780) f = 800;
                 this.factor = f;
             }
+        },
+        addlisteners: function() {
+            addKeyDownListener(
+                49 /** 1 */,
+                () => (this.selected = "none"),
+                this
+            );
+            addKeyDownListener(
+                50 /** 2 */,
+                () => (this.selected = "normal"),
+                this
+            );
+            addKeyDownListener(
+                51 /** 3 */,
+                () => (this.selected = "flick"),
+                this
+            );
+            addKeyDownListener(
+                52 /** 4 */,
+                () => (this.selected = "slide"),
+                this
+            );
+            addKeyDownListener(
+                53 /** 5 */,
+                () => (this.selected = "delete"),
+                this
+            );
+            addKeyDownListener(
+                84 /** t */,
+                () => (this.follow = !this.follow),
+                this
+            );
         }
+    },
+    deactivated: function() {
+        removeKeyDownListeners(this);
+    },
+    activated: function() {
+        this.addlisteners();
     }
 });
 </script>

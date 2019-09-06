@@ -62,7 +62,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { SecondToString, PlayState, ticker } from "../state";
+import { PlayState, ticker } from "../state";
 import { TimePoint, trackid } from "../../core/MapCore";
 import {
     debounce,
@@ -96,9 +96,6 @@ function calcmeasure(taps: number[]) {
 }
 
 export default Vue.extend({
-    filters: {
-        time: SecondToString
-    },
     components: {
         "timing-pad": timingpad
     },
@@ -200,16 +197,12 @@ export default Vue.extend({
         }
     },
     mounted: function() {
-        this.addKeyListeners();
         this.stopmeasure = debounce(3000, this.stopmeasure);
     },
     activated: function() {
         this.addKeyListeners();
     },
     deactivated: function() {
-        removeKeyDownListeners(this);
-    },
-    beforeDestroy: function() {
         removeKeyDownListeners(this);
     }
 });

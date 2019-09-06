@@ -4,18 +4,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace bangbangboom.Data.Migrations
 {
-    public partial class migration01 : Migration
+    public partial class m01 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "UserName",
+            migrationBuilder.AddColumn<DateTime>(
+                name: "Date",
                 table: "AspNetUsers",
-                maxLength: 256,
                 nullable: false,
-                oldClrType: typeof(string),
-                oldMaxLength: 256,
-                oldNullable: true);
+                defaultValue: DateTime.Now)
+                .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
             migrationBuilder.AddColumn<string>(
                 name: "NickName",
@@ -35,10 +33,30 @@ namespace bangbangboom.Data.Migrations
                 maxLength: 300,
                 nullable: true);
 
-            migrationBuilder.AddUniqueConstraint(
-                name: "AK_AspNetUsers_UserName",
-                table: "AspNetUsers",
-                column: "UserName");
+            migrationBuilder.CreateTable(
+                name: "AdminRecords",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    AdminId = table.Column<string>(nullable: false),
+                    DateTime = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Description = table.Column<string>(maxLength: 100, nullable: false),
+                    Detail = table.Column<string>(maxLength: 100, nullable: false),
+                    AffectType = table.Column<string>(maxLength: 20, nullable: false),
+                    AffectId = table.Column<string>(maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdminRecords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AdminRecords_AspNetUsers_AdminId",
+                        column: x => x.AdminId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Musics",
@@ -46,14 +64,15 @@ namespace bangbangboom.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UploaderName = table.Column<string>(maxLength: 50, nullable: false),
-                    Title = table.Column<string>(maxLength: 100, nullable: true),
-                    TitleUnicode = table.Column<string>(maxLength: 100, nullable: true),
-                    Artist = table.Column<string>(maxLength: 100, nullable: true),
-                    ArtistUnicode = table.Column<string>(maxLength: 100, nullable: true),
-                    Description = table.Column<string>(maxLength: 400, nullable: true),
-                    Date = table.Column<DateTime>(nullable: false),
-                    FileHash = table.Column<string>(maxLength: 100, nullable: true),
+                    UploaderId = table.Column<string>(maxLength: 50, nullable: false),
+                    Title = table.Column<string>(maxLength: 100, nullable: false),
+                    TitleUnicode = table.Column<string>(maxLength: 100, nullable: false),
+                    Artist = table.Column<string>(maxLength: 100, nullable: false),
+                    ArtistUnicode = table.Column<string>(maxLength: 100, nullable: false),
+                    Description = table.Column<string>(maxLength: 400, nullable: false),
+                    Date = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    FileHash = table.Column<string>(maxLength: 100, nullable: false),
                     Locked = table.Column<bool>(nullable: false),
                     Deleted = table.Column<bool>(nullable: false)
                 },
@@ -61,11 +80,40 @@ namespace bangbangboom.Data.Migrations
                 {
                     table.PrimaryKey("PK_Musics", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Musics_AspNetUsers_UploaderName",
-                        column: x => x.UploaderName,
+                        name: "FK_Musics_AspNetUsers_UploaderId",
+                        column: x => x.UploaderId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reports",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Date = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    From = table.Column<string>(maxLength: 30, nullable: false),
+                    Type = table.Column<string>(maxLength: 30, nullable: false),
+                    Target = table.Column<string>(maxLength: 30, nullable: false),
+                    Reason = table.Column<string>(maxLength: 400, nullable: false),
+                    Handled = table.Column<bool>(nullable: false),
+                    HandledById = table.Column<string>(nullable: true),
+                    Additional = table.Column<string>(maxLength: 200, nullable: true),
+                    LastModified = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reports", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reports_AspNetUsers_HandledById",
+                        column: x => x.HandledById,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -74,13 +122,17 @@ namespace bangbangboom.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UploaderName = table.Column<string>(nullable: false),
+                    UploaderId = table.Column<string>(nullable: false),
                     MusicId = table.Column<long>(nullable: false),
-                    MapName = table.Column<string>(maxLength: 100, nullable: true),
-                    Description = table.Column<string>(maxLength: 400, nullable: true),
-                    Date = table.Column<DateTime>(nullable: false),
-                    MapContent = table.Column<string>(nullable: true),
-                    ImageFileHash = table.Column<string>(maxLength: 100, nullable: true),
+                    MapName = table.Column<string>(maxLength: 100, nullable: false),
+                    Difficulty = table.Column<double>(nullable: false),
+                    Description = table.Column<string>(maxLength: 400, nullable: false),
+                    Date = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    LastModified = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn),
+                    MapContent = table.Column<string>(nullable: false),
+                    ImageFileHashAndType = table.Column<string>(maxLength: 100, nullable: false),
                     Proved = table.Column<bool>(nullable: false),
                     Locked = table.Column<bool>(nullable: false),
                     Deleted = table.Column<bool>(nullable: false)
@@ -95,10 +147,10 @@ namespace bangbangboom.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Maps_AspNetUsers_UploaderName",
-                        column: x => x.UploaderName,
+                        name: "FK_Maps_AspNetUsers_UploaderId",
+                        column: x => x.UploaderId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -108,11 +160,12 @@ namespace bangbangboom.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: false),
                     MapId = table.Column<long>(nullable: false),
                     ParentCommentId = table.Column<long>(nullable: true),
-                    DateTime = table.Column<DateTime>(nullable: false),
-                    Content = table.Column<string>(maxLength: 200, nullable: true),
+                    DateTime = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Content = table.Column<string>(maxLength: 200, nullable: false),
                     Locked = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
@@ -131,64 +184,66 @@ namespace bangbangboom.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Comments_AspNetUsers_Username",
-                        column: x => x.Username,
+                        name: "FK_Comments_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Favorite",
+                name: "Favorites",
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: false),
                     MapId = table.Column<long>(nullable: false),
                     DateTime = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Favorite", x => x.Id);
+                    table.PrimaryKey("PK_Favorites", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Favorite_Maps_MapId",
+                        name: "FK_Favorites_Maps_MapId",
                         column: x => x.MapId,
                         principalTable: "Maps",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Favorite_AspNetUsers_Username",
-                        column: x => x.Username,
+                        name: "FK_Favorites_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlayRecord",
+                name: "PlayRecords",
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: false),
                     MapId = table.Column<long>(nullable: false),
                     DateTime = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlayRecord", x => x.Id);
+                    table.PrimaryKey("PK_PlayRecords", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlayRecord_Maps_MapId",
+                        name: "FK_PlayRecords_Maps_MapId",
                         column: x => x.MapId,
                         principalTable: "Maps",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PlayRecord_AspNetUsers_Username",
-                        column: x => x.Username,
+                        name: "FK_PlayRecords_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -198,9 +253,11 @@ namespace bangbangboom.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: false),
                     MapId = table.Column<long>(nullable: false),
-                    RateScore = table.Column<int>(nullable: false)
+                    RateScore = table.Column<int>(nullable: false),
+                    Date = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn)
                 },
                 constraints: table =>
                 {
@@ -212,10 +269,10 @@ namespace bangbangboom.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Rates_AspNetUsers_Username",
-                        column: x => x.Username,
+                        name: "FK_Rates_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -225,9 +282,11 @@ namespace bangbangboom.Data.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(nullable: false),
+                    UserId = table.Column<string>(nullable: false),
                     CommentId = table.Column<long>(nullable: false),
-                    IsDislike = table.Column<bool>(nullable: false)
+                    IsDislike = table.Column<bool>(nullable: false),
+                    DateTime = table.Column<DateTime>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
                 },
                 constraints: table =>
                 {
@@ -239,12 +298,17 @@ namespace bangbangboom.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LikeDislikes_AspNetUsers_Username",
-                        column: x => x.Username,
+                        name: "FK_LikeDislikes_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "UserName",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AdminRecords_AdminId",
+                table: "AdminRecords",
+                column: "AdminId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_MapId",
@@ -257,30 +321,30 @@ namespace bangbangboom.Data.Migrations
                 column: "ParentCommentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Comments_Username",
+                name: "IX_Comments_UserId",
                 table: "Comments",
-                column: "Username");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Favorite_Username",
-                table: "Favorite",
-                column: "Username");
+                name: "IX_Favorites_UserId",
+                table: "Favorites",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Favorite_MapId_Username",
-                table: "Favorite",
-                columns: new[] { "MapId", "Username" },
+                name: "IX_Favorites_MapId_UserId",
+                table: "Favorites",
+                columns: new[] { "MapId", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_LikeDislikes_Username",
+                name: "IX_LikeDislikes_UserId",
                 table: "LikeDislikes",
-                column: "Username");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LikeDislikes_CommentId_Username",
+                name: "IX_LikeDislikes_CommentId_UserId",
                 table: "LikeDislikes",
-                columns: new[] { "CommentId", "Username" },
+                columns: new[] { "CommentId", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -289,50 +353,71 @@ namespace bangbangboom.Data.Migrations
                 column: "MusicId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Maps_UploaderName",
+                name: "IX_Maps_UploaderId",
                 table: "Maps",
-                column: "UploaderName");
+                column: "UploaderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Musics_UploaderName",
+                name: "IX_Musics_UploaderId",
                 table: "Musics",
-                column: "UploaderName");
+                column: "UploaderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayRecord_MapId",
-                table: "PlayRecord",
+                name: "IX_PlayRecords_MapId",
+                table: "PlayRecords",
                 column: "MapId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayRecord_Username",
-                table: "PlayRecord",
-                column: "Username");
+                name: "IX_PlayRecords_UserId",
+                table: "PlayRecords",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rates_Username",
+                name: "IX_Rates_UserId",
                 table: "Rates",
-                column: "Username");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rates_MapId_Username",
+                name: "IX_Rates_MapId_UserId",
                 table: "Rates",
-                columns: new[] { "MapId", "Username" },
+                columns: new[] { "MapId", "UserId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reports_HandledById",
+                table: "Reports",
+                column: "HandledById");
+
+            migrationBuilder.Sql("ALTER TABLE AdminRecords AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Comments AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Favorites AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE LikeDislikes AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Maps AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Musics AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE PlayRecords AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Rates AUTO_INCREMENT=10000;");
+            migrationBuilder.Sql("ALTER TABLE Reports AUTO_INCREMENT=10000;");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Favorite");
+                name: "AdminRecords");
+
+            migrationBuilder.DropTable(
+                name: "Favorites");
 
             migrationBuilder.DropTable(
                 name: "LikeDislikes");
 
             migrationBuilder.DropTable(
-                name: "PlayRecord");
+                name: "PlayRecords");
 
             migrationBuilder.DropTable(
                 name: "Rates");
+
+            migrationBuilder.DropTable(
+                name: "Reports");
 
             migrationBuilder.DropTable(
                 name: "Comments");
@@ -343,8 +428,8 @@ namespace bangbangboom.Data.Migrations
             migrationBuilder.DropTable(
                 name: "Musics");
 
-            migrationBuilder.DropUniqueConstraint(
-                name: "AK_AspNetUsers_UserName",
+            migrationBuilder.DropColumn(
+                name: "Date",
                 table: "AspNetUsers");
 
             migrationBuilder.DropColumn(
@@ -358,14 +443,6 @@ namespace bangbangboom.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "WhatsUp",
                 table: "AspNetUsers");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "UserName",
-                table: "AspNetUsers",
-                maxLength: 256,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldMaxLength: 256);
         }
     }
 }
