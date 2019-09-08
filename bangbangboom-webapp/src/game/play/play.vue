@@ -71,8 +71,8 @@ export default Vue.extend({
     position: fixed;
     left: 0;
     top: 0;
-    width: 100vw;
-    height: 100vh;
+    right: 0;
+    bottom: 0;
     z-index: 100;
     display: flex;
     flex-direction: column;

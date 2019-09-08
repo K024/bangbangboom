@@ -29,7 +29,7 @@ export default Vue.extend({
             if (this.pageend) return;
             try {
                 const p = this.page + 1;
-                const res = await api.get<MapShort[]>("user/mymaps", {
+                const res = await api.get<MapShort[]>("map/latest", {
                     params: { page: p }
                 });
                 this.page = p;

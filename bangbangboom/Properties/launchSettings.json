@@ -1,7 +1,15 @@
 ﻿{
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "bangbangboom": {
+    "production": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "https://bangbangboom;http://bangbangboom",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
+    },
+    "development": {
       "commandName": "Project",
       "launchBrowser": false,
       "applicationUrl": "https://localhost:5001;http://localhost:5000",

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using bangbangboom.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
@@ -21,7 +22,7 @@ namespace bangbangboom.Services
 
         private readonly HttpClient client = new HttpClient();
         private static readonly string url = "https://www.recaptcha.net/recaptcha/api/siteverify";
-        private readonly ILogger logger;
+        public readonly ILogger logger;
 
         public ReCaptchaService(IConfiguration config, ILogger logger)
         {
@@ -80,36 +81,34 @@ namespace bangbangboom.Services
 
     public class ReCaptchaAttribute : Attribute, IAsyncActionFilter, IFilterFactory
     {
-        private static readonly Random r = new Random();
-
         private ReCaptchaService service;
-        public bool IsReusable => throw new NotImplementedException();
+        private AppDbContext context;
+        public bool IsReusable => false;
 
         private readonly double minScore;
-        private readonly double checkRate;
 
-        public ReCaptchaAttribute(double minScore = 0.2, double checkRate = 1)
+        public ReCaptchaAttribute(double minScore = 0.2)
         {
             this.minScore = minScore;
-            this.checkRate = checkRate;
         }
 
         public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
         {
             service = serviceProvider.GetRequiredService<ReCaptchaService>();
+            context = serviceProvider.GetRequiredService<AppDbContext>();
             return null;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            var ip = context.HttpContext.Connection.RemoteIpAddress.ToString();
-            if (r.NextDouble() < checkRate)
+            if (context.HttpContext.Request.Method.ToLower() == "post" 
+                && !context.Filters.Any(f => f is NoReCaptchaAttribute))
             {
+                var ip = context.HttpContext.Connection.RemoteIpAddress.ToString();
                 var res = await service.Verify(context.HttpContext.Request, minScore);
                 if (!res)
                 {
-                    context.Result = new StatusCodeResult(400);
-                    return;
+                    service.logger.LogWarning("reCaptcha Verify failed on ip: " + ip);
                 }
             }
             await next();

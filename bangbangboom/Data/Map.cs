@@ -45,6 +45,7 @@ namespace bangbangboom.Data
         public virtual IList<Rate> Rates { get; set; }
         public virtual IList<PlayRecord> PlayRecords { get; set; }
         public virtual IList<Comment> Comments { get; set; }
+        public virtual IList<Favorite> Favorites { get; set; }
 
         public bool Locked { get; set; } = false;
         public bool Deleted { get; set; } = false;
@@ -56,7 +57,8 @@ namespace bangbangboom.Data
             q.Include(m => m.Music).ThenInclude(m => m.Uploader)
             .Include(m => m.Uploader)
             .Include(m => m.Rates)
-            .Include(m => m.PlayRecords);
+            .Include(m => m.PlayRecords)
+            .Include(m => m.Favorites);
     }
 
     public class MapShort
@@ -67,6 +69,7 @@ namespace bangbangboom.Data
         public bool proved;
         public double rate;
         public long plays;
+        public long favorites;
         public MusicShort music;
         public AppUserShort uploader;
         public bool locked;
@@ -81,6 +84,7 @@ namespace bangbangboom.Data
                 proved = m.Proved,
                 rate = m.Rates.AsQueryable().DefaultIfEmpty(new Rate()).Average(r => r.RateScore),
                 plays = m.PlayRecords.AsQueryable().Count(),
+                favorites = m.Favorites.AsQueryable().Count(),
                 music = MusicShort.FromMusic(m.Music),
                 uploader = AppUserShort.FromAppUser(m.Uploader),
                 locked = m.Locked,
@@ -124,6 +128,7 @@ namespace bangbangboom.Data
         public string description;
         public RateDetail rate;
         public long plays;
+        public long favorites;
         public DateTime date;
         public DateTime lastmodified;
         public MusicDetailed music;
@@ -141,6 +146,7 @@ namespace bangbangboom.Data
                 description = m.Description,
                 rate = RateDetail.FromRates(m.Rates),
                 plays = m.PlayRecords.AsQueryable().Count(),
+                favorites = m.Favorites.AsQueryable().Count(),
                 date = m.Date,
                 lastmodified = m.LastModified,
                 music = MusicDetailed.FromMusic(m.Music),

@@ -21,6 +21,7 @@ const messages = {
             account: 'Account',
             logout: 'Logout',
             more: 'More...',
+            Reply: 'Reply',
             reply: 'reply',
             cancel: 'cancel',
             send: 'send',
@@ -40,6 +41,7 @@ const messages = {
             speed: 'Speed',
             uploaded: 'uploaded',
             updated: 'updated',
+            Comment: 'Comment',
         },
         l: {
             register: 'Register:',
@@ -78,6 +80,7 @@ const messages = {
             noteScale: 'Note Scale',
             barOpacity: 'Bar Opacity',
             backgoundDim: 'Backgound Dim',
+            pleaseLogin: 'Please login',
         },
         s: {
             checking: 'Checking...',
@@ -139,6 +142,7 @@ const messages = {
             account: '个人账户',
             logout: '登出',
             more: '更多...',
+            Reply: '回复',
             reply: '回复',
             cancel: '取消',
             send: '发送',
@@ -158,6 +162,7 @@ const messages = {
             speed: '速度',
             uploaded: '已上传',
             updated: '已更新',
+            Comment: '评论',
         },
         l: {
             register: '注册:',
@@ -196,6 +201,7 @@ const messages = {
             noteScale: '音符大小',
             barOpacity: '长条不透明度',
             backgoundDim: '背景暗化',
+            pleaseLogin: '请登录',
         },
         s: {
             checking: '检察中...',
@@ -257,6 +263,7 @@ const messages = {
             account: 'アカウント',
             logout: 'ログアウト',
             more: 'もっと...',
+            Reply: '返事',
             reply: '返事',
             cancel: 'キャンセル',
             send: '送る',
@@ -276,6 +283,7 @@ const messages = {
             speed: '速度',
             uploaded: 'アップロードしました',
             updated: '更新しました',
+            Comment: 'コメント',
         },
         l: {
             register: '新規登録:',
@@ -314,6 +322,7 @@ const messages = {
             noteScale: '音符大きさ',
             barOpacity: 'バー不透明度',
             backgoundDim: '背景暗化',
+            pleaseLogin: 'ログインしてください',
         },
         s: {
             checking: '検察中...',

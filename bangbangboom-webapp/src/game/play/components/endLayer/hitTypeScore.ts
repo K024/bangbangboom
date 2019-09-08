@@ -7,7 +7,8 @@ import { maxComboBanner } from './banner/maxComboBanner';
 import { isFullCombo } from '../../stages/hitScore';
 import { fullComboBanner } from './banner/fullComboBanner';
 
-const lineTexture = Pixi.Texture.from((() => {
+
+const lineTexture = (() => {
     const c = document.createElement("canvas")
     c.width = 420
     c.height = 2
@@ -21,7 +22,7 @@ const lineTexture = Pixi.Texture.from((() => {
     ctx.fillStyle = g
     ctx.fillRect(0, 0, c.width, c.height)
     return c
-})())
+})()
 
 // tslint:disable-next-line: class-name
 export class hitTypeScore extends Pixi.Container {
@@ -36,16 +37,16 @@ export class hitTypeScore extends Pixi.Container {
 
         const perfect = new perfectBanner()
         perfect.y = this.bannerPosY[0]
-        const line1 = new Pixi.Sprite(lineTexture)
+        const line1 = new Pixi.Sprite(Pixi.Texture.from(lineTexture))
         line1.y = this.bannerPosY[1] - 10
 
         const great = new greatBanner()
         great.y = this.bannerPosY[1]
-        const line2 = new Pixi.Sprite(lineTexture)
+        const line2 = new Pixi.Sprite(Pixi.Texture.from(lineTexture))
         line2.y = this.bannerPosY[2] - 10
         const bad = new badBanner()
         bad.y = this.bannerPosY[2]
-        const line3 = new Pixi.Sprite(lineTexture)
+        const line3 = new Pixi.Sprite(Pixi.Texture.from(lineTexture))
         line3.y = this.bannerPosY[3] - 10
         const miss = new missBanner()
         miss.y = this.bannerPosY[3]

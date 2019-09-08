@@ -1,11 +1,11 @@
 <template>
     <div>
-        <md-empty-state v-if="sent" class="md-primary" md-icon="done" md-description="Uploaded"></md-empty-state>
+        <md-empty-state v-if="sent" class="md-primary" md-icon="done" :md-description="$t('w.uploaded')"></md-empty-state>
         <template v-else>
             <div class="md-title">{{$t('l.uploadMusic')}}</div>
             <md-field>
-                <label>{{$t('musicFile')}}</label>
-                <md-file placeholder="Local" accept="audio/mp3" @change="loadfile"></md-file>
+                <label>{{$t('l.musicFile')}}</label>
+                <md-file :placeholder="$t('l.musicFile')" accept="audio/mp3" @change="loadfile"></md-file>
             </md-field>
             <md-field>
                 <label>{{$t('l.musicTitleAscii')}}</label>
@@ -97,7 +97,7 @@ export default Vue.extend({
                 await delay(3000);
                 this.$router.push("/music/" + res.data);
             } catch (error) {
-                this.$toasted.error(this.$t("s.toastedError") as string );
+                this.$toasted.error(this.$t("s.toastedError") as string);
             } finally {
                 this.loading = false;
             }

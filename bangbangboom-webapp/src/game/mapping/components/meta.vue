@@ -64,8 +64,7 @@ export default Vue.extend({
                     MetaState.musicSrc = "";
                 }
             } else {
-                // todo
-                this.$toasted.error("To be implemented");
+                MetaState.musicSrc = "/api/music/file/" + this.musicId
             }
         },
         changeBackground(e: Event) {

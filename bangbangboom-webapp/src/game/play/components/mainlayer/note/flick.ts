@@ -41,7 +41,11 @@ export class FlickSprite extends Pixi.Container {
         this.scale.set(p.scale * noteInitScale)
         this.position.set(p.x, p.y)
 
-        this.top.y = Math.cos(dt * 10) * 30 - 30
+        this.updateTop(musicTime)
+    }
+
+    updateTop(musicTime: number) {
+        this.top.y = Math.cos(musicTime * 10) * 30 - 30
     }
 
 

@@ -16,7 +16,9 @@ export default Vue.extend({
     },
     computed: {
         date(): Date {
-            return new Date(this.time);
+            let t = this.time;
+            if (!t.endsWith("Z")) t += "Z";
+            return new Date(t);
         },
         datestring(): string {
             return this.date.toLocaleString();
@@ -43,7 +45,7 @@ export default Vue.extend({
     },
     mounted() {
         this.update();
-        this.$watch(() => this.$i18n.locale, () => this.update())
+        this.$watch(() => this.$i18n.locale, () => this.update());
     }
 });
 </script>

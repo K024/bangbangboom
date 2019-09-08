@@ -70,7 +70,9 @@
                     <router-view></router-view>
                 </keep-alive>
             </div>
-            <div class="footer">footer</div>
+            <div class="footer">
+                <app-footer></app-footer>
+            </div>
         </div>
         <vue-progress-bar></vue-progress-bar>
         <back-top></back-top>
@@ -82,6 +84,7 @@ import Vue from "vue";
 import { HideLoader } from "@/tools/loader";
 import userlogin from "./account/userlogin.vue";
 import backtop from "./others/backtop.vue";
+import appFooter from "./others/footer.vue";
 import { userstate, LoadCurrentUser } from "./account/state";
 
 // tslint:disable-next-line
@@ -100,7 +103,8 @@ export default Vue.extend({
     name: "app",
     components: {
         "user-login": userlogin,
-        "back-top": backtop
+        "back-top": backtop,
+        appFooter
     },
     data: function() {
         return {
@@ -221,7 +225,7 @@ export default Vue.extend({
 }
 
 .main {
-    min-height: 70vh;
+    min-height: 85vh;
     transition: height 0.3s;
 }
 </style>

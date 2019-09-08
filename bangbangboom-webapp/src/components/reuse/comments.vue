@@ -70,7 +70,7 @@
             </div>
         </div>
         <div class="fill-w flex center">
-            <div class="md-display-1" v-if="loaded&&comments.length===0">{{$t('w.reply')}}</div>
+            <div class="md-display-1 no-comment" v-if="loaded&&comments.length===0">{{$t('l.noComment')}}</div>
         </div>
         <div v-if="reply" style="margin-top: 10px;">
             <div v-if="reply" class="ellipsis re">Re: {{reply.content}}</div>
@@ -79,8 +79,8 @@
             </div>
         </div>
         <md-field>
-            <label>{{reply?"Reply":"Comment"}}</label>
-            <md-textarea v-model="comment" md-counter="200"></md-textarea>
+            <label>{{!loginstate?$t('l.pleaseLogin'):(reply?$t('w.Reply'):$t('w.Comment'))}}</label>
+            <md-textarea :disabled="!loginstate" v-model="comment" md-counter="200"></md-textarea>
         </md-field>
         <div class="flex right" ref="comment">
             <md-button :disabled="!comment || comment.length > 200" @click="send()">{{$t('w.send')}}</md-button>
@@ -142,6 +142,9 @@ export default Vue.extend({
             sending: false
         };
     },
+    computed: {
+        loginstate: () => userstate.loginstate
+    },
     methods: {
         async load() {
             try {
@@ -161,7 +164,7 @@ export default Vue.extend({
                 }
                 this.loaded = true;
             } catch (error) {
-                this.$toasted.error(this.$t('s.toastedError') as string );
+                this.$toasted.error(this.$t("s.toastedError") as string);
             }
         },
         async send() {
@@ -177,7 +180,7 @@ export default Vue.extend({
                 );
                 this.load();
             } catch (error) {
-                this.$toasted.error(this.$t('s.toastedError') as string );
+                this.$toasted.error(this.$t("s.toastedError") as string);
             } finally {
                 this.sending = false;
             }
@@ -202,7 +205,7 @@ export default Vue.extend({
                 }
                 this.load();
             } catch (error) {
-                this.$toasted.error(this.$t('s.toastedError') as string );
+                this.$toasted.error(this.$t("s.toastedError") as string);
             } finally {
                 this.sending = false;
             }
@@ -220,7 +223,7 @@ export default Vue.extend({
                 }
                 this.load();
             } catch (error) {
-                this.$toasted.error(this.$t('s.toastedError') as string );
+                this.$toasted.error(this.$t("s.toastedError") as string);
             } finally {
                 this.sending = false;
             }
@@ -267,5 +270,11 @@ export default Vue.extend({
     border-radius: 3px;
     background: rgba(214, 214, 214, 0.275);
     color: rgb(143, 143, 143);
+}
+.md-icon.md-icon-font.md-theme-default {
+    color: rgba(0, 0, 0, 0.2);
+}
+.no-comment {
+    margin: 20px;
 }
 </style>

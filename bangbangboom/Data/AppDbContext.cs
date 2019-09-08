@@ -52,6 +52,13 @@ namespace bangbangboom.Data
             modelBuilder.Entity<Favorite>()
                 .HasIndex(l => new { l.MapId, l.UserId })
                 .IsUnique();
+
+            modelBuilder.Entity<Meta>()
+                .HasIndex(m => m.Usage);
+            modelBuilder.Entity<Meta>()
+                .HasIndex(m => new { m.Usage, m.Key })
+                .IsUnique();
+                
         }
 
         public DbSet<AdminRecord> AdminRecords { get; set; }
@@ -59,6 +66,7 @@ namespace bangbangboom.Data
         public DbSet<Favorite> Favorites { get; set; }
         public DbSet<LikeDislike> LikeDislikes { get; set; }
         public DbSet<Map> Maps { get; set; }
+        public DbSet<Meta> Metas { get; set; }
         public DbSet<Music> Musics { get; set; }
         public DbSet<PlayRecord> PlayRecords { get; set; }
         public DbSet<Rate> Rates { get; set; }

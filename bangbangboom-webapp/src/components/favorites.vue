@@ -13,6 +13,7 @@ import Vue from "vue";
 import { MapShort } from "../tools/models";
 import api from "../tools/Axios";
 import mapList from "./reuse/maplist.vue";
+import { userstate } from "./account/state";
 
 export default Vue.extend({
     components: {
@@ -26,12 +27,16 @@ export default Vue.extend({
     },
     methods: {
         async load() {
+            if (!userstate.loginstate) {
+                this.$router.push("/account");
+                return;
+            }
             try {
                 const res = await api.get<MapShort[]>("user/favorites");
                 this.list = res.data;
                 this.loaded = true;
             } catch (error) {
-                this.$toasted.error(this.$t('s.toastedError') as string );
+                this.$toasted.error(this.$t("s.toastedError") as string);
             }
         }
     },

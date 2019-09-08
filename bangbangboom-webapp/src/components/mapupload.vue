@@ -1,6 +1,6 @@
 <template>
     <div>
-        <md-empty-state v-if="sent" class="md-primary" md-icon="done" md-description="Uploaded"></md-empty-state>
+        <md-empty-state v-if="sent" class="md-primary" md-icon="done" :md-description="$t('w.uploaded')"></md-empty-state>
         <template v-else>
             <div class="md-title">{{$t('l.uploadMap')}}</div>
             <md-field>
@@ -12,12 +12,12 @@
                 <md-input type="number" v-model="musicid"></md-input>
             </md-field>
             <md-field>
-                <label>{{$t('s.difficulty')}}</label>
+                <label>{{$t('w.difficulty')}}</label>
                 <md-input type="number" v-model="difficulty"></md-input>
             </md-field>
             <md-field>
                 <label>{{$t('l.imageFile')}}</label>
-                <md-file placeholder="Local" accept="image/*" @change="loadfile"></md-file>
+                <md-file :placeholder="$t('l.imageFile')" accept="image/*" @change="loadfile"></md-file>
             </md-field>
             <md-field>
                 <label>{{$t('w.description')}}</label>
@@ -75,7 +75,7 @@ export default Vue.extend({
             if (!this.image || !this.formvalid) return;
             const content = localStorage.getItem("gamemapstate");
             if (!content) {
-                this.$toasted.error(this.$t('s.localStorageEmpty') as string );
+                this.$toasted.error(this.$t("s.localStorageEmpty") as string);
                 return;
             }
             try {
@@ -95,7 +95,7 @@ export default Vue.extend({
                 await delay(3000);
                 this.$router.push("/map/" + res.data);
             } catch (error) {
-                this.$toasted.error(this.$t('s.toastedError') as string );
+                this.$toasted.error(this.$t("s.toastedError") as string);
             } finally {
                 this.loading = false;
             }

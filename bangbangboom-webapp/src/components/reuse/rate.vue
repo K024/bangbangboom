@@ -11,7 +11,7 @@
             <div>{{i}}</div>
         </div>
         <div class="avg flex">
-            <md-icon>star</md-icon>
+            <md-icon class="m-right-s">star</md-icon>
             <div>{{ratescore.average.toFixed(2)}}</div>
         </div>
     </div>
@@ -88,5 +88,8 @@ export default Vue.extend({
 .myrate {
     cursor: pointer;
     background: rgba(45, 122, 255, 0.699);
+}
+.m-right-s {
+    margin-right: 10px;
 }
 </style>

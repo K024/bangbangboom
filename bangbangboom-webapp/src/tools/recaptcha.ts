@@ -1,4 +1,5 @@
 import api from "./Axios"
+import { site_key } from "./sitekey"
 
 // tslint:disable-next-line
 declare namespace grecaptcha {
@@ -6,8 +7,6 @@ declare namespace grecaptcha {
     function execute(site_key: string, options: { action: string }): PromiseLike<string>
 }
 
-// todo
-const site_key = "MY_SITE_KEY"
 
 let recaptchaReady = false
 
@@ -19,16 +18,14 @@ grecaptcha.ready(() => {
     todolist.length = 0
 })
 
-export async function setReCapHeader(action: string) {
+export async function getReCapHeader(action: string): Promise<string> {
     if (!recaptchaReady) {
         return new Promise((res, rej) => {
             todolist.push(() => {
-                setReCapHeader(action).then(res)
+                getReCapHeader(action).then(res)
             })
         })
     }
-    const token = await grecaptcha.execute(site_key, { action })
-    api.defaults.headers.post['X-reCAPTCHA'] = token;
-    api.defaults.headers.get['X-reCAPTCHA'] = token;
+    return await grecaptcha.execute(site_key, { action })
 }
 

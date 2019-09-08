@@ -36,13 +36,13 @@ export const accountRoutes: RouteConfig[] = [{
     beforeEnter: (to, from, next) => {
         if (!userstate.loginstate) next("/account")
         else next()
-    }
+    },
 }, {
     path: '/uploadmusic',
     component: musicupload,
     beforeEnter: (to, from, next) => {
         if (!userstate.loginstate) next("/account")
         else next()
-    }
+    },
 },
 ]

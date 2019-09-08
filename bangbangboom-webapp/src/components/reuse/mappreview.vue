@@ -12,7 +12,11 @@
                     <div class="media-right">
                         <div class="plays flex">
                             {{mapShort.plays}}
-                            <md-icon>meplay_circle_fillednu</md-icon>
+                            <md-icon class="white-icon">meplay_circle_fillednu</md-icon>
+                        </div>
+                        <div class="plays flex">
+                            {{mapShort.favorites}}
+                            <md-icon class="white-icon">favorite</md-icon>
                         </div>
                     </div>
                     <div class="media-bottom ellipsis">
@@ -23,10 +27,14 @@
 
                 <md-card-content>
                     <div class="flex">
-                        <div>
+                        <div class="m-right">
                             <avatar :username="mapShort.uploader.username"></avatar>
                         </div>
                         <div>{{mapShort.mapname}}</div>
+                        <div class="self-right flex">
+                            <md-icon>music_note</md-icon>
+                            {{mapShort.difficulty}}
+                        </div>
                     </div>
                 </md-card-content>
             </md-ripple>
@@ -84,7 +92,11 @@ export default Vue.extend({
     position: absolute;
     right: 10px;
     top: 10px;
-    color: white;
+    color: white !important;
+    text-shadow: 1px 1px 1px #000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
 }
 
 .media-bottom {
@@ -93,5 +105,17 @@ export default Vue.extend({
     bottom: 10px;
     left: 10px;
     max-width: calc(100% - 20px);
+}
+
+.m-right {
+    margin-right: 12px;
+}
+.white-icon {
+    margin-left: 10px;
+    color: white !important;
+}
+
+.self-right {
+    justify-self: flex-end;
 }
 </style>

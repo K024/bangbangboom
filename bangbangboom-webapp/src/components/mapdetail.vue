@@ -41,7 +41,7 @@
                 <music-artist class="md-title md-headline" :music="mapdetail.music"></music-artist>
                 <div class="flex end">
                     <div class="flex m-right">
-                        <md-icon>music_note</md-icon>
+                        <md-icon class="m-right-s">music_note</md-icon>
                         <editable
                             :label="$t('w.difficulty')"
                             :default="''+mapdetail.difficulty"
@@ -51,7 +51,7 @@
                         >{{mapdetail.difficulty}}</editable>
                     </div>
                     <div class="flex m-right">
-                        <md-icon>play_circle_filled</md-icon>
+                        <md-icon class="m-right-s">play_circle_filled</md-icon>
                         {{mapdetail.plays}}
                     </div>
                     <div class="flex">
@@ -59,6 +59,7 @@
                             <md-icon style="color: #ff3939" v-if="isfavorite">favorite</md-icon>
                             <md-icon v-else>favorite_border</md-icon>
                         </md-button>
+                        {{mapdetail.favorites}}
                     </div>
                 </div>
                 <div class="md-layout md-gutter" style="margin: 10px 0">
@@ -286,6 +287,9 @@ export default Vue.extend({
 }
 .m-right {
     margin-right: 20px;
+}
+.m-right-s {
+    margin-right: 10px;
 }
 .date {
     margin: 0 10px;

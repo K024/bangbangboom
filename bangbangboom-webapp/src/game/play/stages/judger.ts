@@ -9,8 +9,8 @@ import { lightBaseParticle } from "../components/mainlayer/particle/lightBasePar
 import { hitParticalEvent } from "../components/mainlayer/particleLayer";
 
 
-// tslint:disable-next-line: interface-name class-name
-interface judgeBasic {
+// tslint:disable-next-line: interface-name class-name interface-over-type-literal
+type judgeBasic = {
     time: number,
     lane: number,
     perfect: () => void,
@@ -19,30 +19,20 @@ interface judgeBasic {
     miss: () => void,
 }
 
-type judgeNeedPointer = {
+type judgeNeedDown = {
+    downTime: number
+    downPos: { x: number, y: number }
     pointerId: number
-    pointerLane: number,
+    pointerLane: number
 } & judgeBasic
 
-type judges = ({
-    type: "single",
-} | {
-    type: "slide_start",
-    next: judges & judgeNeedPointer,
-} | (({
-    type: "flick",
-    downTime: number,
-    downPos: { x: number, y: number },
-} | {
-    type: "slide_among",
-    next: judges & judgeNeedPointer,
-} | {
-    type: "slide_end",
-} | {
-    type: "slide_flick",
-    downPos: { x: number, y: number },
-}) & judgeNeedPointer)) & judgeBasic
-
+type judges =
+    ({ type: "single" } & judgeBasic) |
+    ({ type: "slide_start" } & { next: judgeNeedDown & judges } & judgeBasic) |
+    ({ type: "flick" } & judgeNeedDown) |
+    ({ type: "slide_among" } & { next: judgeNeedDown & judges } & judgeNeedDown) |
+    ({ type: "slide_end" } & judgeNeedDown) |
+    ({ type: "slide_flick" } & judgeNeedDown & { currentPos: { x: number, y: number } })
 
 /** id, type, lane number */
 export const intereactEvent = new GameEvent<[number, string, number, { x: number, y: number }]>()
@@ -57,7 +47,7 @@ export class judger {
 
     private in_notes: judges[] = []
 
-    private needed_pointer = new Map<number, judges & judgeNeedPointer>()
+    private needed_pointer = new Map<number, judges & judgeNeedDown>()
 
     getMusicTime() {
         return (MainGame.audios.song.seek(undefined, musicId) as number) + judgeOffset / 1000
@@ -82,10 +72,11 @@ export class judger {
             } else if (n.next.type === "slide_flick") {
                 const nn = n.next as any
                 nn.type = "flick"
+                nn.downPos = { x: -1, y: -1 }
+                nn.downTime = -1
             }
             if ("pointerId" in n)
                 this.needed_pointer.delete(n.pointerId)
-            const nn = n.next as any
             n.next.pointerId = -1
             n.next.pointerLane = -10
         }
@@ -93,7 +84,7 @@ export class judger {
 
     handle = (id: number, type: string, lane: number, pos: { x: number, y: number }) => {
         const list: judges[] = []
-        const t = this.getMusicTime()
+        const currentTime = this.getMusicTime()
         if (type.endsWith("down")) {
             const ns = this.in_notes.filter(n => {
                 return (n.type === "single" ||
@@ -108,9 +99,9 @@ export class judger {
                 }
                 return
             }
-            ns.sort((a, b) => Math.abs(a.time - t) - Math.abs(b.time - t))
+            ns.sort((a, b) => Math.abs(a.time - currentTime) - Math.abs(b.time - currentTime))
             const n = ns[0]
-            const dt = Math.abs(t - n.time)
+            const dt = Math.abs(currentTime - n.time)
             if (n.type === "single") {
                 if (dt <= perfectLatency) n.perfect()
                 else if (dt <= greatLatency) n.great()
@@ -118,17 +109,23 @@ export class judger {
                 else n.miss()
                 list.push(n)
             } else if (n.type === "flick") {
-                n.downTime = t
+                n.downTime = currentTime
                 n.downPos = pos
                 this.needed_pointer.set(id, n)
             } else if (n.type === "slide_start") {
-                if (dt <= perfectLatency) n.perfect()
-                else if (dt <= greatLatency) n.great()
-                else if (dt <= badLatency) n.bad()
-                else this.slideMiss(n)
-                this.needed_pointer.set(id, n.next)
-                n.next.pointerId = id
-                n.next.pointerLane = lane
+                if (dt > badLatency) {
+                    this.slideMiss(n)
+                } else {
+                    if (dt <= perfectLatency) n.perfect()
+                    else if (dt <= greatLatency) n.great()
+                    else n.bad()
+
+                    this.needed_pointer.set(id, n.next)
+                    n.next.pointerId = id
+                    n.next.pointerLane = lane
+                    n.next.downPos = pos
+                    n.next.downTime = currentTime
+                }
                 list.push(n)
             }
         } else if (type.endsWith("move")) {
@@ -138,8 +135,8 @@ export class judger {
                 if (n.type === "flick") {
                     const dx = n.downPos.x - pos.x
                     const dy = n.downPos.y - pos.y
-                    if (Math.sqrt(dx * dx + dy * dy) > 10) {
-                        if (t - n.downTime > badLatency) n.miss()
+                    if (Math.sqrt(dx * dx + dy * dy) > 5) {
+                        if (currentTime - n.downTime > badLatency) n.miss()
                         else {
                             const dt = Math.abs(n.time - n.downTime)
                             if (dt <= perfectLatency) n.perfect()
@@ -151,22 +148,17 @@ export class judger {
                         this.needed_pointer.delete(id)
                     }
                 } else if (n.type === "slide_flick") {
-                    const dt = n.time - t
-                    if (dt > badLatency) {
+                    const dt = n.time - currentTime
+                    if (dt > badLatency) { // not in the judge time, update finger position only
                         n.downPos = pos
-                    } else {
-                        const dx = n.downPos.x - pos.x
-                        const dy = n.downPos.y - pos.y
-                        if (Math.sqrt(dx * dx + dy * dy) > 10) {
-                            if (Math.abs(dt) > badLatency) n.miss()
-                            else n.perfect()
-                            this.needed_pointer.delete(id)
-                            list.push(n)
-                        }
                     }
+                    n.currentPos = pos
+                } else if (n.type === "slide_among") {
+                    n.downPos = pos;
+                    n.downTime = currentTime;
                 }
             }
-        } else if (type.endsWith("up") /*|| type.endsWith("out") || type.endsWith("leave") || type.endsWith("cancel")*/) {
+        } else if (type.endsWith("up") || type.endsWith("out") || type.endsWith("leave") || type.endsWith("cancel")) {
             const n = this.needed_pointer.get(id)
             if (n) {
                 list.push(n)
@@ -176,10 +168,8 @@ export class judger {
                 } else if (n.type === "slide_among") {
                     this.slideMiss(n)
                 } else if (n.type === "slide_end") {
-                    const dt = Math.abs(n.time - t)
-                    if (dt <= perfectLatency) n.perfect()
-                    else if (dt <= greatLatency) n.great()
-                    else if (dt <= badLatency) n.bad()
+                    const dt = Math.abs(n.time - currentTime)
+                    if (dt <= badLatency) n.perfect()
                     else n.miss()
                 }
             }
@@ -205,17 +195,28 @@ export class judger {
         }
         const list: judges[] = []
         for (const a of this.in_notes) {
-            if (a.type === "slide_among" || a.type === "slide_start") {
+            if (a.type === "slide_among" || a.type === "slide_start" || a.type === "slide_flick") {
                 const dt = t - a.time
                 if (dt >= 0) {
-                    if (dt >= a.next.time - a.time) {
+                    if (a.type === "slide_flick") {
+                        const dx = a.downPos.x - a.currentPos.x
+                        const dy = a.downPos.y - a.currentPos.y
+                        if (Math.sqrt(dx * dx + dy * dy) > 5) {
+                            if (Math.abs(dt) > badLatency) n.miss()
+                            else n.perfect()
+                            this.needed_pointer.delete(a.pointerId)
+                            list.push(n)
+                        }
+                    } else if (dt >= a.next.time - a.time) {
                         this.slideMiss(a)
                         list.push(a)
-                    } else if (a.type === "slide_among" && Math.abs(a.lane - a.pointerLane) < 1.5) {
+                    } else if (a.type === "slide_among" && Math.abs(a.lane - a.pointerLane) < 1.1) {
                         a.perfect()
                         this.needed_pointer.set(a.pointerId, a.next)
                         a.next.pointerId = a.pointerId
                         a.next.pointerLane = a.pointerLane
+                        a.next.downPos = a.downPos
+                        a.next.downTime = a.downTime
                         list.push(a)
                     }
                 }
@@ -253,70 +254,83 @@ export class judger {
                 miss() { n.miss() },
             })
         } else if (n instanceof SlideSprite) {
-            const { notes, flickend } = n.info
-            let i = notes.length - 1
-            let end: judgeNeedPointer & judges
-            if (flickend) {
-                const j = i
-                end = {
-                    type: "slide_flick",
-                    time: notes[i].time,
-                    lane: notes[i].lane,
+            const slide_start = (note: { time: number, lane: number }, i: number, next: judges & judgeNeedDown) => {
+                return {
+                    type: "slide_start" as "slide_start",
+                    time: note.time,
+                    lane: note.lane,
+                    next,
+                    perfect() { n.perfect(i) },
+                    great() { n.great(i) },
+                    bad() { n.great(i) },
+                    miss() { n.miss(i) },
+                }
+            }
+            const slide_among = (note: { time: number, lane: number }, i: number, next: judges & judgeNeedDown) => {
+                return {
+                    type: "slide_among" as "slide_among",
+                    time: note.time,
+                    lane: note.lane,
+                    next,
+                    pointerLane: -10,
+                    pointerId: -1,
+                    downTime: -1,
+                    downPos: { x: -1, y: -1 },
+                    perfect() { n.perfect(i) },
+                    great() { n.great(i) },
+                    bad() { n.great(i) },
+                    miss() { n.miss(i) },
+                }
+            }
+            const slide_end = (note: { time: number, lane: number }, i: number) => {
+                return {
+                    type: "slide_end" as "slide_end",
+                    time: note.time,
+                    lane: note.lane,
+                    pointerLane: -10,
+                    pointerId: -1,
+                    downTime: -1,
+                    downPos: { x: -1, y: -1 },
+                    perfect() { n.perfect(i) },
+                    great() { n.great(i) },
+                    bad() { n.bad(i) },
+                    miss() { n.miss(i) },
+                }
+            }
+            const slide_flick = (note: { time: number, lane: number }, i: number) => {
+                return {
+                    type: "slide_flick" as "slide_flick",
+                    time: note.time,
+                    lane: note.lane,
                     pointerLane: -10,
                     pointerId: -1,
                     downPos: { x: -1, y: -1 },
-                    perfect() { n.perfect(j) },
-                    great() { n.great(j) },
-                    bad() { n.bad(j) },
-                    miss() { n.miss(j) },
+                    currentPos: { x: -1, y: -1 },
+                    downTime: -1,
+                    perfect() { n.perfect(i) },
+                    great() { n.great(i) },
+                    bad() { n.bad(i) },
+                    miss() { n.miss(i) },
                 }
+            }
+            const notes = n.info.notes
+            const flickend = n.info.flickend
+            let i = notes.length - 1
+            let end: judgeNeedDown & judges
+            if (flickend) {
+                end = slide_flick(notes[i], i)
             } else {
-                const j = i
-                end = {
-                    type: "slide_end",
-                    time: notes[i].time,
-                    lane: notes[i].lane,
-                    pointerLane: -10,
-                    pointerId: -1,
-                    perfect() { n.perfect(j) },
-                    great() { n.great(j) },
-                    bad() { n.bad(j) },
-                    miss() { n.miss(j) },
-                }
+                end = slide_end(notes[i], i)
             }
             this.pre_notes.push(end)
             i--;
             while (i > 0) {
-                const end2 = () => end;
-                const k = i
-                const j: judges = {
-                    type: "slide_among",
-                    time: notes[i].time,
-                    lane: notes[i].lane,
-                    next: end2(),
-                    pointerLane: -10,
-                    pointerId: -1,
-                    perfect() { n.perfect(k) },
-                    great() { n.great(k) },
-                    bad() { n.great(k) },
-                    miss() { n.miss(k) },
-                }
+                const j = slide_among(notes[i], i, end)
                 this.pre_notes.push(j)
                 end = j
                 i--;
             }
-            const j = i
-            const e = end
-            this.pre_notes.push({
-                type: "slide_start",
-                time: notes[i].time,
-                lane: notes[i].lane,
-                next: e,
-                perfect() { n.perfect(j) },
-                great() { n.great(j) },
-                bad() { n.great(j) },
-                miss() { n.miss(j) },
-            })
+            this.pre_notes.push(slide_start(notes[i], i, end))
         }
         this.pre_notes.sort((a, b) => a.time - b.time)
     }

@@ -52,6 +52,7 @@ namespace bangbangboom.Controllers
                || m.Music.Artist.Contains(key) || m.Music.ArtistUnicode.Contains(key)
                || m.MapName.Contains(key) || m.Uploader.UserName.Contains(key) || m.Uploader.NickName.Contains(key)
                || m.Music.Description.Contains(key) || m.Description.Contains(key)) && !m.Deleted
+               orderby m.Date descending
                select MapShort.FormMap(m);
 
             return maps.Page(page ?? 1);
@@ -96,10 +97,11 @@ namespace bangbangboom.Controllers
 
             var user = await userManager.GetUserAsync(User);
             if (user != null)
-            {
                 await context.PlayRecords.AddAsync(new PlayRecord() { Map = map, User = user });
-                await context.SaveChangesAsync();
-            }
+            else
+                await context.PlayRecords.AddAsync(new PlayRecord() { Map = map });
+
+            await context.SaveChangesAsync();
 
             return Ok(map.MapContent);
         }
@@ -259,7 +261,7 @@ namespace bangbangboom.Controllers
             var user = await userManager.GetUserAsync(User);
             var rate = await context.Rates.Where(r => r.MapId == id && r.User == user).FirstOrDefaultAsync();
             var favorite = user.Favorites.AsQueryable().Where(f => f.MapId == id).FirstOrDefault();
-            if (rate is null) return new MyRateInfo() { favorite = favorite != null};
+            if (rate is null) return new MyRateInfo() { favorite = favorite != null };
             return new MyRateInfo() { rated = true, score = rate.RateScore, favorite = favorite != null };
         }
 

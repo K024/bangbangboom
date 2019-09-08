@@ -133,7 +133,7 @@ export class MainStage extends Container {
                 a = 0
         }
         this.main.alpha = a
-        if (a === 0) {
+        if (a < 0.1) {
             updateEvent.remove(this.hideMain)
             stageSwitchEvent.emit(new endStage())
         }
@@ -155,6 +155,7 @@ export class MainStage extends Container {
         resizeEvent.remove(this.resize)
         updateEvent.remove(this.update)
         endEvent.remove(this.endTrans)
+        this.juder.destroy()
     }
 
 }

@@ -68,6 +68,7 @@ export class MapShort {
     proved = false
     rate = 0
     plays = 0
+    favorites = 0
     music = new MusicShort()
     uploader = new AppUserShort()
     locked = false
@@ -95,6 +96,7 @@ export class MapDetailed {
     description = ''
     rate = new RateDetail()
     plays = 0
+    favorites = 0
     date = ''
     lastmodified = ''
     music = new MusicDetailed()

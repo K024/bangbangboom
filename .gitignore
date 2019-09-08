@@ -13,6 +13,9 @@
 # nohup output file
 nohup*
 
+# production settings
+appsettings.Production.json
+
 # hashfileprovider directory
 .hashfiles
 

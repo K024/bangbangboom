@@ -16,4 +16,12 @@ module.exports = {
       msTileImage: 'apple-touch-icon.png',
     }
   },
+  devServer: {
+    proxy: {
+      '/api': {
+        target: 'https://localhost:5001',
+        changeOrigin: true,
+      }
+    }
+  }
 }

@@ -5,8 +5,10 @@ import { projection, ratio } from "../../../utils/projection";
 import { MainGame } from "../../../stages/mainStage";
 import { singleSpriteParticle } from "../particle/singleSpriteParticle";
 import { holdSlide, hitParticalEvent } from "../particleLayer";
-import { perfectSoundEvent, greatSoundEvent, badSoundEvent } from "../../../stages/soundEffect";
+import { perfectSoundEvent, greatSoundEvent, badSoundEvent, flickSoundEvent } from "../../../stages/soundEffect";
 import { hitType, hitTypeEvent } from "../hitType";
+import { FlickSprite } from './flick';
+import { flickSpriteParticle } from '../particle/flickSpriteParticle';
 
 
 export class SlideSprite extends Pixi.Container {
@@ -19,16 +21,24 @@ export class SlideSprite extends Pixi.Container {
         // tslint:disable-next-line: no-string-literal
         const note0Texture: any = loader.resources['note'].textures;
         this.info.notes.forEach((n, i) => {
-            const s = (i === 0 || i === this.info.notes.length - 1) ?
-                new Pixi.Sprite(note0Texture["note_long_" + n.lane + ".png"]) :
-                new Pixi.Sprite(note0Texture["note_slide_among.png"])
+            let s: Pixi.Container
+            if (i === 0) {
+                s = new Pixi.Sprite(note0Texture["note_long_" + n.lane + ".png"])
+            } else if (i === this.info.notes.length - 1) {
+                if (info.flickend)
+                    s = new FlickSprite({ type: "flick", time: 0, lane: 0, })
+                else
+                    s = new Pixi.Sprite(note0Texture["note_long_" + n.lane + ".png"])
+            } else {
+                s = new Pixi.Sprite(note0Texture["note_slide_among.png"])
+            }
             this.notes.push(s)
             this.addChild(s)
         })
     }
 
     // 从private 改为 public
-    notes: Pixi.Sprite[] = []
+    notes: Pixi.Container[] = []
 
     private barlayer = new Pixi.Container()
 
@@ -151,6 +161,11 @@ export class SlideSprite extends Pixi.Container {
             this.barlayer.addChild(bar)
         }
 
+
+        const endn = this.notes[this.notes.length - 1]
+        if (endn instanceof FlickSprite) {
+            endn.updateTop(musicTime)
+        }
     }
 
     static getBar(p1: { x: number, y: number, scale: number }, p2: { x: number, y: number, scale: number }) {
@@ -171,8 +186,13 @@ export class SlideSprite extends Pixi.Container {
 
     perfect(n: number) {
         hitTypeEvent.emit(hitType.perfect)
-        hitParticalEvent.emit(new singleSpriteParticle(this.info.notes[n].lane))
-        perfectSoundEvent.emit()
+        if (n === this.info.notes.length - 1 && this.info.flickend) {
+            hitParticalEvent.emit(new flickSpriteParticle(this.info.notes[n].lane))
+            flickSoundEvent.emit()
+        } else {
+            hitParticalEvent.emit(new singleSpriteParticle(this.info.notes[n].lane))
+            perfectSoundEvent.emit()
+        }
         this.setHolding(true, notes_x_collection[this.info.notes[n].lane])
         if (n === this.info.notes.length - 1) {
             this.visible = false

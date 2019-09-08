@@ -121,6 +121,8 @@ namespace bangbangboom
             services.AddMvc(options =>
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddLogging();
         }
 
         protected virtual void ConfigureDatabase(DbContextOptionsBuilder options)
