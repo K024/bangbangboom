@@ -28,6 +28,7 @@ export const musicTimeUpdateEvent = new GameEvent<[number]>()
 let musicTime = 0
 
 export function getMusicTime() {
+    if (gameState === chooseState.autoPlay) return musicTime
     return musicTime - visualOffset / 1000
 }
 

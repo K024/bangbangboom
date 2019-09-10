@@ -2,16 +2,16 @@
     <div>
         <div class="timing">
             <div class="panel">
-                <div class="md-title">Time points</div>
+                <div class="md-title">{{$t('l.timepoints')}}</div>
                 <md-table class="dark-bg" v-model="timepoints" :md-selected-value.sync="selected">
                     <md-table-empty-state md-description="No time points"></md-table-empty-state>
                     <md-table-row slot="md-table-row" slot-scope="{ item }" md-selectable="single">
-                        <md-table-cell md-label="Time offset">{{item.time | time}}</md-table-cell>
+                        <md-table-cell :md-label="$t('l.timeoffset')">{{item.time | time}}</md-table-cell>
                         <md-table-cell md-label="BPM">{{item.bpm}}</md-table-cell>
-                        <md-table-cell md-label="Meter">{{item.bpb}}/4</md-table-cell>
+                        <md-table-cell :md-label="$t('l.meter')">{{item.bpb}}/4</md-table-cell>
                     </md-table-row>
                 </md-table>
-                <md-button class="md-accent" :disabled="!selected" @click="remove">Remove</md-button>
+                <md-button class="md-accent" :disabled="!selected" @click="remove">{{$t('w.Delete')}}</md-button>
             </div>
             <div class="panel">
                 <timing-pad :mute="mute || measuring" :selected="selected"></timing-pad>
@@ -19,21 +19,21 @@
                     :md-ripple="false"
                     @click="measure"
                     :disabled="!selected"
-                >{{selected ? 'Hit here or press \'t\' 5 times and more to measure' : 'Select a timepoint first'}}</md-button>
+                >{{selected ? $t('s.hitorpresstomeasure') : $t('s.selectorcreatetp')}}</md-button>
                 <div class="flex">
                     <div>
                         <md-field>
-                            <label>Time offset</label>
+                            <label>{{$t('l.timeoffset')}}</label>
                             <md-input v-model="inputoffset" type="number" step="0.001"></md-input>
                         </md-field>
                     </div>
-                    <md-button class="md-icon-button" @click="movebeat(false)">
+                    <md-button class="md-icon-button" @click="movebeat(false)" :title="$t('l.moveonebeat')">
                         <md-icon>navigate_before</md-icon>
                     </md-button>
-                    <md-button class="md-icon-button" @click="movebeat(true)">
+                    <md-button class="md-icon-button" @click="movebeat(true)" :title="$t('l.moveonebeat')">
                         <md-icon>navigate_next</md-icon>
                     </md-button>
-                    <md-button @click="setoffset">Set to current</md-button>
+                    <md-button @click="setoffset">{{$t('l.settocurrent')}}</md-button>
                 </div>
                 <div class="flex">
                     <div>
@@ -44,16 +44,16 @@
                     </div>
                     <div>
                         <md-field>
-                            <label>Meter</label>
+                            <label>{{$t('l.meter')}}</label>
                             <md-input v-model="inputbpb" type="number"></md-input>
                             <span class="md-suffix">/4</span>
                         </md-field>
                     </div>
                 </div>
                 <div class="flex">
-                    <md-button @click="set" :disabled="!(canset && selected)">Modify</md-button>
-                    <md-button @click="set" :disabled="!(canset && !selected)">Add new</md-button>
-                    <md-switch v-model="mute">Mute ticker</md-switch>
+                    <md-button @click="set" :disabled="!(canset && selected)">{{$t('w.modify')}}</md-button>
+                    <md-button @click="set" :disabled="!(canset && !selected)">{{$t('w.addnew')}}</md-button>
+                    <md-switch v-model="mute">{{$t('l.muteticker')}}</md-switch>
                 </div>
             </div>
         </div>

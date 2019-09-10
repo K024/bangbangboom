@@ -23,7 +23,7 @@
             <md-input v-model="config.barOpacity" type="number" step="0.01"></md-input>
         </md-field>
         <md-field>
-            <label>{{$t('l.backgoundDim')}}</label>
+            <label>{{$t('l.backgroundDim')}}</label>
             <md-input v-model="config.backgroundDim" type="number" step="0.01"></md-input>
         </md-field>
     </div>

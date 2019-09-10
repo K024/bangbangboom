@@ -21,7 +21,7 @@ export class App {
         this.renderer = Pixi.autoDetectRenderer({
             width: canvas.clientWidth,
             height: canvas.clientHeight,
-            view: canvas
+            view: canvas,
         })
 
         this.setCanvasListener(canvas)

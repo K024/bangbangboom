@@ -74,8 +74,8 @@ export function apply(c: Config) {
     else if (c.backgroundDim < 0) c.backgroundDim = 0
 
     zspeed = c.speed * 2
-    noteInitScale = c.noteScale * 0.8
-    visualOffset = c.visualOffset
+    noteInitScale = c.noteScale * 0.76
+    visualOffset = c.visualOffset - 40
     judgeOffset = c.judgeOffset
     barOpacity = c.barOpacity
     backgroundDim = c.backgroundDim

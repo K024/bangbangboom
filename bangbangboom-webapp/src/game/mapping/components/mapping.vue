@@ -1,26 +1,26 @@
 <template>
-    <div class="mapping">
+    <div class="mapping" @contextmenu.prevent.stop>
         <div class="tools">
             <div>
-                <md-radio v-model="selected" value="none">None</md-radio>
-                <div class="flex" v-for="tool in tools" :key="tool.name">
+                <md-radio v-model="selected" value="none" :title="$t('w.shortcut')+': 1'">{{$t('w.None')}}</md-radio>
+                <div class="flex" v-for="(tool, index) in tools" :key="tool.name">
                     <md-radio v-model="selected" :value="tool.name" :id="'note-' + tool.name"></md-radio>
-                    <label :for="'note-' + tool.name">
+                    <label :for="'note-' + tool.name" :title="$t('w.shortcut')+': ' + (index + 2)">
                         <img class="note-select" :src="tool.src" alt="nomal" />
                     </label>
                 </div>
-                <md-radio v-model="selected" value="delete">Delete</md-radio>
+                <md-radio v-model="selected" value="delete" :title="$t('w.shortcut')+': 5'">{{$t('w.Delete')}}</md-radio>
                 <div class="field">
                     <md-field>
-                        <label for="movie">Beat Division</label>
+                        <label for="movie">{{$t('w.beatDivision')}}</label>
                         <md-select v-model="division">
                             <md-option value="1">1/1</md-option>
                             <md-option value="2">1/2</md-option>
-                            <md-option value="3">1/3 (Tritone?)</md-option>
+                            <md-option value="3">1/3 ({{$t("w.Triplet")}}?)</md-option>
                             <md-option value="4">1/4</md-option>
-                            <md-option value="6">1/6 (Tritone?)</md-option>
-                            <md-option value="8">1/8 (Double the bpm?)</md-option>
-                            <md-option value="24">1/24 (Not recommended!)</md-option>
+                            <md-option value="6">1/6 ({{$t("w.Triplet")}}?)</md-option>
+                            <md-option value="8">1/8</md-option>
+                            <md-option value="24">1/24 ({{$t("l.notRecommended")}}!)</md-option>
                         </md-select>
                     </md-field>
                 </div>
@@ -33,7 +33,7 @@
                     </md-button>
                 </div>
                 <div class="flex">
-                    <md-switch v-model="follow">Follow</md-switch>
+                    <md-switch v-model="follow" :title="$t('w.shortcut')+': t'">{{$t('w.follow')}}</md-switch>
                 </div>
             </div>
         </div>

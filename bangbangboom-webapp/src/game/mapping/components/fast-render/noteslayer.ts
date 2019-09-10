@@ -117,9 +117,10 @@ export default Vue.extend({
     },
     render(h): VNode {
         const list: VNode[] = [];
-        const click = (e: MouseEvent, tpid: string, noteid: string, slideid?: string) => {
+        const click = (e: MouseEvent, tpid: string, noteid: string, slideid?: string, right = false) => {
             e.stopPropagation()
-            if (this.tool !== "delete") return
+            e.preventDefault()
+            if (this.tool !== "delete" && !right) return
             if (!slideid)
                 Actions.removeNote(tpid, noteid)
             else {
@@ -139,6 +140,7 @@ export default Vue.extend({
                         on: {
                             click: (e: MouseEvent) => click(e, tp.track, note.track),
                             dragstart: (e: DragEvent) => this.$emit("drag", e, tp.track, note.track),
+                            contextmenu: (e: MouseEvent) => click(e, tp.track, note.track, undefined, true),
                         },
                         key: note.track,
                         style: {
@@ -158,6 +160,7 @@ export default Vue.extend({
                         return {
                             click: (e: MouseEvent) => click(e, tp.track, n.track, note.track),
                             dragstart: (e: DragEvent) => this.$emit("drag", e, tp.track, n.track, note.track),
+                            contextmenu: (e: MouseEvent) => click(e, tp.track, n.track, note.track, true),
                         }
                     }
                     const style = (n: Single) => {
@@ -210,6 +213,7 @@ export default Vue.extend({
                                     else
                                         click(e, tp.track, end.track, note.track)
                                 },
+                                contextmenu: (e: MouseEvent) => click(e, tp.track, end.track, note.track, true),
                                 dragstart: (e: DragEvent) => this.$emit("drag", e, tp.track, end.track, note.track),
                             },
                             key: end.track,
@@ -232,7 +236,7 @@ export default Vue.extend({
                                 click: (e: MouseEvent) => {
                                     e.stopPropagation()
                                     this.$emit("newmid", e, tp.track, note.track)
-                                }
+                                },
                             },
                             style: {
                                 bottom: bottom + "px",

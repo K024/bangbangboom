@@ -52,7 +52,7 @@ export default Vue.extend({
                 this.$emit("close");
             } catch (error) {
                 const res = HandleErr<string>(error);
-                if (!res) this.$toasted.error("Net error");
+                if (!res) this.$toasted.error(this.$t("s.neterror") as string);
                 else if (res.status === 401)
                     this.$toasted.error(this.$t('s.userNameOrPasswordWrong') as string );
                 else if (res.data.startsWith("lockedout"))

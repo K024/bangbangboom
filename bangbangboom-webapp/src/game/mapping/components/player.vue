@@ -8,7 +8,7 @@
         <md-button class="md-icon-button" @click="stop">
             <md-icon>stop</md-icon>
         </md-button>
-        <md-switch v-model="playstate.half">Half Speed</md-switch>
+        <md-switch v-model="playstate.half">{{$t('l.halfspeed')}}</md-switch>
     </div>
 </template>
 

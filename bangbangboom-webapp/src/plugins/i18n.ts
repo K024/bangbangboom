@@ -26,7 +26,7 @@ const messages = {
             cancel: 'cancel',
             send: 'send',
             edit: 'edit',
-            musics: 'Music',
+            musics: 'Musics',
             settings: 'Settings',
             home: 'home',
             description: 'Description',
@@ -42,6 +42,20 @@ const messages = {
             uploaded: 'uploaded',
             updated: 'updated',
             Comment: 'Comment',
+            shortcut: 'Shortcut',
+            None: 'None',
+            Delete: 'Delete',
+            follow: 'Follow',
+            Triplet: 'Triplet',
+            local: 'Local',
+            beatDivision: 'Beat division',
+            MusicSource: 'Music source',
+            MusicId: 'By Music id (check from the musics page)',
+            load: 'Load',
+            modify: 'Modify',
+            addnew: 'Add new',
+            meta: "Meta",
+            timing: "Timing",
         },
         l: {
             register: 'Register:',
@@ -79,8 +93,20 @@ const messages = {
             judgeOffset: 'Judge Offset',
             noteScale: 'Note Scale',
             barOpacity: 'Bar Opacity',
-            backgoundDim: 'Backgound Dim',
+            backgroundDim: 'Background Dim',
             pleaseLogin: 'Please login',
+            notRecommended: 'Not recommended',
+            lowerPerformance: 'Lower performance',
+            BackgroundCover: 'Background cover',
+            BackgroundImage: 'Background image',
+            halfspeed: 'Half speed',
+            timepoints: 'Time points',
+            meter: "Meter",
+            timeoffset: "Time offset",
+            moveonebeat: 'Move one beat',
+            settocurrent: 'Set to current time',
+            muteticker: 'Mute ticker',
+            testplay: 'Test play',
         },
         s: {
             checking: 'Checking...',
@@ -119,6 +145,26 @@ const messages = {
             emailNotConfirmed: 'Email not confirmed',
 
             emailNotFound: "Email not found",
+
+            pleaseRefresh: "Please refresh this page",
+
+            downloadcurrentmap: 'Download current game map',
+
+            loadmapfile: 'Load map file (need to refresh this page)',
+
+            loadbsmap: 'Load Bang! Simulator map file (testing function, need to refresh)',
+
+            hitorpresstomeasure: "Hit here or press \'t\' 5 times and more to measure",
+
+            selectorcreatetp: "Select or create a time point first",
+
+            savedinbrowser: 'Saved in browser',
+
+            mapinlargerdevice: 'Mapping is recommended in larger devices',
+
+            maploaded: "Map loaded, please refresh",
+
+            convertfailed: "Convert failed",
         },
         c: {
             minutesago: 'less than 1 munite ago | 1 minute ago | {n} minutes ago',
@@ -163,6 +209,20 @@ const messages = {
             uploaded: '已上传',
             updated: '已更新',
             Comment: '评论',
+            shortcut: '快捷键',
+            None: '无',
+            Delete: '删除',
+            follow: '跟随',
+            Triplet: '三连音',
+            beatDivision: '节拍细分',
+            MusicSource: '音乐源',
+            local: '本地',
+            MusicId: '音乐 id (从音乐页面查看)',
+            load: '加载',
+            modify: '修改',
+            addnew: '添加',
+            meta: "通用",
+            timing: "时间轴",
         },
         l: {
             register: '注册:',
@@ -200,8 +260,20 @@ const messages = {
             judgeOffset: '判定偏移',
             noteScale: '音符大小',
             barOpacity: '长条不透明度',
-            backgoundDim: '背景暗化',
+            backgroundDim: '背景暗化',
             pleaseLogin: '请登录',
+            notRecommended: '不推荐',
+            lowerPerformance: '较低性能',
+            BackgroundCover: '背景覆盖',
+            BackgroundImage: '背景图片',
+            halfspeed: '半速',
+            timepoints: '计时点',
+            meter: "拍号",
+            timeoffset: "偏移时间",
+            moveonebeat: '移动一拍',
+            settocurrent: '设为现在时间',
+            muteticker: '节拍器静音',
+            testplay: '测试播放',
         },
         s: {
             checking: '检察中...',
@@ -240,6 +312,26 @@ const messages = {
             emailNotConfirmed: '邮箱未验证',
 
             emailNotFound: "邮箱未找到",
+
+            pleaseRefresh: "请刷新当前页面",
+
+            downloadcurrentmap: '下载当前谱面',
+
+            loadmapfile: '加载谱面文件 (需要刷新页面)',
+
+            loadbsmap: '加载Bang! Simulator铺面文件 (测试功能, 需要刷新页面)',
+
+            hitorpresstomeasure: "点击这里或者按 \'t\' 5次以上进行测量",
+
+            selectorcreatetp: "请先选择或创建计时点",
+
+            savedinbrowser: '已保存在浏览器中',
+
+            mapinlargerdevice: '推荐在更大的设备上作图',
+
+            maploaded: "谱面已加载，请刷新页面",
+
+            convertfailed: "转换失败",
         },
         c: {
             minutesago: '不到1分钟前 | 1分钟前 | {n}分钟前',
@@ -284,6 +376,20 @@ const messages = {
             uploaded: 'アップロードしました',
             updated: '更新しました',
             Comment: 'コメント',
+            shortcut: 'ショートカットキー',
+            None: '無し',
+            Delete: '消す',
+            follow: '従う',
+            Triplet: 'トリプレット',
+            beatDivision: 'ビート分割',
+            MusicSource: '音楽ソース',
+            local: 'ローカル',
+            MusicId: 'ミュージック id (音楽ページで確認してください)',
+            load: 'ロード',
+            modify: '修正する',
+            addnew: '追加する',
+            meta: "メタ",
+            timing: "タイムライン",
         },
         l: {
             register: '新規登録:',
@@ -321,8 +427,20 @@ const messages = {
             judgeOffset: 'ジャッジオフセット',
             noteScale: '音符大きさ',
             barOpacity: 'バー不透明度',
-            backgoundDim: '背景暗化',
+            backgroundDim: '背景暗化',
             pleaseLogin: 'ログインしてください',
+            notRecommended: '推奨しません',
+            lowerPerformance: '低いパフォーマンス',
+            BackgroundCover: '覆うバックグラウンド',
+            BackgroundImage: '背景画像',
+            halfspeed: '半速',
+            timepoints: 'タイミングポイント',
+            meter: "拍子",
+            timeoffset: "オフセット時間",
+            moveonebeat: '一拍動く',
+            settocurrent: '現在の時刻に設定',
+            muteticker: 'メトロノームをミュートする',
+            testplay: 'テストプレイ',
         },
         s: {
             checking: '検察中...',
@@ -344,7 +462,7 @@ const messages = {
 
             notfound: "ページが見つかりません",
 
-            mapUploadNotice: "ご注意: 、譜面コンテンツは、マッピングページから保存されたローカルストレージからロードされます",
+            mapUploadNotice: "ご注意: 譜面コンテンツは、マッピングページから保存されたローカルストレージからロードされます",
 
             notSupportAudio: "お使いのブラウザはオーディオ要素をサポートしていません。",
 
@@ -361,6 +479,26 @@ const messages = {
             emailNotConfirmed: 'メールボックスは検証されません',
 
             emailNotFound: "メールが見つかりません",
+
+            pleaseRefresh: "ページを更新してください",
+
+            downloadcurrentmap: '現在のマップをダウンロードする',
+
+            loadmapfile: 'マップファイルの読み込み（ページを更新する必要がある）',
+
+            loadbsmap: 'Bang! Simulatorマップファイルの読み込み（テスト機能、ページを更新する必要がある）',
+
+            hitorpresstomeasure: "ここを押すか、「t」を5回以上押して測定します",
+
+            selectorcreatetp: "先ずはタイムポイントを選択または作成してください",
+
+            savedinbrowser: 'ブラウザに保存されました',
+
+            mapinlargerdevice: '大きなデバイスではマッピングが推奨されます',
+
+            maploaded: "譜面がロードされました。ページを更新してください",
+
+            convertfailed: "変換に失敗しました",
         },
         c: {
             minutesago: '1分未満 | 1分前 | {n}分前',

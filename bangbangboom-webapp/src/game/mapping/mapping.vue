@@ -1,13 +1,13 @@
 <template>
     <div class="flex center">
-        <div class="md-title" style="margin: 30px">Mapping is recommended in larger devices</div>
+        <div class="md-title" style="margin: 30px">{{$t("s.mapinlargerdevice")}}</div>
         <md-content style="background-color: black" md-theme="dark" class="map-editor only-g">
             <div class="background-image" :style="backgroundStyle"></div>
             <md-content class="flex fill-w dark-bg">
                 <md-tabs :md-active-tab="tab" style="flex-grow: 1">
-                    <md-tab id="tab-meta" md-label="Meta" to="/mapping#meta" replace></md-tab>
-                    <md-tab id="tab-timing" md-label="Timing" to="/mapping#timing" replace></md-tab>
-                    <md-tab id="tab-mapping" md-label="Mapping" to="/mapping#mapping" replace></md-tab>
+                    <md-tab id="tab-meta" :md-label="$t('w.meta')" to="/mapping#meta" replace></md-tab>
+                    <md-tab id="tab-timing" :md-label="$t('w.timing')" to="/mapping#timing" replace></md-tab>
+                    <md-tab id="tab-mapping" :md-label="$t('w.mapping')" to="/mapping#mapping" replace></md-tab>
                 </md-tabs>
                 <div class="flex center buttons">
                     <md-button class="md-icon-button" @click="undo" :disabled="!undostate.canUndo">
@@ -19,8 +19,8 @@
                     <md-button class="md-icon-button" @click="save">
                         <md-icon>save_alt</md-icon>
                     </md-button>
-                    <md-button class="md-icon-button" @click="testplay" title="Test play">
-                        <md-icon>build</md-icon>
+                    <md-button class="md-icon-button" @click="testplay" :title="$t('l.testplay')">
+                        <md-icon>play_circle_filled</md-icon>
                     </md-button>
                 </div>
                 <md-button class="md-icon-button" @click="$router.back()">
@@ -100,7 +100,7 @@ export default Vue.extend({
         redo: undoState.Redo,
         save: function() {
             saveState();
-            this.$toasted.success("Saved in local store");
+            this.$toasted.success(this.$t("s.savedinbrowser") as string);
         },
         testplay() {
             this.save();

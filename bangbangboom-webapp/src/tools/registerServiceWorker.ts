@@ -1,8 +1,11 @@
 /* tslint:disable:no-console */
 
-import { register } from 'register-service-worker';
+import { register, unregister } from 'register-service-worker';
+import Vue from 'vue';
+import i18n from '@/plugins/i18n';
 
-if (process.env.NODE_ENV === 'production') {
+const enabled = false
+if (process.env.NODE_ENV === 'production' && enabled) {
   register(`${process.env.BASE_URL}service-worker.js`, {
     ready() {
       console.log(
@@ -21,6 +24,7 @@ if (process.env.NODE_ENV === 'production') {
     },
     updated() {
       console.log('New content is available; please refresh.');
+      Vue.toasted.success(i18n.t("s.pleaseRefresh") as string);
     },
     offline() {
       console.log('No internet connection found. App is running in offline mode.');
@@ -29,4 +33,6 @@ if (process.env.NODE_ENV === 'production') {
       console.error('Error during service worker registration:', error);
     },
   });
+} else {
+  unregister()
 }

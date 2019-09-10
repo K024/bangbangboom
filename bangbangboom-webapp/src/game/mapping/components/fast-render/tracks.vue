@@ -155,6 +155,8 @@ export default Vue.extend({
             return this.timeHeightFactor * t + "px";
         },
         scroll: function(e: WheelEvent) {
+            e.preventDefault()
+            e.stopPropagation()
             const dt = e.deltaY / this.timeHeightFactor;
             let target = SelectPosition.p - dt;
             if (target < 0) target = 0;
@@ -357,8 +359,9 @@ export default Vue.extend({
 .beatline4 {
     border-bottom: 1px dashed darkslateblue;
 }
-.preview {
+.note.preview {
     opacity: 0.5;
+    z-index: 0;
 }
 .progress {
     position: absolute;

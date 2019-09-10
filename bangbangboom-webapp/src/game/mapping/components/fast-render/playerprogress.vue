@@ -1,5 +1,5 @@
 <template>
-    <div class="flex bar">
+    <div class="flex bar" @wheel="scroll">
         <div class="flex center time" ref="time"></div>
         <div ref="bar" class="bar" @click="barclick">
             <div class="layer flex">
@@ -37,7 +37,16 @@ export default Vue.extend({
             const x = e.pageX - bar.offsetLeft;
             const p = x / bar.clientWidth;
             seekPercent(p);
-        }
+        },
+        scroll: function(e: WheelEvent) {
+            e.preventDefault()
+            e.stopPropagation()
+            const dt = e.deltaY / 100;
+            let target = PlayState.position + dt;
+            if (target < 0) target = 0;
+            if (target > PlayState.duration) target = PlayState.duration;
+            seekPercent(target / PlayState.duration);
+        },
     },
     mounted: function() {
         this.$watch(
