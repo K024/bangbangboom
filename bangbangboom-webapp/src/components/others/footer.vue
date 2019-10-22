@@ -6,7 +6,7 @@
                 href="https://github.com/K024/bangbangboom"
                 target="_blank"
                 rel="noopener noreferrer"
-            >bangbangboom open source project</a>, we couldn't grarantee anything in this website.
+            >bangbangboom open source project</a>, we couldn't grarantee anything in this website. (such as deleting the DB and closing the server)
         </div>
         <div>
             This site is protected by reCAPTCHA and the Google
@@ -20,6 +20,7 @@
             <a href="http://bestdori.com" target="_blank" rel="noopener noreferrer">bestdori</a>
         </div>
         <div>Copyright bangbangboom© 2019 All rights reserved</div>
+        <div>自制谱交流群：709302487</div>
     </div>
 </template>
 

@@ -44,6 +44,10 @@ export default Vue.extend({
         width: {
             type: Number,
             required: true
+        },
+        mirror: {
+            type: Boolean,
+            default: false,
         }
     },
     data: function () {
@@ -249,6 +253,10 @@ export default Vue.extend({
                 }
             }
         }
-        return h("div", {}, list);
+        return h("div", {
+            style: {
+                ...this.mirror && { transform: "scaleX(-1)" }
+            }
+        }, list);
     }
 });

@@ -1,30 +1,30 @@
 <template>
     <div class="play">
-        <md-button class="md-icon-button back" @click="$router.back()" md-theme="dark">
+        <!-- <md-button class="md-icon-button back" @click="$router.back()" md-theme="dark">
             <md-icon>navigate_before</md-icon>
-        </md-button>
+        </md-button>-->
         <canvas ref="canvas" touch-action="none"></canvas>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import { App } from "./app";
+import "pixi.js";
+import { Game, GameLoadConfig } from "bangbangboom-game";
 import { MetaState } from "../mapping/state";
-import { Config } from "./constants";
+import api from "@/tools/Axios";
+import { MapDetailed } from "@/tools/models";
 import { GameConfig } from "./config";
 
 export default Vue.extend({
     data: function() {
         return {
             canvas: null as null | HTMLCanvasElement,
-            app: null as null | App
+            game: null as null | Game,
+            destroyed: false
         };
     },
     methods: {
-        resizeCanvas: function() {
-            if (this.app) this.app.resizeCanvas();
-        },
         load() {
             const mapid = this.$route.params.id;
             if (!mapid) {
@@ -38,7 +38,9 @@ export default Vue.extend({
             if (mapid === "local") {
                 songurl = MetaState.musicSrc;
                 background = MetaState.backgroundImageSrc;
-                mapsource = "local";
+                mapsource = URL.createObjectURL(
+                    new Blob([localStorage.getItem("gamemapstate") || ""])
+                );
             } else {
                 mapsource = "/api/map/content/" + mapid;
                 songurl = "/api/map/music/" + mapid;
@@ -46,22 +48,40 @@ export default Vue.extend({
             }
             this.canvas = this.$refs.canvas as HTMLCanvasElement;
             if (!this.canvas) throw new Error();
-            this.app = new App(this.canvas, {
-                songurl,
-                mapsource,
-                background,
-                skin: "skin0",
-                config: GameConfig.config
+            const loadConfig = Object.assign(new GameLoadConfig(), {
+                musicSrc: songurl,
+                mapSrc: mapsource,
+                backgroundSrc: background,
+                skin: "/assets/default",
+                songName: ""
             });
+            const c = GameConfig.config as any;
+            for (const key in c) {
+                if (c[key] && typeof c[key] === "string")
+                    c[key] = parseFloat(c[key]);
+            }
+            this.game = new Game(this.canvas, GameConfig.config, loadConfig);
+            this.game.start();
+            this.game.ondestroyed = () => {
+                if (!this.destroyed) this.$router.back();
+                this.destroyed = true;
+            };
+
+            if (mapid !== "local")
+                api.get<MapDetailed>("map/info", {
+                    params: { id: mapid }
+                }).then(res => {
+                    loadConfig.songName =
+                        res.data.music.titleunicode + " - " + res.data.mapname;
+                });
         }
     },
     mounted: function() {
         this.load();
-        window.addEventListener("resize", this.resizeCanvas);
     },
     beforeDestroy: function() {
-        if (this.app) this.app.destroy();
-        window.removeEventListener("resize", this.resizeCanvas);
+        this.destroyed = true;
+        if (this.game) this.game.destroy();
     }
 });
 </script>

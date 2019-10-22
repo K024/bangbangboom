@@ -89,7 +89,9 @@ export default Vue.extend({
                         content: content,
                         description: this.description,
                         image: this.image
-                    })
+                    }), {
+                        timeout: 0
+                    }
                 );
                 this.sent = true;
                 await delay(3000);

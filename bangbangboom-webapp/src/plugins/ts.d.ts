@@ -18,6 +18,15 @@ declare module '*.mp3' {
     export default name;
 }
 
+declare module '@pixi/canvas-renderer' {
+    import { Renderer } from "pixi.js"
+    export class CanvasRenderer extends Renderer { }
+}
+
+declare module '@pixi/canvas-graphics' {
+    export const CanvasGraphicsRenderer: (...params: any[]) => any
+}
+
 declare module "vue-progressbar" {
     import { PluginFunction } from "vue";
 

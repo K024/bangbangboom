@@ -10,6 +10,8 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@pixi/canvas-graphics": "^5.1.3",
+    "@pixi/canvas-renderer": "^5.1.3",
     "axios": "^0.19.0",
     "howler": "^2.1.2",
     "pepjs": "^0.5.2",

@@ -38,6 +38,9 @@
             <div class="flex">
                 <md-button @click="loadbsmap">{{$t('s.loadbsmap')}}</md-button>
             </div>
+            <div class="flex">
+                <md-button @click="clearmap">{{$t('s.clearmap')}}</md-button>
+            </div>
         </div>
     </div>
 </template>
@@ -137,6 +140,10 @@ export default Vue.extend({
                     };
                 }
             });
+        },
+        clearmap() {
+            localStorage.setItem("gamemapstate", "");
+            this.$toasted.success(this.$t("s.maploaded") as string);
         }
     }
 });

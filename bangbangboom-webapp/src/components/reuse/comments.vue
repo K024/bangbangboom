@@ -168,6 +168,7 @@ export default Vue.extend({
             }
         },
         async send() {
+            if (!userstate.loginstate) return
             try {
                 this.sending = true;
                 await api.post(
@@ -193,6 +194,7 @@ export default Vue.extend({
             }
         },
         async like(c: CommentDetail) {
+            if (!userstate.loginstate) return
             try {
                 this.sending = true;
                 const ld = this.mylikedislikes.get(c.id);
@@ -211,6 +213,7 @@ export default Vue.extend({
             }
         },
         async dislike(c: CommentDetail) {
+            if (!userstate.loginstate) return
             try {
                 this.sending = true;
                 const ld = this.mylikedislikes.get(c.id);

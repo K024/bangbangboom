@@ -91,7 +91,9 @@ export default Vue.extend({
                         artistunicode: this.artistunicode,
                         description: this.description,
                         file: this.file
-                    })
+                    }), {
+                        timeout: 0
+                    }
                 );
                 this.sent = true;
                 await delay(3000);

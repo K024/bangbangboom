@@ -9,7 +9,6 @@ import { getReCapHeader } from './recaptcha'
  */
 const api = axios.create({
     baseURL: location.origin + "/api/",
-    timeout: 3000,
 })
 
 export const GetXSRFHeader = async () => {

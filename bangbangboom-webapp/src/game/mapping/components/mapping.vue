@@ -35,9 +35,18 @@
                 <div class="flex">
                     <md-switch v-model="follow" :title="$t('w.shortcut')+': t'">{{$t('w.follow')}}</md-switch>
                 </div>
+                <div class="flex">
+                    <md-switch v-model="mirror" :title="$t('w.shortcut')+': y'">{{$t('w.mirror')}}</md-switch>
+                </div>
             </div>
         </div>
-        <tracks class="track" :time-height-factor="factor" :division="parseInt(division)" :tool="selected"></tracks>
+        <tracks
+            class="track"
+            :time-height-factor="factor"
+            :division="parseInt(division)"
+            :tool="selected"
+            :mirror="mirror"
+        ></tracks>
         <scrollbar class="scrollbar" :time-height-factor="factor">scrollbar</scrollbar>
     </div>
 </template>
@@ -65,7 +74,8 @@ export default Vue.extend({
             selected: "none",
             division: "1",
             factor: 400,
-            active: true
+            active: true,
+            mirror: false
         };
     },
     computed: {
@@ -126,6 +136,11 @@ export default Vue.extend({
             addKeyDownListener(
                 84 /** t */,
                 () => (this.follow = !this.follow),
+                this
+            );
+            addKeyDownListener(
+                89 /** y */,
+                () => (this.mirror = !this.mirror),
                 this
             );
         }

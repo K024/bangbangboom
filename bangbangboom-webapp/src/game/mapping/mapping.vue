@@ -151,6 +151,10 @@ export default Vue.extend({
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    user-select: none;
+}
+.map-editor * {
+    user-select: inherit;
 }
 .background-image {
     z-index: -1;

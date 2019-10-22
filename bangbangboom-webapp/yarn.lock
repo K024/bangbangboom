@@ -758,6 +758,27 @@
     "@pixi/core" "^5.1.3"
     "@pixi/display" "^5.1.3"
 
+"@pixi/canvas-graphics@^5.1.3":
+  version "5.1.3"
+  resolved "https://registry.npm.taobao.org/@pixi/canvas-graphics/download/@pixi/canvas-graphics-5.1.3.tgz#4456e27f710ee39605b69d1b34e93ccbc03d7376"
+  integrity sha1-RFbif3EO45YFtp0bNOk8y8A9c3Y=
+  dependencies:
+    "@pixi/canvas-renderer" "^5.1.3"
+    "@pixi/core" "^5.1.3"
+    "@pixi/graphics" "^5.1.3"
+    "@pixi/math" "^5.1.0"
+
+"@pixi/canvas-renderer@^5.1.3":
+  version "5.1.3"
+  resolved "https://registry.npm.taobao.org/@pixi/canvas-renderer/download/@pixi/canvas-renderer-5.1.3.tgz#2e1765f54c884f3b4bad8bd11e06cdbb77dab72e"
+  integrity sha1-Lhdl9UyITztLrYvRHgbNu3faty4=
+  dependencies:
+    "@pixi/constants" "^5.1.0"
+    "@pixi/core" "^5.1.3"
+    "@pixi/math" "^5.1.0"
+    "@pixi/settings" "^5.1.3"
+    "@pixi/utils" "^5.1.3"
+
 "@pixi/constants@^5.1.0":
   version "5.1.0"
   resolved "https://registry.npm.taobao.org/@pixi/constants/download/@pixi/constants-5.1.0.tgz#663192a3d72cbbca1c40a94a7e1004fbf9ab664a"
@@ -1895,6 +1916,13 @@ balanced-match@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npm.taobao.org/balanced-match/download/balanced-match-1.0.0.tgz#89b4d199ab2bee49de164ea02b89ce462d71b767"
   integrity sha1-ibTRmasr7kneFk6gK4nORi1xt2c=
+
+bangbangboom-game@../../bangbangboom-game:
+  version "0.0.1"
+  dependencies:
+    howler "^2.1.2"
+    inversify "^5.0.1"
+    reflect-metadata "^0.1.13"
 
 base64-js@^1.0.2:
   version "1.3.1"
@@ -3317,9 +3345,9 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     stream-shift "^1.0.0"
 
 earcut@^2.1.5:
-  version "2.1.5"
-  resolved "https://registry.npm.taobao.org/earcut/download/earcut-2.1.5.tgz#829280a9a3a0f5fee0529f0a47c3e4eff09b21e4"
-  integrity sha1-gpKAqaOg9f7gUp8KR8Pk7/CbIeQ=
+  version "2.2.1"
+  resolved "https://registry.npm.taobao.org/earcut/download/earcut-2.2.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fearcut%2Fdownload%2Fearcut-2.2.1.tgz#3bae0b1b6fec41853b56b126f03a42a34b28f1d5"
+  integrity sha1-O64LG2/sQYU7VrEm8DpCo0so8dU=
 
 easy-stack@^1.0.0:
   version "1.0.0"
@@ -3523,7 +3551,7 @@ event-pubsub@4.3.0:
 
 eventemitter3@^3.0.0, eventemitter3@^3.1.0:
   version "3.1.2"
-  resolved "https://registry.npm.taobao.org/eventemitter3/download/eventemitter3-3.1.2.tgz#2d3d48f9c346698fce83a85d7d664e98535df6e7"
+  resolved "https://registry.npm.taobao.org/eventemitter3/download/eventemitter3-3.1.2.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Feventemitter3%2Fdownload%2Feventemitter3-3.1.2.tgz#2d3d48f9c346698fce83a85d7d664e98535df6e7"
   integrity sha1-LT1I+cNGaY/Og6hdfWZOmFNd9uc=
 
 events@^3.0.0:
@@ -4574,6 +4602,11 @@ invariant@^2.2.2:
   dependencies:
     loose-envify "^1.0.0"
 
+inversify@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.npm.taobao.org/inversify/download/inversify-5.0.1.tgz#500d709b1434896ce5a0d58915c4a4210e34fb6e"
+  integrity sha1-UA1wmxQ0iWzloNWJFcSkIQ40+24=
+
 invert-kv@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npm.taobao.org/invert-kv/download/invert-kv-1.0.0.tgz#104a8e4aaca6d3d8cd157a8ef8bfab2d7a3ffdb6"
@@ -4899,7 +4932,7 @@ isexe@^2.0.0:
 
 ismobilejs@^0.5.1:
   version "0.5.2"
-  resolved "https://registry.npm.taobao.org/ismobilejs/download/ismobilejs-0.5.2.tgz#e81bacf6187c532ad8348355f4fecd6e6adfdce1"
+  resolved "https://registry.npm.taobao.org/ismobilejs/download/ismobilejs-0.5.2.tgz?cache=0&sync_timestamp=1568180544676&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fismobilejs%2Fdownload%2Fismobilejs-0.5.2.tgz#e81bacf6187c532ad8348355f4fecd6e6adfdce1"
   integrity sha1-6Bus9hh8UyrYNINV9P7Nbmrf3OE=
 
 isobject@^2.0.0:
@@ -5918,7 +5951,7 @@ oauth-sign@~0.9.0:
 
 object-assign@^4.0.1, object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
-  resolved "https://registry.npm.taobao.org/object-assign/download/object-assign-4.1.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fobject-assign%2Fdownload%2Fobject-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
+  resolved "https://registry.npm.taobao.org/object-assign/download/object-assign-4.1.1.tgz?cache=0&sync_timestamp=1567685355928&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fobject-assign%2Fdownload%2Fobject-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
   integrity sha1-IQmtx5ZYh8/AXLvUQsrIv7s2CGM=
 
 object-copy@^0.1.0:
@@ -7054,6 +7087,11 @@ readdirp@^3.1.1:
   integrity sha1-+oXS0U1CiZIORnHerZZDGt0u54o=
   dependencies:
     picomatch "^2.0.4"
+
+reflect-metadata@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.npm.taobao.org/reflect-metadata/download/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
+  integrity sha1-Z648pXyXKiqhZCsQ/jY/4y1J3Ag=
 
 regenerate-unicode-properties@^8.1.0:
   version "8.1.0"

@@ -19,6 +19,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
+        // target: 'https://bangbangboom.ml',
         target: 'https://localhost:5001',
         changeOrigin: true,
       }

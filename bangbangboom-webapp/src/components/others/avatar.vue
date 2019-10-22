@@ -18,7 +18,9 @@ export default Vue.extend({
                 src: this.username
                     ? "/api/user/profile/" + this.username
                     : avatarurl,
-                error: avatarurl
+                loading: avatarurl,
+                error: avatarurl,
+                attempt: 1
             };
         }
     }

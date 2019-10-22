@@ -1,4 +1,4 @@
-import { Config } from './constants';
+import { GameConfig as Config } from 'bangbangboom-game';
 import Vue from 'vue';
 
 export const GameConfig = Vue.observable({
@@ -8,7 +8,8 @@ export const GameConfig = Vue.observable({
 const c = localStorage.getItem("gameconfig")
 
 if (c) {
-    GameConfig.config = JSON.parse(c)
+    const config = JSON.parse(c)
+    Object.assign(GameConfig.config, config)
 }
 
 const vm = new Vue()

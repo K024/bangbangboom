@@ -7,7 +7,7 @@ export default Vue.extend({
         timeHeightFactor: {
             type: Number,
             required: true
-        },
+        }
     },
     computed: {
         progresstrans: function (): string {

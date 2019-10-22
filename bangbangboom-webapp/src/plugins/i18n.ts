@@ -56,6 +56,7 @@ const messages = {
             addnew: 'Add new',
             meta: "Meta",
             timing: "Timing",
+            mirror: "Mirror",
         },
         l: {
             register: 'Register:',
@@ -154,6 +155,8 @@ const messages = {
 
             loadbsmap: 'Load Bang! Simulator map file (testing function, need to refresh)',
 
+            clearmap: 'Clear current map (need to refresh this page)',
+
             hitorpresstomeasure: "Hit here or press \'t\' 5 times and more to measure",
 
             selectorcreatetp: "Select or create a time point first",
@@ -223,6 +226,7 @@ const messages = {
             addnew: '添加',
             meta: "通用",
             timing: "时间轴",
+            mirror: "镜像",
         },
         l: {
             register: '注册:',
@@ -321,6 +325,8 @@ const messages = {
 
             loadbsmap: '加载Bang! Simulator铺面文件 (测试功能, 需要刷新页面)',
 
+            clearmap: '清除谱面 (需要刷新页面)',
+
             hitorpresstomeasure: "点击这里或者按 \'t\' 5次以上进行测量",
 
             selectorcreatetp: "请先选择或创建计时点",
@@ -390,6 +396,7 @@ const messages = {
             addnew: '追加する',
             meta: "メタ",
             timing: "タイムライン",
+            mirror: "ミラー",
         },
         l: {
             register: '新規登録:',
@@ -487,6 +494,8 @@ const messages = {
             loadmapfile: 'マップファイルの読み込み（ページを更新する必要がある）',
 
             loadbsmap: 'Bang! Simulatorマップファイルの読み込み（テスト機能、ページを更新する必要がある）',
+
+            clearmap: '現在のマップをクリアする （ページを更新する必要がある）',
 
             hitorpresstomeasure: "ここを押すか、「t」を5回以上押して測定します",
 

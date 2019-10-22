@@ -83,7 +83,7 @@
                         </div>
                     </div>
                     <div class="md-layout-item md-xsmall-size-100 md-small-size-50">
-                        <rate :rate="mapdetail.rate" :myrate="myrate" @rate="rate"></rate>
+                        <!-- <rate :rate="mapdetail.rate" :myrate="myrate" @rate="rate"></rate> -->
                     </div>
                 </div>
                 <div class="md-subheading">{{$t('w.description')}}:</div>

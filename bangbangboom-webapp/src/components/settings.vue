@@ -26,6 +26,14 @@
             <label>{{$t('l.backgroundDim')}}</label>
             <md-input v-model="config.backgroundDim" type="number" step="0.01"></md-input>
         </md-field>
+        <md-field>
+            <label>Render rate</label>
+            <md-input v-model="config.resolution" type="number" step="0.01"></md-input>
+        </md-field>
+        <md-field>
+            <label>Effect Volume</label>
+            <md-input v-model="config.effectVolume" type="number" step="0.01"></md-input>
+        </md-field>
     </div>
 </template>
 
@@ -36,7 +44,7 @@ import { usersettings } from "./others/settings";
 export default Vue.extend({
     computed: {
         config: () => GameConfig.config,
-        settings: () => usersettings
+        settings: () => usersettings.settings
     }
 });
 </script>

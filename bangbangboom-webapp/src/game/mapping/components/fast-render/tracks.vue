@@ -30,7 +30,7 @@
             <div class="layer" v-show="division % 4 === 0">
                 <div class="subline beatline4" v-for="b in beatline4" :key="b" :style="{bottom: bottompx(b)}"></div>
             </div>
-            <div class="layer">
+            <div class="layer" :style="{transform: this.mirror ? 'scaleX(-1)' : ''}">
                 <img class="note preview" v-if="previewNote" :src="previewNote.src" :style="previewNote" />
                 <img
                     class="note preview"
@@ -49,6 +49,7 @@
                 :width="width"
                 @drag="drag"
                 @newmid="newmid"
+                :mirror="mirror"
             ></notes>
         </div>
     </div>
@@ -89,6 +90,10 @@ export default Vue.extend({
         tool: {
             type: String,
             required: true
+        },
+        mirror: {
+            type: Boolean,
+            default: false
         }
     },
     data: function() {
@@ -155,8 +160,8 @@ export default Vue.extend({
             return this.timeHeightFactor * t + "px";
         },
         scroll: function(e: WheelEvent) {
-            e.preventDefault()
-            e.stopPropagation()
+            e.preventDefault();
+            e.stopPropagation();
             const dt = e.deltaY / this.timeHeightFactor;
             let target = SelectPosition.p - dt;
             if (target < 0) target = 0;
@@ -172,7 +177,7 @@ export default Vue.extend({
             let l = Math.floor((x / rect.width) * 10 - 1.5);
             if (l < 0) l = -1;
             if (l > 6) l = -1;
-            this.mouseLane = l;
+            this.mouseLane = this.mirror ? 6 - l : l;
         },
         click: function(e: MouseEvent) {
             if (this.tool === "none") return;

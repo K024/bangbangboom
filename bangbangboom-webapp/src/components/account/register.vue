@@ -16,8 +16,8 @@
                 <md-button
                     class="fill-w md-primary md-raised"
                     @click="confirm"
-                    :disabled="state != 'acceptable' || loading"
-                >{{$t('w.confirm')}}</md-button>
+                    disabled
+                >注册暂时关闭 / Registraiton is now closed</md-button>
             </template>
         </div>
     </div>
@@ -53,6 +53,7 @@ export default Vue.extend({
     },
     methods: {
         confirm: async function() {
+            return;
             try {
                 this.loading = true;
                 await api.post(
