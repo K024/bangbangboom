@@ -37,45 +37,57 @@ namespace bangbangboom.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Comment>()
-                .HasOne(c => c.ParentComment)
-                .WithMany()
-                .HasForeignKey(c => c.ParentCommentId);
+                .HasOne<AppUser>().WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Comment>()
+                .HasOne<Map>().WithMany()
+                .HasForeignKey(c => c.MapId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Comment>()
+                .HasOne<Comment>().WithMany()
+                .HasForeignKey(c => c.ParentCommentId)
+                .OnDelete(DeleteBehavior.SetNull);
 
-            modelBuilder.Entity<LikeDislike>()
-                .HasIndex(l => new { l.CommentId, l.UserId })
-                .IsUnique();
-
-            modelBuilder.Entity<Rate>()
-                .HasIndex(l => new { l.MapId, l.UserId })
-                .IsUnique();
-
+            modelBuilder.Entity<Favorite>()
+                .HasOne<AppUser>().WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Favorite>()
+                .HasOne<Map>().WithMany()
+                .HasForeignKey(f => f.MapId)
+                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Favorite>()
                 .HasIndex(l => new { l.MapId, l.UserId })
                 .IsUnique();
+
+            modelBuilder.Entity<Map>()
+                .HasOne<AppUser>().WithMany()
+                .HasForeignKey(m => m.UploaderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlayRecord>()
+                .HasOne<Map>().WithMany()
+                .HasForeignKey(p => p.MapId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Meta>()
                 .HasIndex(m => m.Usage);
             modelBuilder.Entity<Meta>()
                 .HasIndex(m => new { m.Usage, m.Key })
                 .IsUnique();
-                
-        }
 
-        public DbSet<AdminRecord> AdminRecords { get; set; }
+        }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Favorite> Favorites { get; set; }
-        public DbSet<LikeDislike> LikeDislikes { get; set; }
         public DbSet<Map> Maps { get; set; }
         public DbSet<Meta> Metas { get; set; }
-        public DbSet<Music> Musics { get; set; }
         public DbSet<PlayRecord> PlayRecords { get; set; }
-        public DbSet<Rate> Rates { get; set; }
-        public DbSet<Report> Reports { get; set; }
     }
 
     public static class PageExtension
     {
-        public static IQueryable<T> Page<T>(this IQueryable<T> q,int page = 1, int pagesize = 24)
+        public static IQueryable<T> Page<T>(this IQueryable<T> q, int page = 1, int pagesize = 24)
         {
             var p = page - 1;
             return q.Skip(p * pagesize).Take(pagesize);

@@ -4,24 +4,21 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
 
 namespace bangbangboom.Controllers
 {
+
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public partial class UserController : ControllerBase
     {
         private readonly UserManager<AppUser> userManager;
         public UserController(
@@ -35,16 +32,34 @@ namespace bangbangboom.Controllers
         public async Task<object> Me()
         {
             var user = await userManager.GetUserAsync(User);
-            return AppUserDetailed.FromAppUser(user);
+            return new
+            {
+                username = user.UserName,
+                nickname = user.NickName,
+                whatsup = user.WhatsUp,
+                hasprofile = user.ProfileFileHash != null,
+                roles = await userManager.GetRolesAsync(user),
+            };
         }
 
-        [HttpGet("{username}")]
+        [HttpGet]
         public async Task<object> Info(
-            [Required]string username)
+            [FromForm][Required]string username,
+            [FromServices] AppDbContext context)
         {
-            var user = await userManager.FindByNameAsync(username);
-            if (user is null) return StatusCode(404);
-            return AppUserDetailed.FromAppUser(user);
+            var userq =
+                from u in context.Users
+                where u.NormalizedUserName == userManager.NormalizeKey(username)
+                select new AppUserInfo(u)
+                {
+                    uploadedmaps = (
+                        from m in context.Maps
+                        where m.UploaderId == u.Id
+                        select 1).Count()
+                };
+            var user = await userq.FirstOrDefaultAsync();
+            if (user == null) return StatusCode(404);
+            return user;
         }
 
         [Authorize]
@@ -74,7 +89,7 @@ namespace bangbangboom.Controllers
             return Ok();
         }
 
-        [HttpGet("{username}")]
+        [HttpGet("{username}.{ext?}")]
         public async Task<object> Profile(
             [Required]string username,
             [FromServices] HashFileProvider fileProvider)
@@ -115,87 +130,6 @@ namespace bangbangboom.Controllers
             return Ok();
         }
 
-
-        [Authorize]
-        [HttpPost]
-        public async Task<object> AddFavorite(
-            [FromForm][Required] long mapId,
-            [FromServices] AppDbContext context)
-        {
-            var user = await userManager.GetUserAsync(User);
-            var map = await context.Maps.FindAsync(mapId);
-            if (map is null || map.Deleted) return StatusCode(404);
-
-            if (user.Favorites.AsQueryable().Where(f => f.Map == map).Count() <= 0)
-            {
-                user.Favorites.Add(new Favorite() { Map = map });
-                await context.SaveChangesAsync();
-            }
-
-            return Ok();
-        }
-
-
-        [Authorize]
-        [HttpPost]
-        public async Task<object> RemoveFavorite(
-            [FromForm][Required] long mapId,
-            [FromServices] AppDbContext context)
-        {
-            var user = await userManager.GetUserAsync(User);
-            var favorite = context.Favorites.AsQueryable().Where(f => f.MapId == mapId).FirstOrDefault();
-
-            if (favorite != null)
-            {
-                user.Favorites.Remove(favorite);
-                await context.SaveChangesAsync();
-            }
-
-            return Ok();
-        }
-
-
-        [Authorize]
-        [HttpGet]
-        public async Task<object> Favorites(
-            [FromQuery][Range(1, 10000)] int? page)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            var favorites =
-                from f in user.Favorites.AsQueryable()
-                where !f.Map.Deleted
-                orderby f.DateTime descending
-                select MapShort.FormMap(f.Map);
-
-            return favorites.Page(page ?? 1);
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<object> MyMusics(
-            [FromQuery][Range(1, 10000)] int? page)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            return user.UploadedMusics.AsQueryable()
-                .OrderByDescending(m => m.Date)
-                .Select(m => MusicShort.FromMusic(m))
-                .Page(page ?? 1);
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<object> MyMaps(
-            [FromQuery][Range(1, 10000)] int? page)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            return user.UploadedMaps.AsQueryable()
-                .OrderByDescending(m => m.Date)
-                .Select(m => MapShort.FormMap(m))
-                .Page(page ?? 1);
-        }
 
     }
 }

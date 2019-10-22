@@ -23,6 +23,6 @@ namespace bangbangboom.Data
         public string Value { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime DateTime { get; set; } = DateTime.Now;
+        public DateTimeOffset DateTime { get; set; } = DateTimeOffset.Now;
     }
 }

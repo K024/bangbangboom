@@ -10,56 +10,46 @@ namespace bangbangboom.Data
 
     public class Comment
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
         [Required]
         public string UserId { get; set; }
-        public virtual AppUser User { get; set; }
 
+        [Required]
         public long MapId { get; set; }
-        public virtual Map Map { get; set; }
 
         public long? ParentCommentId { get; set; }
-        public virtual Comment ParentComment { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime DateTime { get; set; } = DateTime.Now;
+        public DateTimeOffset DateTime { get; set; } = DateTimeOffset.Now;
 
         [Required]
         [MaxLength(200)]
         public string Content { get; set; }
 
         public bool Locked { get; set; }
-
-        public virtual List<LikeDislike> LikeDislikes { get; set; }
     }
 
-    public class CommentDetail
+    public class CommentInfo
     {
         public long id;
         public long mapid;
-        public AppUserShort user;
+        public AppUserInfo user;
         public long? parentcommentid;
-        public DateTime datetime;
+        public DateTimeOffset datetime;
         public string content;
         public bool locked;
-        public int like;
-        public int dislike;
 
-        public static CommentDetail FromComment(Comment c, bool admin = false)
+        // public CommentInfo() { }
+        public CommentInfo(Comment c)
         {
-            return new CommentDetail()
-            {
-                id = c.Id,
-                mapid = c.MapId,
-                user = AppUserShort.FromAppUser(c.User),
-                parentcommentid = c.ParentCommentId,
-                datetime = c.DateTime,
-                content = c.Locked && !admin ? "" : c.Content,
-                locked = c.Locked,
-                like = c.LikeDislikes.AsQueryable().Where(l => !l.IsDislike).Count(),
-                dislike = c.LikeDislikes.AsQueryable().Where(l => l.IsDislike).Count()
-            };
+            id = c.Id;
+            mapid = c.MapId;
+            parentcommentid = c.ParentCommentId;
+            datetime = c.DateTime;
+            content = c.Content;
+            locked = c.Locked;
         }
     }
 }

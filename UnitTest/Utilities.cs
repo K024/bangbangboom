@@ -17,18 +17,21 @@ namespace UnitTest
         {
             get
             {
-                if (_factory is null) _factory = new CustomWebApplicationFactory<TestStartup>()
-                  .WithWebHostBuilder(options =>
-                  {
-                      options.UseSetting("https_port", "5001");
-                  });
+                if (_factory is null) _factory = new CustomWebApplicationFactory<TestStartup>();
+                _factory.WithWebHostBuilder(options =>
+                {
+                    options.UseSetting("https_port", "5001");
+                });
                 return _factory;
             }
         }
 
+        private static IServiceScope scope;
+
         public static TService GetService<TService>()
         {
-            var scope = Factory.Server.Host.Services.CreateScope();
+            if (scope is null)
+                scope = Factory.Server.Host.Services.CreateScope();
             return scope.ServiceProvider.GetRequiredService<TService>();
         }
 

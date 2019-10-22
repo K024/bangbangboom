@@ -10,16 +10,14 @@ namespace bangbangboom.Data
     public class Favorite
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } 
+        public long Id { get; set; }
 
         [Required]
         public string UserId { get; set; }
-        public virtual AppUser User { get; set; }
-
+        [Required]
         public long MapId { get; set; }
-        public virtual Map Map { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime DateTime { get; set; } = DateTime.Now;
+        public DateTimeOffset DateTime { get; set; } = DateTimeOffset.Now;
     }
 }

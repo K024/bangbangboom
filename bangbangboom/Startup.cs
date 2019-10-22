@@ -113,6 +113,8 @@ namespace bangbangboom
 
             services.AddSingleton<MediaFileProcessor>();
 
+            services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, ScheduedTaskService>();
+
             ConfiureProductionServices(services);
 
             services.AddSwaggerGen(c =>
@@ -159,6 +161,7 @@ namespace bangbangboom
             }
 
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
             app.UseStaticFiles();
 
             if (env.IsDevelopment())
@@ -181,7 +184,7 @@ namespace bangbangboom
                 else
                     await next();
             });
-            app.UseSpa(config => { });
+            // app.UseSpa(config => { });
 
             dbContext.Database.Migrate();
         }

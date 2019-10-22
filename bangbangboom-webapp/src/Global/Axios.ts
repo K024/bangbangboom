@@ -1,0 +1,29 @@
+import axios from 'axios'
+import qs from 'qs'
+import { setMessage } from './Snackbar'
+
+export const Api = axios.create({
+    baseURL: location.origin + "/api/",
+})
+
+export const GetXSRFHeader = async () => {
+    try {
+        const result = await Api.get<string>('xsrf')
+        Api.defaults.headers.post['X-XSRF-TOKEN'] = result.data;
+    } catch (error) {
+        setMessage("net.error", "error")
+    }
+}
+GetXSRFHeader()
+
+export function Xform(form: object): string {
+    return qs.stringify(form)
+}
+
+export function Form(form: { [k: string]: string | Blob }): FormData {
+    const data = new FormData()
+    for (const key in form) data.append(key, form[key])
+    return data
+}
+
+

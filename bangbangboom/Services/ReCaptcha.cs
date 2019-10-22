@@ -66,23 +66,17 @@ namespace bangbangboom.Services
             public bool success;
             public double score;
             public string action;
-            public DateTime challenge_ts;
+            public DateTimeOffset challenge_ts;
             public string hostname;
             public string[] errorCodes;
         }
 #pragma warning restore CS0649
-
-        public class BanRecord
-        {
-            public DateTime time;
-            public int counter = 0;
-        }
     }
 
     public class ReCaptchaAttribute : Attribute, IAsyncActionFilter, IFilterFactory
     {
         private ReCaptchaService service;
-        private AppDbContext context;
+        // private AppDbContext context;
         public bool IsReusable => false;
 
         private readonly double minScore;
@@ -95,7 +89,7 @@ namespace bangbangboom.Services
         public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
         {
             service = serviceProvider.GetRequiredService<ReCaptchaService>();
-            context = serviceProvider.GetRequiredService<AppDbContext>();
+            // context = serviceProvider.GetRequiredService<AppDbContext>();
             return null;
         }
 

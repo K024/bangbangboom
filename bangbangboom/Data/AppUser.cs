@@ -20,50 +20,23 @@ namespace bangbangboom.Data
         public string WhatsUp { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime Date { get; set; } = DateTime.Now;
-
-        public virtual IList<Music> UploadedMusics { get; set; }
-        public virtual IList<Map> UploadedMaps { get; set; }
-        public virtual IList<Favorite> Favorites { get; set; }
-
+        public DateTimeOffset RegisterDate { get; set; } = DateTime.Now;
     }
 
-    public class AppUserShort
-    {
-        public string username;
-        public string nickname;
-        public string whatsup;
-
-        public static AppUserShort FromAppUser(AppUser u)
-        {
-            return new AppUserShort()
-            {
-                username = u.UserName,
-                nickname = u.NickName ?? u.UserName,
-                whatsup = u.WhatsUp,
-            };
-        }
-    }
-
-    public class AppUserDetailed
+    public class AppUserInfo
     {
         public string username;
         public string nickname;
         public string whatsup;
         public bool hasprofile;
-        public int uploadedmusics;
-        public int uploadedmaps;
-        public static AppUserDetailed FromAppUser(AppUser u)
+        public int? uploadedmaps;
+        // public AppUserInfo() { }
+        public AppUserInfo(AppUser u)
         {
-            return new AppUserDetailed()
-            {
-                username = u.UserName,
-                nickname = u.NickName ?? u.UserName,
-                whatsup = u.WhatsUp ?? "",
-                hasprofile = !string.IsNullOrEmpty(u.ProfileFileHash),
-                uploadedmusics = u.UploadedMusics.AsQueryable().Count(),
-                uploadedmaps = u.UploadedMaps.AsQueryable().Count()
-            };
+            username = u.UserName;
+            nickname = u.NickName;
+            whatsup = u.WhatsUp;
+            hasprofile = u.ProfileFileHash != null;
         }
     }
 }

@@ -254,7 +254,7 @@ namespace UnitTest
 
             var result3 = await client.GetAsync("api/account/current");
             result3.EnsureSuccessStatusCode();
-            var json = JObject.Parse(await result3.Content.ReadAsStringAsync());
+            // var json = JObject.Parse(await result3.Content.ReadAsStringAsync());
             // Assert.AreEqual(email, json["email"]);
         }
 

@@ -24,6 +24,7 @@ namespace bangbangboom.Controllers
     {
         private readonly SignInManager<AppUser> signInManager;
         private readonly UserManager<AppUser> userManager;
+
         public AccountController(
             UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
         {
@@ -61,20 +62,22 @@ namespace bangbangboom.Controllers
                 await userManager.FindByEmailAsync(UserName) :
                 await userManager.FindByNameAsync(UserName);
 
-            if (user is null) return StatusCode(401);
-            var result = await signInManager.PasswordSignInAsync(user, Password, true, true);
+            if (user != null)
+            {
+                var result = await signInManager.PasswordSignInAsync(user, Password, true, true);
 
-            if (result.Succeeded)
-                return Ok();
+                if (result.Succeeded)
+                    return Ok();
 
-            if (result.IsLockedOut)
-                return StatusCode(403, "lockedout" + 
-                    await userManager.GetLockoutEndDateAsync(user));
+                if (result.IsLockedOut)
+                    return StatusCode(403, "Locked out until: " +
+                        await userManager.GetLockoutEndDateAsync(user));
 
-            if (!await userManager.IsEmailConfirmedAsync(user))
-                return StatusCode(403, "emailnotconfirmed");
+                if (result.IsNotAllowed)
+                    return StatusCode(403, "Email not confirmed.");
+            }
 
-            return StatusCode(401);
+            return StatusCode(401, "Username or password wrong.");
         }
 
         [Authorize]
@@ -97,7 +100,7 @@ namespace bangbangboom.Controllers
                 _ = sender.SendResetPasswordEmailAsync(Email, user.UserName, user.Id, token);
                 return Ok();
             }
-            return StatusCode(401);
+            return StatusCode(401, "No such user.");
         }
 
         [HttpPost]
@@ -107,14 +110,14 @@ namespace bangbangboom.Controllers
             [FromForm][Required][MaxLength(20)] string NewPassword)
         {
             var user = await userManager.FindByIdAsync(Guid);
-            if (user is null) return StatusCode(401);
+            if (user is null) return StatusCode(401, "No such user.");
             var result = await userManager.ResetPasswordAsync(user, Token, NewPassword);
             if (result.Succeeded)
             {
                 await signInManager.SignInAsync(user, true);
                 return Ok();
             }
-            return StatusCode(401);
+            return StatusCode(401, "Token not valid.");
         }
 
         [HttpPost]
@@ -144,15 +147,15 @@ namespace bangbangboom.Controllers
             {
                 var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
                 _ = sender.SendRegisterConfirmEmailAsync(Email, id, token);
-                DeleteIfNotConfirmedAfter2h(user.Id);
                 return Ok();
             }
-            return StatusCode(401);
+            return StatusCode(401, "Create user failed.");
         }
 
 
         [HttpPost]
         public async Task<object> TestUserName(
+            [RegularExpression(@"^[A-Za-z][A-Za-z0-9_]{3,20}$")]
             [FromForm][Required] string UserName)
         {
             var user = await userManager.FindByNameAsync(UserName);
@@ -165,15 +168,17 @@ namespace bangbangboom.Controllers
         public async Task<object> ConfirmEmail(
             [FromForm][Required] string Guid,
             [FromForm][Required] string Token,
-            [FromForm][Required][MaxLength(20)] string UserName,
-            [FromForm][Required][MaxLength(20)] string Password,
+            [RegularExpression(@"^[A-Za-z][A-Za-z0-9_]{3,20}$")]
+            [FromForm][Required] string UserName,
+            [RegularExpression(@"^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)[\x00-\xff]{8,20}$")]
+            [FromForm][Required] string Password,
             [FromServices] AppDbContext appDbContext)
         {
-            if (!Regex.IsMatch(UserName, "^[A-Za-z][A-Za-z0-9_]{3,}$")) return StatusCode(401);
             using (var transaction = appDbContext.Database.BeginTransaction())
             {
                 var user = await userManager.FindByIdAsync(Guid);
-                if (user is null) return StatusCode(401);
+                if (user is null) return StatusCode(401, "No such user.");
+                if (user.EmailConfirmed) return StatusCode(401, "Email already confirmed.");
                 var result = await userManager.ConfirmEmailAsync(user, Token);
                 while (result.Succeeded)
                 {
@@ -187,22 +192,8 @@ namespace bangbangboom.Controllers
                     return Ok();
                 }
                 transaction.Rollback();
-                return StatusCode(401);
+                return StatusCode(401, "Confirm email failed.");
             }
-        }
-
-        [NonAction]
-        private void DeleteIfNotConfirmedAfter2h(string guid)
-        {
-            Task.Run(async () =>
-            {
-                await Task.Delay(TimeSpan.FromHours(2));
-                var user = await userManager.FindByIdAsync(guid);
-                if (user != null && !await userManager.IsEmailConfirmedAsync(user))
-                {
-                    await userManager.DeleteAsync(user);
-                }
-            });
         }
     }
 }

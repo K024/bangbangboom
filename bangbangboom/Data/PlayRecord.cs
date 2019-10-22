@@ -12,13 +12,12 @@ namespace bangbangboom.Data
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; } 
 
+        [MaxLength(100)]
         public string UserId { get; set; }
-        public virtual AppUser User { get; set; }
 
         public long MapId { get; set; }
-        public virtual Map Map { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime DateTime { get; set; } = DateTime.Now;
+        public DateTimeOffset DateTime { get; set; } = DateTimeOffset.Now;
     }
 }

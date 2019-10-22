@@ -2,11 +2,26 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-  <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
+  <meta charset="utf-8" />
+  <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#e0e0e0" />
+  <meta name="description" content="bangbangboom - Community for Bang Dreamers" />
+  <link rel="apple-touch-icon" href="favicon192.png" />
+  <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+  <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
   <title>bangbangboom</title>
   <style>
     [loader].loader {
@@ -14,13 +29,11 @@
       margin: 0 auto;
       width: 100px;
     }
-
     [loader].loader:before {
       content: "";
       display: block;
       padding-top: 100%;
     }
-
     [loader].circular {
       -webkit-animation: loader-rotate 2s linear infinite;
       animation: loader-rotate 2s linear infinite;
@@ -36,7 +49,6 @@
       right: 0;
       margin: auto;
     }
-
     [loader].path {
       stroke-dasharray: 1, 200;
       stroke-dashoffset: 0;
@@ -44,97 +56,78 @@
       animation: loader-dash 1.5s ease-in-out infinite, loader-color 6s ease-in-out infinite;
       stroke-linecap: round;
     }
-
     @-webkit-keyframes loader-rotate {
       100% {
         -webkit-transform: rotate(360deg);
         transform: rotate(360deg);
       }
     }
-
     @keyframes loader-rotate {
       100% {
         -webkit-transform: rotate(360deg);
         transform: rotate(360deg);
       }
     }
-
     @-webkit-keyframes loader-dash {
       0% {
         stroke-dasharray: 1, 200;
         stroke-dashoffset: 0;
       }
-
       50% {
         stroke-dasharray: 89, 200;
         stroke-dashoffset: -35px;
       }
-
       100% {
         stroke-dasharray: 89, 200;
         stroke-dashoffset: -124px;
       }
     }
-
     @keyframes loader-dash {
       0% {
         stroke-dasharray: 1, 200;
         stroke-dashoffset: 0;
       }
-
       50% {
         stroke-dasharray: 89, 200;
         stroke-dashoffset: -35px;
       }
-
       100% {
         stroke-dasharray: 89, 200;
         stroke-dashoffset: -124px;
       }
     }
-
     @-webkit-keyframes loader-color {
-
       100%,
       0% {
         stroke: #d62d20;
       }
-
       40% {
         stroke: #0057e7;
       }
-
       66% {
         stroke: #008744;
       }
-
       80%,
       90% {
         stroke: #ffa700;
       }
     }
-
     @keyframes loader-color {
-
       100%,
       0% {
         stroke: #d62d20;
       }
-
       40% {
         stroke: #0057e7;
       }
-
       66% {
         stroke: #008744;
       }
-
       80%,
       90% {
         stroke: #ffa700;
       }
     }
-
     [loader].showbox {
       display: -webkit-box;
       display: -ms-flexbox;
@@ -151,14 +144,13 @@
       align-items: center;
       height: 80vh;
     }
-
     [loader].text {
       margin: 20px;
       font-size: 20px;
       font-weight: bold;
       color: darkgray;
     }
-  </style>
+    </style>
 </head>
 
 <body>
@@ -170,13 +162,18 @@
     </div>
     <div loader class="text">bangbangboom loading...</div>
   </div>
-  <noscript>
-    <strong>We're sorry but bangbangboom doesn't work properly without JavaScript enabled. Please enable it to
-      continue.</strong>
-  </noscript>
-  <div id="app"></div>
-  <script src="https://www.recaptcha.net/recaptcha/api.js?render=6LdBd7MUAAAAAPIvH-Yx5-UrFJ1bS7D5HZbqptQQ"></script>
-  <!-- built files will be auto injected -->
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
 </body>
 
 </html>

@@ -17,7 +17,7 @@ namespace bangbangboom.Services
     {
         private readonly IEmailSender sender;
 
-        public EmailSender(IHostingEnvironment env, IConfiguration config)
+        public EmailSender(IConfiguration config)
         {
             IEmailSenderExtentions.Domain = config["Domain"] ?? "localhost";
             var cfg = config.GetSection("SMTP");

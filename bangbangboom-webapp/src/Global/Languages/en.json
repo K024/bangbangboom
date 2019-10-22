@@ -1,0 +1,21 @@
+{
+  "app.hello": "Hello",
+  "menu.search": "Search",
+  "menu.ranking": "Ranking",
+  "menu.favorites": "Favorites",
+  "menu.mapping": "Mapping",
+  "menu.settings": "Settings",
+  "menu.profile": "Profile",
+  "menu.mymaps": "My maps",
+  "menu.reviewings": "Reviewings",
+  "menu.users": "Users",
+  "menu.allmaps": "All maps",
+  "menu.meta": "Meta",
+  "menu.timing": "Timing",
+  "label.usernameemail": "User name / Email",
+  "label.password": "Password",
+  "label.login": "Login",
+  "label.register": "Register",
+  "label.forgotpass": "Forgot password",
+  "error.neterr": "Network error!"
+}
