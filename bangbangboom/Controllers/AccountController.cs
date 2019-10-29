@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
 namespace bangbangboom.Controllers
@@ -24,34 +25,26 @@ namespace bangbangboom.Controllers
     {
         private readonly SignInManager<AppUser> signInManager;
         private readonly UserManager<AppUser> userManager;
+        private readonly IEmailSender sender;
+        private readonly IMemoryCache cache;
 
         public AccountController(
-            UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+            UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
+            IEmailSender sender, IMemoryCache cache)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
+            this.sender = sender;
+            this.cache = cache;
         }
 
-        public class UserInfo
+        private readonly Random random = new Random();
+
+        [NonAction]
+        private string RandToken()
         {
-            public string username;
-            public string email;
-            public IList<string> roles;
+            return random.Next(1000000, 2000000).ToString().Substring(1);
         }
-
-        [Authorize]
-        [HttpGet]
-        public async Task<object> Current()
-        {
-            var user = await userManager.GetUserAsync(User);
-            return new UserInfo
-            {
-                username = user.UserName,
-                email = user.Email,
-                roles = await userManager.GetRolesAsync(user)
-            };
-        }
-
 
         [HttpPost]
         public async Task<object> Login(
@@ -72,9 +65,6 @@ namespace bangbangboom.Controllers
                 if (result.IsLockedOut)
                     return StatusCode(403, "Locked out until: " +
                         await userManager.GetLockoutEndDateAsync(user));
-
-                if (result.IsNotAllowed)
-                    return StatusCode(403, "Email not confirmed.");
             }
 
             return StatusCode(401, "Username or password wrong.");
@@ -90,34 +80,49 @@ namespace bangbangboom.Controllers
 
         [HttpPost]
         public async Task<object> ForgotPassword(
-            [FromForm][Required] string Email,
-            [FromServices] IEmailSender sender)
+            [FromForm][Required] string Email)
         {
             var user = await userManager.FindByEmailAsync(Email);
             if (user != null)
             {
-                var token = await userManager.GeneratePasswordResetTokenAsync(user);
-                _ = sender.SendResetPasswordEmailAsync(Email, user.UserName, user.Id, token);
-                return Ok();
+                var key = "ResetPassword:" + Email;
+                if (cache.TryGetValue(key, out _))
+                {
+                    return StatusCode(403, "Sent too many emails.");
+                }
+                else
+                {
+                    var token = RandToken();
+                    cache.Set(key, token, DateTimeOffset.Now + TimeSpan.FromHours(2));
+                    await sender.SendTokenEmailAsync(Email, token);
+                    return Ok();
+                }
             }
             return StatusCode(401, "No such user.");
         }
 
         [HttpPost]
         public async Task<object> ResetPassword(
-            [FromForm][Required] string Guid,
+            [FromForm][Required] string Email,
             [FromForm][Required] string Token,
             [FromForm][Required][MaxLength(20)] string NewPassword)
         {
-            var user = await userManager.FindByIdAsync(Guid);
+            var key = "ResetPassword:" + Email;
+            if (!cache.TryGetValue(key, out string token))
+                return StatusCode(401, "Invalid token.");
+            else if (token != Token)
+                return StatusCode(401, "Invalid token.");
+            cache.Remove(key);
+
+            var user = await userManager.FindByEmailAsync(Email);
             if (user is null) return StatusCode(401, "No such user.");
-            var result = await userManager.ResetPasswordAsync(user, Token, NewPassword);
-            if (result.Succeeded)
+            if ((await userManager.RemovePasswordAsync(user)).Succeeded &&
+                (await userManager.AddPasswordAsync(user, NewPassword)).Succeeded)
             {
                 await signInManager.SignInAsync(user, true);
                 return Ok();
             }
-            return StatusCode(401, "Token not valid.");
+            return StatusCode(401, "Reset password failed.");
         }
 
         [HttpPost]
@@ -131,25 +136,23 @@ namespace bangbangboom.Controllers
         }
 
         [HttpPost]
-        public async Task<object> Register(
-            [FromForm][Required] string Email,
-            [FromServices] IEmailSender sender)
+        public async Task<object> SendRegisterEmail(
+            [FromForm][Required] string Email)
         {
-            var id = Guid.NewGuid().ToString();
-            var user = new AppUser()
+            var user = await userManager.FindByEmailAsync(Email);
+            if (user != null) return StatusCode(403, "Email has been registered.");
+            var key = "Register:" + Email;
+            if (cache.TryGetValue(key, out _))
             {
-                Id = id,
-                UserName = id.Replace('-', '_'),
-                Email = Email,
-            };
-            var result = await userManager.CreateAsync(user);
-            if (result.Succeeded)
+                return StatusCode(403, "Sent too many emails.");
+            }
+            else
             {
-                var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                _ = sender.SendRegisterConfirmEmailAsync(Email, id, token);
+                var token = RandToken();
+                cache.Set(key, token, DateTimeOffset.Now + TimeSpan.FromHours(2));
+                await sender.SendTokenEmailAsync(Email, token);
                 return Ok();
             }
-            return StatusCode(401, "Create user failed.");
         }
 
 
@@ -165,35 +168,34 @@ namespace bangbangboom.Controllers
         }
 
         [HttpPost]
-        public async Task<object> ConfirmEmail(
-            [FromForm][Required] string Guid,
+        public async Task<object> Register(
+            [FromForm][Required] string Email,
             [FromForm][Required] string Token,
             [RegularExpression(@"^[A-Za-z][A-Za-z0-9_]{3,20}$")]
             [FromForm][Required] string UserName,
             [RegularExpression(@"^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)[\x00-\xff]{8,20}$")]
-            [FromForm][Required] string Password,
-            [FromServices] AppDbContext appDbContext)
+            [FromForm][Required] string Password)
         {
-            using (var transaction = appDbContext.Database.BeginTransaction())
+            var key = "Register:" + Email;
+            if (!cache.TryGetValue(key, out string token)) 
+                return StatusCode(401, "Invalid token.");
+            else if (token != Token)
+                return StatusCode(401, "Invalid token.");
+            cache.Remove(key);
+
+            var user = new AppUser()
             {
-                var user = await userManager.FindByIdAsync(Guid);
-                if (user is null) return StatusCode(401, "No such user.");
-                if (user.EmailConfirmed) return StatusCode(401, "Email already confirmed.");
-                var result = await userManager.ConfirmEmailAsync(user, Token);
-                while (result.Succeeded)
-                {
-                    var result2 = await userManager.SetUserNameAsync(user, UserName);
-                    if (!result2.Succeeded) break;
-                    var result3 = await userManager.AddPasswordAsync(user, Password);
-                    if (!result3.Succeeded) break;
-                    await signInManager.SignInAsync(user, true);
-                    await appDbContext.SaveChangesAsync();
-                    transaction.Commit();
-                    return Ok();
-                }
-                transaction.Rollback();
-                return StatusCode(401, "Confirm email failed.");
+                Id = Guid.NewGuid().ToString(),
+                UserName = UserName,
+                Email = Email,
+            };
+            var result1 = await userManager.CreateAsync(user, Password);
+            if (!result1.Succeeded)
+            {
+                return StatusCode(401, "Create user failed.");
             }
+            await signInManager.SignInAsync(user, true);
+            return Ok();
         }
     }
 }

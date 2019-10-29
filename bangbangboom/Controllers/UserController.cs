@@ -21,31 +21,32 @@ namespace bangbangboom.Controllers
     public partial class UserController : ControllerBase
     {
         private readonly UserManager<AppUser> userManager;
+        private readonly AppDbContext context;
+        private readonly HashFileProvider fileProvider;
         public UserController(
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager, AppDbContext context, HashFileProvider provider)
         {
             this.userManager = userManager;
+            this.context = context;
+            fileProvider = provider;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<object> Me()
         {
             var user = await userManager.GetUserAsync(User);
-            return new
+
+            if (user is null) return StatusCode(204);
+
+            return new AppUserInfo(user)
             {
-                username = user.UserName,
-                nickname = user.NickName,
-                whatsup = user.WhatsUp,
-                hasprofile = user.ProfileFileHash != null,
-                roles = await userManager.GetRolesAsync(user),
+                roles = (await userManager.GetRolesAsync(user)).ToArray(),
             };
         }
 
         [HttpGet]
         public async Task<object> Info(
-            [FromForm][Required]string username,
-            [FromServices] AppDbContext context)
+            [FromForm][Required]string username)
         {
             var userq =
                 from u in context.Users
@@ -65,8 +66,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> SetNickName(
-            [FromForm][MaxLength(20)] string nickname,
-            [FromServices] AppDbContext context)
+            [FromForm][MaxLength(20)] string nickname)
         {
             var user = await userManager.GetUserAsync(User);
             nickname = nickname?.Trim();
@@ -80,8 +80,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> SetWhatsUp(
-            [FromForm][MaxLength(300)] string whatsup,
-            [FromServices] AppDbContext context)
+            [FromForm][MaxLength(300)] string whatsup)
         {
             var user = await userManager.GetUserAsync(User);
             user.WhatsUp = whatsup;
@@ -91,8 +90,7 @@ namespace bangbangboom.Controllers
 
         [HttpGet("{username}.{ext?}")]
         public async Task<object> Profile(
-            [Required]string username,
-            [FromServices] HashFileProvider fileProvider)
+            [Required]string username)
         {
             var user = await userManager.FindByNameAsync(username);
             var hash = user?.ProfileFileHash;
@@ -114,8 +112,6 @@ namespace bangbangboom.Controllers
         [HttpPost]
         public async Task<object> UploadProfile(
             [Required] IFormFile file,
-            [FromServices] HashFileProvider fileProvider,
-            [FromServices] AppDbContext context,
             [FromServices] MediaFileProcessor processor)
         {
             if (!processor.TryProcessImage(file.OpenReadStream(), out var jpg,

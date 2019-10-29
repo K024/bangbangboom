@@ -16,8 +16,7 @@ namespace bangbangboom.Controllers
 
         [HttpGet("{id}.{ext?}")]
         public async Task<object> Content(
-            [Required]long id,
-            [FromServices] AppDbContext context)
+            [Required]long id)
         {
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
@@ -34,9 +33,7 @@ namespace bangbangboom.Controllers
 
         [HttpGet("{id}.{ext?}")]
         public async Task<object> Image(
-            [Required]long id,
-            [FromServices] AppDbContext context,
-            [FromServices] HashFileProvider fileProvider)
+            [Required]long id)
         {
             var map = await context.Maps.FindAsync(id);
             if (map is null || map.ImageFileHashAndType is null) return StatusCode(404);
@@ -61,9 +58,7 @@ namespace bangbangboom.Controllers
         }
         [HttpGet("{id}.{ext?}")]
         public async Task<object> Music(
-            [Required] long id,
-            [FromServices] AppDbContext context,
-            [FromServices] HashFileProvider fileProvider)
+            [Required] long id)
         {
             var map = await context.Maps.FindAsync(id);
             if (map is null || map.MusicHash is null) return StatusCode(404);

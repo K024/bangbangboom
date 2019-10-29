@@ -23,16 +23,20 @@ namespace bangbangboom.Controllers
     {
 
         private readonly UserManager<AppUser> userManager;
+        private readonly AppDbContext context;
+        private readonly HashFileProvider fileProvider;
         public MapController(
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager,
+            AppDbContext context, HashFileProvider fileProvider)
         {
             this.userManager = userManager;
+            this.context = context;
+            this.fileProvider = fileProvider;
         }
 
         [HttpGet]
         public async Task<object> Info(
-            [FromQuery][Required]long id,
-            [FromServices] AppDbContext context)
+            [FromQuery][Required]long id)
         {
             var map = await (
                 from m in context.Maps
@@ -63,8 +67,7 @@ namespace bangbangboom.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<object> Add(
-            [FromServices] AppDbContext context)
+        public async Task<object> Add()
         {
             var user = await userManager.GetUserAsync(User);
             var count = await (
@@ -96,9 +99,7 @@ namespace bangbangboom.Controllers
             [FromForm][MaxLength(400)] string description,
             [FromForm] string content,
             IFormFile image,
-            IFormFile music,
-            [FromServices] HashFileProvider fileProvider,
-            [FromServices] AppDbContext context)
+            IFormFile music)
         {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
@@ -150,8 +151,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Delete(
-            [FromForm][Required] long id,
-            [FromServices] AppDbContext context)
+            [FromForm][Required] long id)
         {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);

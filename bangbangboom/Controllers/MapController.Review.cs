@@ -18,8 +18,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Publish(
-            [FromForm][Required]long id,
-            [FromServices] AppDbContext context)
+            [FromForm][Required]long id)
         {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
@@ -36,8 +35,7 @@ namespace bangbangboom.Controllers
         public async Task<object> Review(
             [FromForm][Required] long id,
             [FromForm] bool? pass,
-            [FromForm] bool? proved,
-            [FromServices] AppDbContext context)
+            [FromForm] bool? proved)
         {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
@@ -62,8 +60,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Recall(
-            [FromForm][Required]long id,
-            [FromServices] AppDbContext context)
+            [FromForm][Required]long id)
         {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);

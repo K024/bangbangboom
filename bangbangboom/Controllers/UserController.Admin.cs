@@ -28,8 +28,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpGet]
         public async Task<object> All(
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
+            [FromQuery][Range(1, 10000)] int? page)
         {
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Admin))

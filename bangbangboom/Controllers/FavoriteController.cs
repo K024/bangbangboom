@@ -20,16 +20,18 @@ namespace bangbangboom.Controllers
     public class FavoriteController : ControllerBase
     {
         private readonly UserManager<AppUser> userManager;
+        private readonly AppDbContext context;
         public FavoriteController(
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager, AppDbContext context)
         {
             this.userManager = userManager;
+            this.context = context;
         }
 
         [Authorize]
         [HttpGet]
         public async Task<object> All(
-            [FromServices] AppDbContext context)
+            [FromQuery][Range(1, 10000)] int? page)
         {
             var user = await userManager.GetUserAsync(User);
             var favoritesq =
@@ -49,14 +51,13 @@ namespace bangbangboom.Controllers
                         where fa.MapId == m.Id
                         select 1).Count(),
                 };
-            return await favoritesq.ToListAsync();
+            return await favoritesq.Page(page ?? 1).ToListAsync();
         }
 
         [Authorize]
         [HttpPost]
         public async Task<object> Add(
-            [FromForm][Required] long MapId,
-            [FromServices] AppDbContext context)
+            [FromForm][Required] long MapId)
         {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(MapId);
@@ -70,8 +71,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Remove(
-            [FromForm][Required] long MapId,
-            [FromServices] AppDbContext context)
+            [FromForm][Required] long MapId)
         {
             var user = await userManager.GetUserAsync(User);
             var favorite = await (

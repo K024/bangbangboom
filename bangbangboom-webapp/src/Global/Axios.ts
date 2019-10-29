@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 import { setMessage } from './Snackbar'
 
@@ -24,6 +24,13 @@ export function Form(form: { [k: string]: string | Blob }): FormData {
     const data = new FormData()
     for (const key in form) data.append(key, form[key])
     return data
+}
+
+export function HandleErr<T>(err: AxiosError<T>) {
+    if (!err.response) {
+        return
+    }
+    return err.response
 }
 
 

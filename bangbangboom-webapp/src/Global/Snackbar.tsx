@@ -60,13 +60,14 @@ export function setMessage(message: string, type = "info" as keyof typeof varian
   Message.open = true
 }
 
+const handleClose = (event: React.SyntheticEvent | React.MouseEvent, reason?: string) => {
+  if (reason === 'clickaway') return
+  Message.open = false
+};
+
 export const GlobalSnackbar = () => {
 
   const classes = useStyles();
-  const handleClose = (event: React.SyntheticEvent | React.MouseEvent, reason?: string) => {
-    if (reason === 'clickaway') return
-    Message.open = false
-  };
   const Icon = variantIcon[Message.type]
 
   return useObserver(() => (

@@ -1,5 +1,5 @@
 import React, { ReactNode, useRef, useState } from "react"
-import { Box, makeStyles, Menu, MenuItem, Typography, ButtonBase, IconButton, Avatar, Fade, /*Popover*/ } from "@material-ui/core"
+import { Box, makeStyles, Menu, MenuItem, Typography, ButtonBase, IconButton, Avatar, Fade, Popover } from "@material-ui/core"
 import MenuIcon from "@material-ui/icons/Menu"
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIosOutlined';
@@ -9,7 +9,7 @@ import { FormattedMessage } from "react-intl"
 import { useHistory } from "react-router"
 import { Locale } from "../Global/Locale"
 import { mediaQuery } from "../Global/Theme"
-// import { LoginForm } from "./Components/LoginForm";
+import { LoginForm } from "./Components/LoginForm";
 
 const useStyles = makeStyles(theme => ({
   header: {
@@ -122,7 +122,6 @@ const LangMenu = () => {
     </Menu></>)
 }
 
-/*
 const LoginMenu = () => {
   const classes = useStyles()
   const loginBtn = useRef<HTMLButtonElement>(null)
@@ -139,7 +138,6 @@ const LoginMenu = () => {
       </Box>
     </Popover></>)
 }
-*/
 
 export const HomeFrame = ({ children = {} as ReactNode }) => {
   const classes = useStyles()
@@ -167,7 +165,7 @@ export const HomeFrame = ({ children = {} as ReactNode }) => {
             </Box>
             <Box display="flex" right="0" height="100%" position="absolute">
               <LangMenu />
-              {/* <LoginMenu /> */}
+              <LoginMenu />
               <Box className={classes.menuItem}>
                 <IconButton classes={{ root: classes.iconbtn }} onClick={() => direct("/dashboard")}>
                   <Avatar style={{ background: "#808080" }}>C</Avatar>

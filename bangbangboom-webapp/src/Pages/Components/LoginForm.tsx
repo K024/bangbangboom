@@ -1,11 +1,15 @@
 import React, { useState } from "react"
 import { useObserver } from "mobx-react-lite"
 import { makeStyles } from "@material-ui/core"
-import { TextField, Box, Button, CircularProgress } from "@material-ui/core"
+import { TextField, Box, Button } from "@material-ui/core"
 import { FormattedMessage } from "react-intl"
 import { PasswordField } from "./PasswordFiled"
-import { useObservableForm } from "../../Global/UseObservableForm"
+import { useObservableForm, FormValue } from "../../Global/UseObservableForm"
 import { useHistory } from "react-router"
+import { ButtonProgress } from "./CoverProgress"
+import { LoadCurrentUser } from "../UserState"
+import { setMessage } from "../../Global/Snackbar"
+import { Api, HandleErr, Xform } from "../../Global/Axios"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -13,29 +17,23 @@ const useStyles = makeStyles(theme => ({
       margin: theme.spacing(0.5)
     }
   },
-  buttonProgress: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    marginTop: -12,
-    marginLeft: -12
-  },
 }))
 
 export const LoginForm = ({ onClose = () => { } }) => {
 
   const classes = useStyles()
 
-  const { form, formValid } = useObservableForm({
+  const { form, formValid } = useObservableForm(() => ({
     username: {
       required: true,
     },
     password: {
       required: true,
     },
-  })
+  }))
 
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   const history = useHistory()
 
@@ -44,12 +42,26 @@ export const LoginForm = ({ onClose = () => { } }) => {
     onClose()
   }
 
-  const login = () => {
+  const login = async () => {
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
+    try {
+      await Api.post("account/login", Xform(FormValue(form)))
+      await LoadCurrentUser()
+      setSuccess(true)
       onClose()
-    }, 2000)
+    } catch (error) {
+      const res = HandleErr<string>(error)
+      if (!res)
+        setMessage("error.neterr", "error")
+      else {
+        const s = res.data.toLowerCase()
+        if (s.startsWith("locked out"))
+          setMessage("user.lockedout", "error")
+        else if (s.startsWith("username or password wrong"))
+          setMessage("user.usernamepasswrong", "error")
+      }
+    }
+    setLoading(false)
   }
 
   return useObserver(() => (
@@ -62,13 +74,12 @@ export const LoginForm = ({ onClose = () => { } }) => {
         label={<FormattedMessage id="label.password" />}
         {...form.password}>
       </PasswordField>
-      <Box position="relative">
-        <Button variant="contained" color="primary" disabled={!formValid || loading}
+      <ButtonProgress position="relative" loading={loading}>
+        <Button variant="contained" color="primary" disabled={!formValid || loading || success}
           onClick={login} fullWidth>
           <FormattedMessage id="label.login" />
         </Button>
-        {loading && <CircularProgress size={24} className={classes.buttonProgress} />}
-      </Box>
+      </ButtonProgress>
       <Box display="flex" justifyContent="space-around">
         <Button onClick={() => handleForward("/register")}><FormattedMessage id="label.register" /></Button>
         <Button onClick={() => handleForward("/forgotpass")}><FormattedMessage id="label.forgotpass" /></Button>

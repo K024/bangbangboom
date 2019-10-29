@@ -1,4 +1,5 @@
 import { useLocalStore, useComputed } from "mobx-react-lite"
+import { useEffect, useState } from "react"
 
 export type FormDescription<K extends string> = Record<K, {
   value?: string
@@ -14,24 +15,26 @@ export type FormProps = {
   required?: boolean
 }
 
-export function useObservableForm<K extends string>(description: FormDescription<K>) {
+export function useObservableForm<K extends string>(descriptionFunc: () => FormDescription<K>) {
   const form = useLocalStore(() => {
+    const description = descriptionFunc()
     const ret = {} as Record<K, FormProps>
     for (const key in description) {
 
-      const validator = description[key].validator
+      const { validator, value, required } = description[key]
 
       ret[key] = {
-        value: description[key].value || "",
+        value: value || "",
         error: false,
-        required: description[key].required,
+        required: required,
         helperText: validator ? " " : null,
         onChange: e => {
           const field = form[key]
-          field.value = e.target.value
+          const value = e.target.value
+          field.value = value
           if (validator) {
-            const res = validator(e.target.value)
-            if (res === true || !e.target.value) {
+            const res = validator(value)
+            if (res === true || !value) {
               field.error = false
               field.helperText = " "
             } else {
@@ -49,7 +52,7 @@ export function useObservableForm<K extends string>(description: FormDescription
   const formValid = useComputed(() => {
     for (const key in form) {
       if (form[key].error) return false
-      if (description[key].required && !form[key].value) return false
+      if (form[key].required && !form[key].value) return false
     }
     return true
   })
@@ -58,5 +61,42 @@ export function useObservableForm<K extends string>(description: FormDescription
     form,
     formValid
   }
+}
+
+export function FormValue<K extends string>(form: Record<K, FormProps>) {
+  const ret = {} as Record<K, string>
+  for (const key in form) {
+    ret[key] = form[key].value
+  }
+  return ret
+}
+
+export type checkstate = "notchecking" | "checking" | "valid" | "invalid"
+
+export function useAsyncCheck<T>(
+  value: T,
+  shoudCheck: (v: T) => boolean,
+  check: (v: T, callback: (res: boolean) => void) => void,
+  deps?: readonly any[]) {
+
+  const [status, setStatus] = useState("notchecking" as checkstate)
+
+  useEffect(() => {
+    let valid = true
+    if (!shoudCheck(value)) {
+      setStatus("notchecking")
+    } else {
+      setStatus("checking")
+      check(value, v => {
+        if (valid) {
+          if (v) setStatus("valid")
+          else setStatus("invalid")
+        }
+      })
+    }
+    return () => { valid = false }
+  }, deps)
+
+  return status
 }
 

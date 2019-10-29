@@ -29,6 +29,7 @@ namespace bangbangboom.Data
         public string nickname;
         public string whatsup;
         public bool hasprofile;
+        public string[] roles;
         public int? uploadedmaps;
         // public AppUserInfo() { }
         public AppUserInfo(AppUser u)

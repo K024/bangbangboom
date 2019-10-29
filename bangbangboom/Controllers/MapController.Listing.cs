@@ -17,9 +17,9 @@ namespace bangbangboom.Controllers
         [HttpGet]
         public object Search(
             [FromQuery][Required][MaxLength(50)] string key,
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
+            [FromQuery][Range(1, 10000)] int? page)
         {
+            if (string.IsNullOrEmpty(key)) return StatusCode(401);
             var maps =
                from m in context.Maps
                join u in context.Users on m.UploaderId equals u.Id
@@ -46,8 +46,7 @@ namespace bangbangboom.Controllers
 
         [HttpGet]
         public object Latest(
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
+            [FromQuery][Range(1, 10000)] int? page)
         {
             var maps =
                from m in context.Maps
@@ -72,8 +71,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpGet]
         public async Task<object> Reviewings(
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
+            [FromQuery][Range(1, 10000)] int? page)
         {
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Reviewer))
@@ -93,8 +91,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpGet]
         public async Task<object> All(
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
+            [FromQuery][Range(1, 10000)] int? page)
         {
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Admin))

@@ -67,8 +67,6 @@ namespace bangbangboom
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
                 options.User.RequireUniqueEmail = true;
-
-                options.SignIn.RequireConfirmedEmail = true;
             });
 
             services.Configure<SecurityStampValidatorOptions>(options =>

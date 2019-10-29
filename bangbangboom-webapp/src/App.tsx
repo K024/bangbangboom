@@ -5,7 +5,6 @@ import { LocaleProvider } from './Global/Locale';
 import { HomeFrame } from './Pages/HomeFrame';
 import { DashboardFrame } from './Pages/DashboardFrame';
 import { GlobalSnackbar } from './Global/Snackbar';
-import { ProgressBar } from './Global/Progress';
 import { Home } from './Pages/MainPages/Home';
 import { ThemeProvider } from '@material-ui/styles';
 import { theme } from './Global/Theme';
@@ -51,9 +50,7 @@ const App = () => {
                   <Route path="/favorites">Favorites</Route>
                   <Route path="/settings">Settings</Route>
                   <Route path="/register">Register</Route>
-                  <Route path="/confirmemail">Confirm Email</Route>
                   <Route path="/forgotpass">Forgot Password</Route>
-                  <Route path="/resetpass">Reset Password</Route>
                   <Route path="/map/:id">Map</Route>
                   <Route path="/user/:id">User</Route>
                   <Route path="/pages/:id">Pages</Route>
@@ -63,7 +60,6 @@ const App = () => {
             </Route>
           </Switch>
           <GlobalSnackbar />
-          <ProgressBar />
         </Router>
       </ThemeProvider>
     </LocaleProvider>

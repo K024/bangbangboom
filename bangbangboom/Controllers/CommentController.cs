@@ -18,17 +18,18 @@ namespace bangbangboom.Controllers
     {
 
         private readonly UserManager<AppUser> userManager;
+        private readonly AppDbContext context;
 
         public CommentController(
-            UserManager<AppUser> userManager)
+            UserManager<AppUser> userManager, AppDbContext context)
         {
             this.userManager = userManager;
+            this.context = context;
         }
 
         [HttpGet]
         public async Task<object> Map(
-            [FromQuery][Required] long MapId,
-            [FromServices] AppDbContext context)
+            [FromQuery][Required] long MapId)
         {
             var commentsq =
                 from c in context.Comments
@@ -47,8 +48,7 @@ namespace bangbangboom.Controllers
         public async Task<object> Send(
             [FromForm][Required] long MapId,
             [FromForm] long? ReplyId,
-            [FromForm][Required][MaxLength(200)] string comment,
-            [FromServices] AppDbContext context)
+            [FromForm][Required][MaxLength(200)] string comment)
         {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(MapId);
@@ -72,8 +72,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Delete(
-            [FromForm][Required] long id,
-            [FromServices] AppDbContext context)
+            [FromForm][Required] long id)
         {
             var user = await userManager.GetUserAsync(User);
             var comment = await context.Comments.FindAsync(id);

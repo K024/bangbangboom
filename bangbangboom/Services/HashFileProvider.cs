@@ -32,7 +32,7 @@ namespace bangbangboom.Services
         public HashFileProvider(IOptions<HashFileProviderOptions> option)
         {
             var options = option.Value;
-            hash = options.HashFunc ?? new HMACMD5();
+            hash = options.HashFunc;
             baseDir = Path.GetFullPath(options.BaseDir);
             if (!Directory.Exists(baseDir))
                 Directory.CreateDirectory(baseDir);

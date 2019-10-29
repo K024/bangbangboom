@@ -1,15 +1,63 @@
-import React from "react"
-import { Button } from "@material-ui/core"
-import { Loading } from "../../Global/Progress"
+import React, { useState, useEffect } from "react"
+import { Button, Typography } from "@material-ui/core"
 import { setMessage } from "../../Global/Snackbar"
+import { observable } from "mobx"
+import { MapInfo } from "../../Global/Modals"
+import { Api } from "../../Global/Axios"
+import { MergeListDistinct } from "../../Global/Utils"
+import { useObserver } from "mobx-react-lite"
+import { MapPreviewList } from "../Components/MapItem"
+import { FormattedMessage } from "react-intl"
+import { ButtonProgress } from "../Components/CoverProgress"
+
+const HomePageMaps = observable({
+  maps: [] as MapInfo[],
+  page: 1,
+  nomore: false,
+})
+
+const comparator = (a: MapInfo, b: MapInfo) => {
+  const ta = (a.reviewed && new Date(a.reviewed)) || new Date(0)
+  const tb = (b.reviewed && new Date(b.reviewed)) || new Date(0)
+  return tb.getTime() - ta.getTime()
+}
+
+const LoadPage = async (page = 1) => {
+  try {
+    const res = await Api.get<MapInfo[]>("map/latest", { params: { page } })
+    const list = MergeListDistinct(HomePageMaps.maps, res.data, comparator)
+    HomePageMaps.maps = list
+    if (res.data.length === 0) HomePageMaps.nomore = true
+  } catch (error) {
+    setMessage("error.neterr", "error")
+  }
+}
 
 export const Home = () => {
-  return (<>
-    <Button onClick={() => Loading.loading = true}>Load</Button>
-    <Button onClick={() => Loading.loading = false}>Stop</Button>
-    <Button onClick={() => setMessage("Message")}>Stop</Button>
-    <Button onClick={() => setMessage("Message2", "success")}>Stop</Button>
-    <Button onClick={() => setMessage("Message3", "warning")}>Stop</Button>
-    <Button onClick={() => setMessage("Message3", "error")}>Stop</Button>
-  </>)
+
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    LoadPage(1)
+    setLoading(false)
+  })
+
+  const LoadMore = async () => {
+    setLoading(true)
+    HomePageMaps.page++
+    await LoadPage(HomePageMaps.page)
+    setLoading(false)
+  }
+
+  return useObserver(() => (<>
+    <Typography variant="h2">Home</Typography>
+    <MapPreviewList maps={HomePageMaps.maps} />
+    {!HomePageMaps.nomore &&
+      <ButtonProgress loading={loading} m={1}>
+        <Button onClick={LoadMore} disabled={loading} fullWidth>
+          <FormattedMessage id="home.loadmore" />
+        </Button>
+      </ButtonProgress>}
+  </>))
 }
