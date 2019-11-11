@@ -1,13 +1,31 @@
-import React, { useState } from "react"
-import { Box, Typography, TextField, Button } from "@material-ui/core"
-import { useObserver } from "mobx-react-lite"
+import React from "react"
+import { Box, Typography, TextField, Button, makeStyles } from "@material-ui/core"
+import { useObserver, useLocalStore } from "mobx-react-lite"
 import { FormattedMessage } from "react-intl"
+// eslint-disable-next-line
 import { useObservableForm, FormValue, useAsyncCheck, checkstate } from "../../Global/UseObservableForm"
-import { UsernameReg, PasswordReg, LoadCurrentUser } from "../UserState"
+import { UsernameReg, PasswordReg, LoadCurrentUser, UserState } from "../UserState"
 import { Api, Xform, HandleErr } from "../../Global/Axios"
 import { setMessage } from "../../Global/Snackbar"
 import { DebounceFunc } from "../../Global/Utils"
 import { ButtonProgress as CoverProgress } from "../Components/CoverProgress"
+import { Redirect } from "react-router"
+import { PasswordField } from "../Components/PasswordFiled"
+
+const useStyles = makeStyles(theme => ({
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    maxWidth: 400,
+    margin: "auto",
+    "&>*": {
+      margin: theme.spacing(1, 0)
+    }
+  },
+  mid: {
+    textAlign: "center"
+  }
+}))
 
 const TestItem = (field: string, path: string) => DebounceFunc(async (value: string, callback: (res: boolean) => void) => {
   try {
@@ -18,29 +36,31 @@ const TestItem = (field: string, path: string) => DebounceFunc(async (value: str
     setMessage("error.neterr", "error")
     callback(false)
   }
-}, 300)
+}, 800)
 
 const TestEmail = TestItem("email", "account/testemail")
 const TestUsername = TestItem("username", "account/testusername")
 
 const emailbtntext = (checkstate: checkstate) => {
   switch (checkstate) {
-    case "checking": return null
-    case "invalid": return <FormattedMessage id="email.registered" />
-    case "notchecking": return null
-    case "valid": return <FormattedMessage id="email.sendemail" />
+    case "checking": return " "
+    case "invalid": return <FormattedMessage id="info.emailregisterd" />
+    case "notchecking": return " "
+    case "valid": return <FormattedMessage id="label.sendemail" />
   }
 }
 const usernametesttext = (checkstate: checkstate) => {
   switch (checkstate) {
     case "checking": return " "
-    case "invalid": return <FormattedMessage id="username.registered" />
+    case "invalid": return <FormattedMessage id="info.usernameregistered" />
     case "notchecking": return " "
-    case "valid": return <FormattedMessage id="username.available" />
+    case "valid": return <FormattedMessage id="info.usernameavailable" />
   }
 }
 
 export const RegisterPage = () => {
+
+  const classes = useStyles()
 
   const { form, formValid } = useObservableForm(() => ({
     email: {
@@ -66,59 +86,67 @@ export const RegisterPage = () => {
   const emailcheck = useAsyncCheck(form.email.value,
     s => !!s && !form.email.error, TestEmail, [form.email.value])
 
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const s = useLocalStore(() => ({
+    loading: false,
+    success: false
+  }))
 
   const Register = async () => {
-    setLoading(true)
+    s.loading = true
     try {
       await Api.post("account/register", Xform(FormValue(form)))
       await LoadCurrentUser()
-      setSuccess(true)
+      s.success = true
+      return
     } catch (error) {
       setMessage("error.neterr", "error")
     }
-    setLoading(false)
+    s.loading = false
   }
 
   const SendEmail = async () => {
-    setLoading(true)
+    s.loading = true
     try {
       await Api.post("account/sendregisteremail", Xform({ email: form.email.value }))
+      setMessage("notice.emailmaynotsent", "success")
     } catch (error) {
       const res = HandleErr(error)
       if (res) setMessage("error.senttoomanyemails", "error")
       else setMessage("error.neterr", "error")
     }
-    setLoading(false)
+    s.loading = false
   }
 
   return useObserver(() => (
     <Box>
-      {success ?
-        <></> :
+      {s.success || UserState.user ?
+        <Redirect to="/"></Redirect> :
         <>
-          <Typography>
-            <FormattedMessage id="notice.emailmaynotsent" />
-          </Typography>
-          <TextField label={<FormattedMessage id="label.email" />} {...form.email} />
-          <CoverProgress loading={emailcheck === "checking"}>
-            <Button disabled={emailcheck !== "valid" || loading}
-              onClick={SendEmail}>
-              {emailbtntext(emailcheck)}
+          <Box m={1} className={classes.mid}>
+            <Typography variant="h5">
+              **&nbsp;<FormattedMessage id="notice.emailmaynotsent" />&nbsp;**
+            </Typography>
+          </Box>
+          <Box p={2} className={classes.form}>
+            <TextField label={<FormattedMessage id="label.email" />} {...form.email} />
+            <CoverProgress loading={emailcheck === "checking"}>
+              <Button disabled={emailcheck !== "valid" || s.loading}
+                onClick={SendEmail} fullWidth>
+                {emailbtntext(emailcheck)}
+              </Button>
+            </CoverProgress>
+            <TextField label={<FormattedMessage id="label.token" />}  {...form.token} />
+            <TextField label={<FormattedMessage id="label.username" />}  {...form.username} />
+            <CoverProgress loading={usernamecheck === "checking"}>
+              <Typography variant="body2">{usernametesttext(usernamecheck)}</Typography>
+            </CoverProgress>
+            <PasswordField label={<FormattedMessage id="label.password" />} {...form.password} />
+            <Button variant="contained"
+              disabled={s.loading || !formValid || usernamecheck !== "valid" || emailcheck !== "valid"}
+              onClick={Register}>
+              <FormattedMessage id="label.submit" />
             </Button>
-          </CoverProgress>
-          <TextField label={<FormattedMessage id="label.token" />}  {...form.token} />
-          <TextField label={<FormattedMessage id="label.username" />}  {...form.username} />
-          <CoverProgress loading={usernamecheck === "checking"}>
-            <Typography>{usernametesttext(usernamecheck)}</Typography>
-          </CoverProgress>
-          <TextField label={<FormattedMessage id="label.password" />} {...form.password} />
-          <Button variant="contained"
-            disabled={loading || !formValid || usernamecheck !== "valid" || emailcheck !== "valid"}
-            onClick={Register}>
-            <FormattedMessage id="label.submit" />
-          </Button>
+          </Box>
         </>}
     </Box>
   ))

@@ -22,9 +22,9 @@ namespace bangbangboom.Controllers
     {
         private readonly UserManager<AppUser> userManager;
         private readonly AppDbContext context;
-        private readonly HashFileProvider fileProvider;
+        private readonly GuidFileProvider fileProvider;
         public UserController(
-            UserManager<AppUser> userManager, AppDbContext context, HashFileProvider provider)
+            UserManager<AppUser> userManager, AppDbContext context, GuidFileProvider provider)
         {
             this.userManager = userManager;
             this.context = context;
@@ -93,14 +93,14 @@ namespace bangbangboom.Controllers
             [Required]string username)
         {
             var user = await userManager.FindByNameAsync(username);
-            var hash = user?.ProfileFileHash;
-            if (hash == null)
+            var fileid = user?.ProfileFileId;
+            if (fileid == null)
                 return StatusCode(404);
             try
             {
-                var fs = fileProvider.GetFileByHash(hash);
+                var fs = fileProvider.GetFileByGuid(fileid);
                 return File(fs, "image/jpeg", null,
-                    EntityTagHeaderValue.Parse(new StringSegment('"' + hash + '"')), true);
+                    EntityTagHeaderValue.Parse(new StringSegment('"' + fileid + '"')), true);
             }
             catch (FileNotFoundException)
             {
@@ -111,17 +111,25 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> UploadProfile(
-            [Required] IFormFile file,
+            IFormFile file,
             [FromServices] MediaFileProcessor processor)
         {
-            if (!processor.TryProcessImage(file.OpenReadStream(), out var jpg,
-                maxsize: 200 * 1024))
-                return StatusCode(400);
             var user = await userManager.GetUserAsync(User);
-            var hash = await fileProvider.SaveFileAsync(jpg);
-            if (user.ProfileFileHash != null)
-                fileProvider.DeleteFile(user.ProfileFileHash);
-            user.ProfileFileHash = hash;
+            if (file != null){
+                if (!processor.TryProcessImage(file.OpenReadStream(), out var jpg,
+                    maxsize: 200 * 1024))
+                    return StatusCode(400);
+                var fileid = await fileProvider.SaveFileAsync(jpg);
+                if (user.ProfileFileId != null)
+                    fileProvider.DeleteFile(user.ProfileFileId);
+                user.ProfileFileId = fileid;
+            }
+            else
+            {
+                if (user.ProfileFileId != null)
+                    fileProvider.DeleteFile(user.ProfileFileId);
+                user.ProfileFileId = null;
+            }
             await context.SaveChangesAsync();
             return Ok();
         }

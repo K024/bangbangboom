@@ -36,10 +36,10 @@ namespace bangbangboom.Data
         public DateTimeOffset? Reviewed { get; set; }
 
         [MaxLength(100)]
-        public string MusicHash { get; set; }
+        public string MusicFileId { get; set; }
         public string MapContent { get; set; }
         [MaxLength(100)]
-        public string ImageFileHashAndType { get; set; }
+        public string ImageFileIdAndType { get; set; }
 
         [Required]
         [MaxLength(10)]
@@ -76,8 +76,8 @@ namespace bangbangboom.Data
             lastmodified = m.LastModified;
             reviewed = m.Reviewed;
             status = m.Status;
-            hasmusic = m.MusicHash != null;
-            hasimage = m.ImageFileHashAndType != null;
+            hasmusic = m.MusicFileId != null;
+            hasimage = m.ImageFileIdAndType != null;
         }
     }
 }

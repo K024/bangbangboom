@@ -21,7 +21,7 @@ namespace bangbangboom.Services
         {
             //IEmailSenderExtentions.Domain = config["Domain"] ?? "localhost";
             var cfg = config.GetSection("SMTP");
-            if (cfg != null)
+            if (cfg.Value != null)
                 sender = new SmtpSender(cfg["server"], cfg.GetValue<int>("port"), cfg["user"], cfg["password"]);
             else
                 sender = new DesktopSender();

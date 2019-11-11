@@ -105,6 +105,7 @@ namespace bangbangboom.Controllers
         public async Task<object> ResetPassword(
             [FromForm][Required] string Email,
             [FromForm][Required] string Token,
+            [RegularExpression(@"^(?![0-9]+$)(?![a-z]+$)(?![A-Z]+$)[\x00-\xff]{8,20}$")]
             [FromForm][Required][MaxLength(20)] string NewPassword)
         {
             var key = "ResetPassword:" + Email;
@@ -116,8 +117,9 @@ namespace bangbangboom.Controllers
 
             var user = await userManager.FindByEmailAsync(Email);
             if (user is null) return StatusCode(401, "No such user.");
-            if ((await userManager.RemovePasswordAsync(user)).Succeeded &&
-                (await userManager.AddPasswordAsync(user, NewPassword)).Succeeded)
+            if (user.PasswordHash != null)
+                await userManager.RemovePasswordAsync(user);
+            if ((await userManager.AddPasswordAsync(user, NewPassword)).Succeeded)
             {
                 await signInManager.SignInAsync(user, true);
                 return Ok();
@@ -177,7 +179,7 @@ namespace bangbangboom.Controllers
             [FromForm][Required] string Password)
         {
             var key = "Register:" + Email;
-            if (!cache.TryGetValue(key, out string token)) 
+            if (!cache.TryGetValue(key, out string token))
                 return StatusCode(401, "Invalid token.");
             else if (token != Token)
                 return StatusCode(401, "Invalid token.");

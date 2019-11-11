@@ -66,8 +66,8 @@ export const MapDetailPage = () => {
   const classes = useStyles()
 
   const params = useParams<{ id?: string }>()
-  if (!params.id) return <NotFoundPage />
 
+  // eslint-disable-next-line
   const history = useHistory()
 
   const state = useLocalStore(() => ({
@@ -77,6 +77,7 @@ export const MapDetailPage = () => {
 
   useEffect(() => {
     (async function () {
+      if (!params.id) return
       try {
         const res = await Api.get<MapInfo>("map/info", { params: { id: params.id } })
         state.map = res.data
@@ -87,34 +88,39 @@ export const MapDetailPage = () => {
         else setMessage("error.neterr", "error")
       }
     })()
-  }, [params.id])
+  }, [params.id, state])
 
-  if (state.notfound) return <NotFoundPage />
-  const map = state.map
-  if (!map) return <Box m={3}><CircularProgress style={{ margin: "auto" }} /></Box>
 
-  return useObserver(() => (
-    <Box>
-      <Box className={classes.imageBox}>
-        <LazyLoad>
-          {map.hasimage && <img className={classes.image} src={`/api/image/${map.id}`} alt="" />}
-        </LazyLoad>
-        <Box className={clsx(classes.center, classes.playcover)}>
-          <PlayCircleFilledIcon className={classes.playicon} />
+  return useObserver(() => {
+
+    if (!params.id) return <NotFoundPage />
+    if (state.notfound) return <NotFoundPage />
+    const map = state.map
+    if (!map) return <Box m={3}><CircularProgress style={{ margin: "auto" }} /></Box>
+
+    return (
+      <Box>
+        <Box className={classes.imageBox}>
+          <LazyLoad>
+            {map.hasimage && <img className={classes.image} src={`/api/image/${map.id}`} alt="" />}
+          </LazyLoad>
+          <Box className={clsx(classes.center, classes.playcover)}>
+            <PlayCircleFilledIcon className={classes.playicon} />
+          </Box>
         </Box>
+        <Box display="flex">
+          <Typography>{map.musicname}</Typography>
+        </Box>
+        <Typography>{map.artist}</Typography>
+        <Box display="flex">
+          <UserProfile user={map.uploader} />
+          <UserName user={map.uploader} />
+          <Typography>{map.mapname}</Typography>
+        </Box>
+        <Typography>{map.description}</Typography>
       </Box>
-      <Box display="flex">
-        <Typography>{map.musicname}</Typography>
-      </Box>
-      <Typography>{map.artist}</Typography>
-      <Box display="flex">
-        <UserProfile user={map.uploader} />
-        <UserName user={map.uploader} />
-        <Typography>{map.mapname}</Typography>
-      </Box>
-      <Typography>{map.description}</Typography>
-    </Box>
-  ))
+    )
+  })
 }
 
 

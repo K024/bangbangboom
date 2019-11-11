@@ -10,6 +10,9 @@ import { useHistory } from "react-router"
 import { Locale } from "../Global/Locale"
 import { mediaQuery } from "../Global/Theme"
 import { LoginForm } from "./Components/LoginForm";
+import { UserState } from "./UserState";
+import { UserProfile } from "./Components/UserProfile";
+import { useObserver } from "mobx-react-lite";
 
 const useStyles = makeStyles(theme => ({
   header: {
@@ -72,7 +75,7 @@ const menuList = [
   { text: "menu.search", to: "/search" },
   { text: "menu.ranking", to: "/ranking" },
   { text: "menu.favorites", to: "/favorites" },
-  { text: "menu.mapping", to: "/mapping" },
+  { text: "menu.mapping", to: "/mapping/meta" },
   { text: "menu.settings", to: "/settings" },
 ]
 
@@ -139,6 +142,24 @@ const LoginMenu = () => {
     </Popover></>)
 }
 
+const ObserverPart = () => {
+  const classes = useStyles()
+  const history = useHistory()
+
+  const direct = (path: string) => {
+    history.push(path)
+  }
+  return useObserver(() => (<>
+    {!UserState.user && <LoginMenu />}
+    <Box className={classes.menuItem}>
+      <IconButton classes={{ root: classes.iconbtn }} onClick={() => direct("/dashboard")}>
+        {!UserState.user
+          ? <Avatar style={{ background: "#808080" }}>?</Avatar>
+          : <UserProfile user={UserState.user} />}
+      </IconButton>
+    </Box></>))
+}
+
 export const HomeFrame = ({ children = {} as ReactNode }) => {
   const classes = useStyles()
   const history = useHistory()
@@ -165,12 +186,7 @@ export const HomeFrame = ({ children = {} as ReactNode }) => {
             </Box>
             <Box display="flex" right="0" height="100%" position="absolute">
               <LangMenu />
-              <LoginMenu />
-              <Box className={classes.menuItem}>
-                <IconButton classes={{ root: classes.iconbtn }} onClick={() => direct("/dashboard")}>
-                  <Avatar style={{ background: "#808080" }}>C</Avatar>
-                </IconButton>
-              </Box>
+              <ObserverPart />
               <ButtonBase className={classes.menuItem} onClick={() => history.goBack()} color="inherit">
                 <ArrowBackIosIcon />
               </ButtonBase>

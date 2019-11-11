@@ -7,11 +7,11 @@ export type UserProfileProps = { user: AppUserInfo } & AvatarProps
 
 export const UserProfile = ({ user, ...others }: UserProfileProps) => (
   <Avatar
+    style={{ background: "#808080" }}
     {...(user.hasprofile ?
-      { src: `/api/profile/${user.username}` } :
+      { src: `/api/user/profile/${user.username}` } :
       { children: (user.nickname || user.username).charAt(0).toUpperCase() })}
-    {...others} />
-)
+    {...others} />)
 
 export type UserNameProps = { user: AppUserInfo } &
   React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>
@@ -24,5 +24,4 @@ export const UserName = ({ user, ...others }: UserNameProps) => (
         <Typography variant="body1" display="inline">{user.nickname}</Typography>
         <Typography variant="body2" display="inline">@{user.username}</Typography>
       </>}
-  </span>
-)
+  </span>)

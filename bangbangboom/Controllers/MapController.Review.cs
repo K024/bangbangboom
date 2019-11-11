@@ -65,8 +65,8 @@ namespace bangbangboom.Controllers
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
-            if (!MapStatus.CanPublicView.Contains(map.Status) || user.Id != map.UploaderId
-                || !await userManager.IsInRoleAsync(user, AppUserRole.Reviewer))
+            if (!MapStatus.CanPublicView.Contains(map.Status) || 
+                (user.Id != map.UploaderId && !await userManager.IsInRoleAsync(user, AppUserRole.Reviewer)))
                 return StatusCode(403);
             map.Status = MapStatus.Wip;
             map.Reviewed = null;

@@ -1,13 +1,31 @@
-import React, { useState } from "react"
-import { Box, Typography, TextField, Button } from "@material-ui/core"
-import { useObserver } from "mobx-react-lite"
+import React from "react"
+import { Box, Typography, TextField, Button, makeStyles } from "@material-ui/core"
+import { useObserver, useLocalStore } from "mobx-react-lite"
 import { FormattedMessage } from "react-intl"
 import { useObservableForm, FormValue } from "../../Global/UseObservableForm"
-import { PasswordReg } from "../UserState"
+import { PasswordReg, LoadCurrentUser, UserState } from "../UserState"
 import { Api, Xform, HandleErr } from "../../Global/Axios"
 import { setMessage } from "../../Global/Snackbar"
+import { Redirect } from "react-router"
 
-export const RegisterPage = () => {
+const useStyles = makeStyles(theme => ({
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    maxWidth: 400,
+    margin: "auto",
+    "&>*": {
+      margin: theme.spacing(1, 0)
+    }
+  },
+  mid: {
+    textAlign: "center"
+  }
+}))
+
+export const ForgotPassPage = () => {
+
+  const classes = useStyles()
 
   const { form, formValid } = useObservableForm(() => ({
     email: {
@@ -24,13 +42,16 @@ export const RegisterPage = () => {
     }
   }))
 
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const s = useLocalStore(() => ({
+    loading: false,
+    success: false
+  }))
 
   const SendEmail = async () => {
-    setLoading(true)
+    s.loading = true
     try {
-      await Api.post("account/forgotpass", Xform({ email: form.email.value }))
+      await Api.post("account/forgotpassword", Xform({ email: form.email.value }))
+      setMessage("notice.emailmaynotsent", "success")
     } catch (error) {
       const res = HandleErr(error)
       if (res) {
@@ -41,39 +62,46 @@ export const RegisterPage = () => {
       }
       else setMessage("error.neterr", "error")
     }
-    setLoading(false)
+    s.loading = false
   }
 
 
-  const Register = async () => {
-    setLoading(true)
+  const ResetPass = async () => {
+    s.loading = true
     try {
-      await Api.post("account/register", Xform(FormValue(form)))
-      setSuccess(true)
+      await Api.post("account/resetpassword", Xform(FormValue(form)))
+      await LoadCurrentUser()
+      s.success = true
     } catch (error) {
       setMessage("error.neterr", "error")
     }
-    setLoading(false)
+    s.loading = false
   }
 
   return useObserver(() => (
     <Box>
-      {success ?
-        <></> :
+      {s.success || UserState.user ?
+        <Redirect to="/" /> :
         <>
-          <Typography>
-            <FormattedMessage id="notice.emailmaynotsent" />
+          <Box m={1} className={classes.mid}>
+            <Typography variant="h5">
+              **&nbsp;<FormattedMessage id="notice.emailmaynotsent" />&nbsp;**
           </Typography>
-          <TextField label={<FormattedMessage id="label.email" />} {...form.email} />
-          <Button disabled={form.email.error || loading}
-            onClick={SendEmail}>
-            <FormattedMessage id="email.sendemail" />
-          </Button>
-          <TextField label={<FormattedMessage id="label.token" />}  {...form.token} />
-          <TextField label={<FormattedMessage id="label.password" />} {...form.newpassword} />
-          <Button
-            disabled={loading || !formValid}
-            onClick={Register}></Button>
+          </Box>
+          <Box p={2} className={classes.form}>
+            <TextField label={<FormattedMessage id="label.email" />} {...form.email} />
+            <Button disabled={form.email.error || s.loading}
+              onClick={SendEmail}>
+              <FormattedMessage id="label.sendemail" />
+            </Button>
+            <TextField label={<FormattedMessage id="label.token" />}  {...form.token} />
+            <TextField label={<FormattedMessage id="label.newpassword" />} {...form.newpassword} />
+            <Button
+              disabled={s.loading || !formValid}
+              onClick={ResetPass} variant="contained">
+              <FormattedMessage id="label.submit" />
+            </Button>
+          </Box>
         </>}
     </Box>
   ))

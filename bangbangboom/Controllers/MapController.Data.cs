@@ -36,7 +36,7 @@ namespace bangbangboom.Controllers
             [Required]long id)
         {
             var map = await context.Maps.FindAsync(id);
-            if (map is null || map.ImageFileHashAndType is null) return StatusCode(404);
+            if (map is null || map.ImageFileIdAndType is null) return StatusCode(404);
             if (!MapStatus.CanPublicView.Contains(map.Status))
             {
                 var user = await userManager.GetUserAsync(User);
@@ -45,11 +45,11 @@ namespace bangbangboom.Controllers
             }
             try
             {
-                var hashAndType = map.ImageFileHashAndType.Split(':');
-                var file = fileProvider.GetFileByHash(hashAndType[0]);
+                var idAndType = map.ImageFileIdAndType.Split(':');
+                var file = fileProvider.GetFileByGuid(idAndType[0]);
 
-                return File(file, hashAndType[1], null,
-                    EntityTagHeaderValue.Parse(new StringSegment('"' + hashAndType[0] + '"')), true);
+                return File(file, idAndType[1], null,
+                    EntityTagHeaderValue.Parse(new StringSegment('"' + idAndType[0] + '"')), true);
             }
             catch (Exception)
             {
@@ -61,7 +61,7 @@ namespace bangbangboom.Controllers
             [Required] long id)
         {
             var map = await context.Maps.FindAsync(id);
-            if (map is null || map.MusicHash is null) return StatusCode(404);
+            if (map is null || map.MusicFileId is null) return StatusCode(404);
             if (!MapStatus.CanPublicView.Contains(map.Status))
             {
                 var user = await userManager.GetUserAsync(User);
@@ -70,9 +70,9 @@ namespace bangbangboom.Controllers
             }
             try
             {
-                var file = fileProvider.GetFileByHash(map.MusicHash);
+                var file = fileProvider.GetFileByGuid(map.MusicFileId);
                 return File(file, "audio/mp3", null,
-                    EntityTagHeaderValue.Parse(new StringSegment('"' + map.MusicHash + '"')), true);
+                    EntityTagHeaderValue.Parse(new StringSegment('"' + map.MusicFileId + '"')), true);
             }
             catch (Exception)
             {

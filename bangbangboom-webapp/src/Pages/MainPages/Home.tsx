@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect } from "react"
 import { Button, Typography } from "@material-ui/core"
 import { setMessage } from "../../Global/Snackbar"
 import { observable } from "mobx"
 import { MapInfo } from "../../Global/Modals"
 import { Api } from "../../Global/Axios"
 import { MergeListDistinct } from "../../Global/Utils"
-import { useObserver } from "mobx-react-lite"
+import { useObserver, useLocalStore } from "mobx-react-lite"
 import { MapPreviewList } from "../Components/MapItem"
 import { FormattedMessage } from "react-intl"
 import { ButtonProgress } from "../Components/CoverProgress"
@@ -35,28 +35,30 @@ const LoadPage = async (page = 1) => {
 
 export const Home = () => {
 
-  const [loading, setLoading] = useState(false)
+  const s = useLocalStore(() => ({
+    loading: false
+  }))
 
   useEffect(() => {
-    setLoading(true)
+    s.loading = true
     LoadPage(1)
-    setLoading(false)
-  })
+    s.loading = false
+  }, [s])
 
   const LoadMore = async () => {
-    setLoading(true)
+    s.loading = true
     HomePageMaps.page++
     await LoadPage(HomePageMaps.page)
-    setLoading(false)
+    s.loading = false
   }
 
   return useObserver(() => (<>
     <Typography variant="h2">Home</Typography>
     <MapPreviewList maps={HomePageMaps.maps} />
     {!HomePageMaps.nomore &&
-      <ButtonProgress loading={loading} m={1}>
-        <Button onClick={LoadMore} disabled={loading} fullWidth>
-          <FormattedMessage id="home.loadmore" />
+      <ButtonProgress loading={s.loading} m={1}>
+        <Button onClick={LoadMore} disabled={s.loading} fullWidth>
+          <FormattedMessage id="label.loadmore" />
         </Button>
       </ButtonProgress>}
   </>))

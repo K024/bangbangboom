@@ -16,9 +16,9 @@ namespace bangbangboom.Services
         private readonly TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
         private Timer timer;
         private readonly IServiceProvider services;
-        private readonly ILogger logger;
+        private readonly ILogger<ScheduedTaskService> logger;
 
-        public ScheduedTaskService(IServiceProvider provider, ILogger logger)
+        public ScheduedTaskService(IServiceProvider provider, ILogger<ScheduedTaskService> logger)
         {
             services = provider;
             this.logger = logger;
@@ -41,12 +41,6 @@ namespace bangbangboom.Services
                 using (var scope = services.CreateScope())
                 using (var context = scope.ServiceProvider.GetService<AppDbContext>())
                 {
-                    var usersq = await (
-                        from u in context.Users
-                        where !u.EmailConfirmed && u.RegisterDate + TimeSpan.FromHours(4) < DateTimeOffset.Now
-                        select u).ToListAsync();
-                    context.RemoveRange(usersq);
-                    await context.SaveChangesAsync();
 
                     logger.LogInformation("Scheduled task finished at " + DateTime.Now);
                 }

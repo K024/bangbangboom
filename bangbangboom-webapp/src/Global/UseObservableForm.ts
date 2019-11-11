@@ -95,6 +95,7 @@ export function useAsyncCheck<T>(
       })
     }
     return () => { valid = false }
+    // eslint-disable-next-line
   }, deps)
 
   return status

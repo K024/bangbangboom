@@ -2,6 +2,7 @@ import axios, { AxiosError } from 'axios'
 import qs from 'qs'
 import { setMessage } from './Snackbar'
 
+/* eslint-disable no-restricted-globals */
 export const Api = axios.create({
     baseURL: location.origin + "/api/",
 })

@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import { useObserver } from "mobx-react-lite"
 import { Api } from "../../Global/Axios"
 import { setMessage } from "../../Global/Snackbar"
 import { MapInfo } from "../../Global/Modals"
-import { Typography, Button, TextField, Box } from "@material-ui/core"
+import { Typography, Button, TextField, Box, IconButton, InputAdornment } from "@material-ui/core"
 import { MapPreviewList } from "../Components/MapItem"
 import { ButtonProgress } from "../Components/CoverProgress"
 import { FormattedMessage } from "react-intl"
-
+import SearchIcon from '@material-ui/icons/Search'
 
 const Search = async (key: string, page = 1) => {
   try {
@@ -26,7 +26,7 @@ export const SearchPage = () => {
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
   const [list, setList] = useState([] as MapInfo[])
-  const [nomore, setNomore] = useState(false)
+  const [nomore, setNomore] = useState(true)
 
   const loadMore = async () => {
     if (searchingkey.trim() === "") return
@@ -46,24 +46,33 @@ export const SearchPage = () => {
 
   return useObserver(() => (
     <>
-      <Typography variant="h2">Search</Typography>
-      <Box display="flex">
-        <TextField style={{ flexGrow: 1 }} value={key} onChange={e => setKey(e.target.value)} />
-        <Button onClick={search}>
-          <FormattedMessage id="home.loadmore" />
-        </Button>
+      <Typography variant="h5">Search</Typography>
+      <Box display="flex" p={1}>
+        <TextField style={{ flexGrow: 1 }} value={key}
+          onChange={e => setKey(e.target.value)}
+          InputProps={{
+            endAdornment:
+              <InputAdornment position="end">
+                <IconButton onClick={search}>
+                  <SearchIcon />
+                </IconButton>
+              </InputAdornment>
+          }}
+        />
       </Box>
       <MapPreviewList maps={list} />
       {!nomore &&
         <ButtonProgress loading={loading} m={1}>
           <Button onClick={loadMore} disabled={loading} fullWidth>
-            <FormattedMessage id="home.loadmore" />
+            <FormattedMessage id="label.loadmore" />
           </Button>
         </ButtonProgress>}
       {nomore && list.length === 0 &&
-        <Typography variant="h3">
-          <FormattedMessage id="search.noresult" />
-        </Typography>}
+        <Box m={2} textAlign="center">
+          <Typography variant="h6">
+            <FormattedMessage id="info.noresult" />
+          </Typography>
+        </Box>}
     </>
   ))
 }

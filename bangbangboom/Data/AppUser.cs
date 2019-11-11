@@ -15,7 +15,7 @@ namespace bangbangboom.Data
         [MaxLength(50)]
         public string NickName { get; set; }
         [MaxLength(100)]
-        public string ProfileFileHash { get; set; }
+        public string ProfileFileId { get; set; }
         [MaxLength(300)]
         public string WhatsUp { get; set; }
 
@@ -37,7 +37,7 @@ namespace bangbangboom.Data
             username = u.UserName;
             nickname = u.NickName;
             whatsup = u.WhatsUp;
-            hasprofile = u.ProfileFileHash != null;
+            hasprofile = u.ProfileFileId != null;
         }
     }
 }

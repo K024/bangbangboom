@@ -24,10 +24,10 @@ namespace bangbangboom.Controllers
 
         private readonly UserManager<AppUser> userManager;
         private readonly AppDbContext context;
-        private readonly HashFileProvider fileProvider;
+        private readonly GuidFileProvider fileProvider;
         public MapController(
             UserManager<AppUser> userManager,
-            AppDbContext context, HashFileProvider fileProvider)
+            AppDbContext context, GuidFileProvider fileProvider)
         {
             this.userManager = userManager;
             this.context = context;
@@ -120,9 +120,9 @@ namespace bangbangboom.Controllers
                 {
                     var type = image.ContentType;
                     if (!type.StartsWith("image") || image.Length > 1024 * 1024 * 5) return StatusCode(400);
-                    var hash = await fileProvider.SaveFileAsync(image.OpenReadStream());
-                    fileProvider.DeleteFile(map.ImageFileHashAndType.Split(':')[0]);
-                    map.ImageFileHashAndType = hash + ":" + type;
+                    var fileid = await fileProvider.SaveFileAsync(image.OpenReadStream());
+                    fileProvider.DeleteFile(map.ImageFileIdAndType.Split(':')[0]);
+                    map.ImageFileIdAndType = fileid + ":" + type;
                 }
                 catch (Exception)
                 {
@@ -132,9 +132,9 @@ namespace bangbangboom.Controllers
             {
                 try
                 {
-                    var hash = await fileProvider.SaveFileAsync(music.OpenReadStream());
-                    fileProvider.DeleteFile(map.MusicHash);
-                    map.MusicHash = hash;
+                    var fileid = await fileProvider.SaveFileAsync(music.OpenReadStream());
+                    fileProvider.DeleteFile(map.MusicFileId);
+                    map.MusicFileId = fileid;
                 }
                 catch (Exception)
                 {

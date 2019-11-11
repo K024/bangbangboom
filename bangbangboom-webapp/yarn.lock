@@ -8796,6 +8796,11 @@ react-app-polyfill@^1.0.4:
     regenerator-runtime "0.13.3"
     whatwg-fetch "3.0.0"
 
+react-async-component@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npm.taobao.org/react-async-component/download/react-async-component-2.0.0.tgz#a56c1278ac588291fce6cd5cf033eb97eb36483c"
+  integrity sha1-pWwSeKxYgpH85s1c8DPrl+s2SDw=
+
 react-dev-utils@^9.1.0:
   version "9.1.0"
   resolved "https://registry.npm.taobao.org/react-dev-utils/download/react-dev-utils-9.1.0.tgz#3ad2bb8848a32319d760d0a84c56c14bdaae5e81"

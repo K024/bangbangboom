@@ -11,28 +11,23 @@ using Microsoft.Extensions.Options;
 
 namespace bangbangboom.Services
 {
-    public class HashFileProviderOptions
+    public class GuidFileProviderOptions
     {
-        public HashAlgorithm HashFunc { get; set; } = new HMACMD5();
-
         public string BaseDir { get; set; } = Path.Combine(
-            Environment.CurrentDirectory, ".hashfiles");
+            Environment.CurrentDirectory, ".files");
 
         public int SubDirCount { get; set; } = 1;
     }
 
-    public class HashFileProvider
+    public class GuidFileProvider
     {
-        private readonly HashAlgorithm hash;
-
         private readonly string baseDir;
 
         private readonly int subDirCount;
 
-        public HashFileProvider(IOptions<HashFileProviderOptions> option)
+        public GuidFileProvider(IOptions<GuidFileProviderOptions> option)
         {
             var options = option.Value;
-            hash = options.HashFunc;
             baseDir = Path.GetFullPath(options.BaseDir);
             if (!Directory.Exists(baseDir))
                 Directory.CreateDirectory(baseDir);
@@ -41,9 +36,9 @@ namespace bangbangboom.Services
                 subDirCount = 1;
         }
 
-        public Stream GetFileByHash(string hash)
+        public Stream GetFileByGuid(string guid)
         {
-            var finfo = GetFileInfo(hash);
+            var finfo = GetFileInfo(guid);
             if (!finfo.Exists) throw new FileNotFoundException();
             return finfo.OpenRead();
         }
@@ -51,9 +46,9 @@ namespace bangbangboom.Services
         public async Task<string> SaveFileAsync(Stream fileStream)
         {
             fileStream.Position = 0;
-            var filehash = ToHex(hash.ComputeHash(fileStream));
+            var guid = ToHex(Guid.NewGuid().ToByteArray());
             fileStream.Position = 0;
-            var finfo = GetFileInfo(filehash);
+            var finfo = GetFileInfo(guid);
             if (!finfo.Exists)
             {
                 finfo.Directory.Create();
@@ -62,12 +57,12 @@ namespace bangbangboom.Services
                 fs.Close();
             }
             fileStream.Position = 0;
-            return filehash;
+            return guid;
         }
 
-        public bool DeleteFile(string hash)
+        public bool DeleteFile(string guid)
         {
-            var finfo = GetFileInfo(hash);
+            var finfo = GetFileInfo(guid);
             if (!finfo.Exists) return false;
             finfo.Delete();
             return true;
@@ -81,17 +76,17 @@ namespace bangbangboom.Services
             return hex.ToString();
         }
 
-        private FileInfo GetFileInfo(string hexhash)
+        private FileInfo GetFileInfo(string guid)
         {
-            if (hexhash.Length < subDirCount * 2) throw new ArgumentException();
+            if (guid.Length < subDirCount * 2) throw new ArgumentException();
             var i = 0;
             var path = baseDir;
             while (i < subDirCount)
             {
-                path = Path.Combine(path, hexhash.Substring(i * 2, 2));
+                path = Path.Combine(path, guid.Substring(i * 2, 2));
                 i++;
             }
-            path = Path.Combine(path, hexhash.Substring(i * 2));
+            path = Path.Combine(path, guid.Substring(i * 2));
             return new FileInfo(path);
         }
     }

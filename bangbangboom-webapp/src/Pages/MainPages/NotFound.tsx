@@ -9,11 +9,12 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column",
     alignItems: "center",
     "&>*": {
-      margin: theme.spacing(3, 0)
-    }
+      margin: theme.spacing(1, 0)
+    },
+    color: "#a0a0a0"
   },
   icon: {
-    fontSize: "160px!important"
+    fontSize: "calc(160px + 10vw)!important"
   }
 }))
 
@@ -23,8 +24,8 @@ export const NotFoundPage = () => {
   return (
     <Box className={classes.root}>
       <ExploreOffIcon className={classes.icon} />
-      <Typography variant="h1">404</Typography>
-      <Typography variant="h2">
+      <Typography variant="h3">404</Typography>
+      <Typography variant="h6">
         <FormattedMessage id="notice.notfound" />
       </Typography>
     </Box>

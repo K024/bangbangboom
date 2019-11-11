@@ -14,8 +14,7 @@ const useStyles = makeStyles(theme => ({
     transition: "all 0.3s",
     "&:hover": {
       transform: "scale(1.05) rotate(2deg)",
-      boxShadow: "0 6px 2px -4px rgba(0, 0, 0, 0.4), \
-        0 4px 4px 0 rgba(0, 0, 0, 0.28), 0 2px 10px 0 rgba(0, 0, 0, 0.24)"
+      boxShadow: "0 6px 2px -4px rgba(0, 0, 0, 0.4), 0 4px 4px 0 rgba(0, 0, 0, 0.28), 0 2px 10px 0 rgba(0, 0, 0, 0.24)"
     },
   },
   media: {

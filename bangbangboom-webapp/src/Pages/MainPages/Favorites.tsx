@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react"
-import { useObserver } from "mobx-react-lite"
+import React, { useEffect } from "react"
+import { useObserver, useLocalStore } from "mobx-react-lite"
 import { Api } from "../../Global/Axios"
 import { setMessage } from "../../Global/Snackbar"
 import { MapInfo } from "../../Global/Modals"
-import { Typography, Button } from "@material-ui/core"
+import { Typography, Button, Box } from "@material-ui/core"
 import { MapPreviewList } from "../Components/MapItem"
 import { ButtonProgress } from "../Components/CoverProgress"
 import { FormattedMessage } from "react-intl"
+import { UserState } from "../UserState"
 
 
 const GetFavorites = async (page = 1) => {
   try {
-    const res = await Api.get<MapInfo[]>("favorites/all", { params: { page } })
+    const res = await Api.get<MapInfo[]>("favorite/all", { params: { page } })
     return res.data
   } catch (error) {
     setMessage("error.neterr", "error")
@@ -21,40 +22,47 @@ const GetFavorites = async (page = 1) => {
 
 export const FavoritesPage = () => {
 
-  const [page, setPage] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [list, setList] = useState([] as MapInfo[])
-  const [nomore, setNomore] = useState(false)
+  const s = useLocalStore(() => ({
+    page: 1,
+    loading: false,
+    list: [] as MapInfo[],
+    nomore: false,
+  }))
 
   useEffect(() => {
-    setLoading(true)
+    if (!UserState.user) return
+    s.loading = true
     GetFavorites().then(v => {
-      setLoading(false)
-      setPage(2)
-      setList(v)
-      if (v.length === 0) setNomore(true)
+      s.loading = false
+      s.page = 2
+      s.list = v
+      if (v.length === 0) s.nomore = true
     })
-  }, [])
+  }, [s])
 
   const loadMore = async () => {
-    setLoading(true)
-    const res = await GetFavorites(page)
-    setLoading(false)
-    setPage(page + 1)
-    setList(list.concat(...res))
-    if (res.length === 0) setNomore(true)
+    s.loading = true
+    const res = await GetFavorites(s.page)
+    s.loading = false
+    s.page = s.page + 1
+    s.list.push(...res)
+    if (res.length === 0) s.nomore = true
   }
 
   return useObserver(() => (
     <>
       <Typography variant="h2">Favorites</Typography>
-      <MapPreviewList maps={list} />
-      {!nomore &&
-        <ButtonProgress loading={loading} m={1}>
-          <Button onClick={loadMore} disabled={loading} fullWidth>
-            <FormattedMessage id="home.loadmore" />
-          </Button>
-        </ButtonProgress>}
+      {!UserState.user
+        ? <Box m={1}><FormattedMessage id="info.pleaselogin" /></Box>
+        : <>
+          <MapPreviewList maps={s.list} />
+          {!s.nomore &&
+            <ButtonProgress loading={s.loading} m={1}>
+              <Button onClick={loadMore} disabled={s.loading} fullWidth>
+                <FormattedMessage id="label.loadmore" />
+              </Button>
+            </ButtonProgress>}
+        </>}
     </>
   ))
 }

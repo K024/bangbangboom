@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useObserver } from "mobx-react-lite"
+import React, { useCallback } from "react"
+import { useObserver, useLocalStore } from "mobx-react-lite"
 import { makeStyles } from "@material-ui/core"
 import { TextField, Box, Button } from "@material-ui/core"
 import { FormattedMessage } from "react-intl"
@@ -32,8 +32,10 @@ export const LoginForm = ({ onClose = () => { } }) => {
     },
   }))
 
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const s = useLocalStore(() => ({
+    loading: false,
+    success: false
+  }))
 
   const history = useHistory()
 
@@ -42,12 +44,12 @@ export const LoginForm = ({ onClose = () => { } }) => {
     onClose()
   }
 
-  const login = async () => {
-    setLoading(true)
+  const login = useCallback(async () => {
+    s.loading = true
     try {
       await Api.post("account/login", Xform(FormValue(form)))
       await LoadCurrentUser()
-      setSuccess(true)
+      s.success = true
       onClose()
     } catch (error) {
       const res = HandleErr<string>(error)
@@ -58,11 +60,11 @@ export const LoginForm = ({ onClose = () => { } }) => {
         if (s.startsWith("locked out"))
           setMessage("user.lockedout", "error")
         else if (s.startsWith("username or password wrong"))
-          setMessage("user.usernamepasswrong", "error")
+          setMessage("info.usernamepasswrong", "error")
       }
     }
-    setLoading(false)
-  }
+    s.loading = false
+  }, [s, onClose, form])
 
   return useObserver(() => (
     <Box className={classes.root} display="flex" flexDirection="column" alignItems="stretch">
@@ -74,8 +76,8 @@ export const LoginForm = ({ onClose = () => { } }) => {
         label={<FormattedMessage id="label.password" />}
         {...form.password}>
       </PasswordField>
-      <ButtonProgress position="relative" loading={loading}>
-        <Button variant="contained" color="primary" disabled={!formValid || loading || success}
+      <ButtonProgress position="relative" loading={s.loading}>
+        <Button variant="contained" color="primary" disabled={!formValid || s.loading || s.success}
           onClick={login} fullWidth>
           <FormattedMessage id="label.login" />
         </Button>

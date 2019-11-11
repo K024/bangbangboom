@@ -1,5 +1,6 @@
-import React, { useState } from "react"
+import React, { useEffect } from "react"
 import { FormattedMessage, FormattedDate } from "react-intl"
+import { useLocalStore } from "mobx-react-lite"
 
 export type DateTimeProps = { date: string | Date }
 
@@ -8,29 +9,37 @@ const onehour = 60 * 60 * 1000
 
 export const DateTime = ({ date }: DateTimeProps) => {
 
-  const d = typeof date === "string" ? new Date(date) : date
+  const s = useLocalStore(() => ({
+    display: <></>,
+  }))
 
-  const [display, setDisplay] = useState(null as React.ReactNode)
+  useEffect(() => {
+    const d = typeof date === "string" ? new Date(date) : date
+    let toid = 0
 
-  const update = () => {
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    if (diff < onehour) {
-      const minute = Math.ceil(diff / oneminute);
-      const next = minute * oneminute - diff;
-      setDisplay(<FormattedMessage id="number.minutesago" values={{ count: minute }} />)
-      setTimeout(update, next);
-    } else if (diff < 24 * onehour) {
-      const hour = Math.ceil(diff / onehour);
-      const next = hour * onehour - diff;
-      setDisplay(<FormattedMessage id="number.minutesago" values={{ count: hour }} />)
-      setTimeout(update, next);
-    } else {
-      setDisplay(<FormattedDate value={d} />)
-    } aqa
-  }
+    // eslint-disable-next-line
+    const update = () => {
+      const now = new Date()
+      const diff = now.getTime() - d.getTime()
+      if (diff < onehour) {
+        const minute = Math.ceil(diff / oneminute)
+        const next = minute * oneminute - diff
+        s.display = <FormattedMessage id="number.minutesago" values={{ count: minute }} />
+        toid = setTimeout(update, next) as any
+      } else if (diff < 24 * onehour) {
+        const hour = Math.ceil(diff / onehour)
+        const next = hour * onehour - diff
+        s.display = <FormattedMessage id="number.minutesago" values={{ count: hour }} />
+        toid = setTimeout(update, next) as any
+      } else {
+        s.display = <FormattedDate value={d} />
+      }
+    }
 
-  return display
+    return () => { clearTimeout(toid) }
+  }, [s, date])
+
+  return s.display
 }
 
 

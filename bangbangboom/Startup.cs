@@ -19,7 +19,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Swashbuckle.AspNetCore.Swagger;
 
 namespace bangbangboom
 {
@@ -38,6 +37,7 @@ namespace bangbangboom
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddOptions();
+            services.AddLogging();
             services.AddMemoryCache();
 
             services.Configure<GzipCompressionProviderOptions>(
@@ -62,6 +62,7 @@ namespace bangbangboom
             {
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
+                options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 8;
 
                 options.User.AllowedUserNameCharacters =
@@ -77,8 +78,8 @@ namespace bangbangboom
 
             void ConfigCookie(CookieBuilder cookie)
             {
-                cookie.SecurePolicy = CookieSecurePolicy.Always;
-                cookie.SameSite = SameSiteMode.Strict;
+                cookie.SecurePolicy = CookieSecurePolicy.None;
+                cookie.SameSite = SameSiteMode.None;
                 cookie.HttpOnly = true;
                 cookie.Path = "/api/";
                 cookie.Expiration = TimeSpan.FromDays(30);
@@ -105,9 +106,9 @@ namespace bangbangboom
                 options.HeaderName = "X-XSRF-TOKEN";
             });
 
-            services.Configure<HashFileProviderOptions>(options =>
+            services.Configure<GuidFileProviderOptions>(options =>
                 options.BaseDir = Path.Combine(env.ContentRootPath, ".hashfiles"));
-            services.AddSingleton<HashFileProvider>();
+            services.AddSingleton<GuidFileProvider>();
 
             services.AddSingleton<MediaFileProcessor>();
 
@@ -115,14 +116,9 @@ namespace bangbangboom
 
             ConfiureProductionServices(services);
 
-            services.AddSwaggerGen(c =>
-                c.SwaggerDoc("v1", new Info() { Title = "bangbangboom", Version = "v1" }));
-
             services.AddMvc(options =>
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            services.AddLogging();
         }
 
         protected virtual void ConfigureDatabase(DbContextOptionsBuilder options)
@@ -162,15 +158,6 @@ namespace bangbangboom
             app.UseDefaultFiles();
             app.UseStaticFiles();
 
-            if (env.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-                });
-            }
-
             app.UseAuthentication();
             app.UseMvc();
 
@@ -184,7 +171,7 @@ namespace bangbangboom
             });
             // app.UseSpa(config => { });
 
-            dbContext.Database.Migrate();
+            dbContext.Database.EnsureCreated();
         }
     }
 }

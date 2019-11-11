@@ -1,4 +1,6 @@
 
+/* eslint-disable no-unused-expressions */
+
 export function MergeListDistinct<T>(list1: T[], list2: T[], comparator: (a: T, b: T) => number) {
   const ret: T[] = []
   let p1 = 0, p2 = 0
@@ -12,7 +14,8 @@ export function MergeListDistinct<T>(list1: T[], list2: T[], comparator: (a: T, 
       p2++
     } else {
       ret.push(list1[p1])
-      p1++ , p2++
+      p1++
+      p2++
     }
   }
   while (p1 < list1.length) {

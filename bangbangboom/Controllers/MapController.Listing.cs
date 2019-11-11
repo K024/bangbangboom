@@ -44,6 +44,31 @@ namespace bangbangboom.Controllers
             return maps.Page(page ?? 1);
         }
 
+        [Authorize]
+        [HttpGet]
+        public async Task<object> MyMaps()
+        {
+            var user = await userManager.GetUserAsync(User);
+            var maps =
+               from m in context.Maps
+               join u in context.Users on m.UploaderId equals u.Id
+               where u.Id == user.Id
+               orderby m.Reviewed descending
+               select new MapInfo(m)
+               {
+                   uploader = new AppUserInfo(u),
+                   plays = (
+                       from pl in context.PlayRecords
+                       where pl.MapId == m.Id
+                       select 1).Count(),
+                   favorites = (
+                       from fa in context.Favorites
+                       where fa.MapId == m.Id
+                       select 1).Count(),
+               };
+            return maps;
+        }
+
         [HttpGet]
         public object Latest(
             [FromQuery][Range(1, 10000)] int? page)
