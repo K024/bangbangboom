@@ -1,18 +1,18 @@
-import React from 'react';
-import clsx from 'clsx';
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
-import InfoIcon from '@material-ui/icons/Info';
-import CloseIcon from '@material-ui/icons/Close';
-import { orange, lightGreen } from '@material-ui/core/colors';
-import IconButton from '@material-ui/core/IconButton';
-import Snackbar from '@material-ui/core/Snackbar';
-import SnackbarContent from '@material-ui/core/SnackbarContent';
-import WarningIcon from '@material-ui/icons/Warning';
-import { makeStyles } from '@material-ui/core/styles';
-import { observable } from 'mobx';
-import { useObserver } from 'mobx-react-lite';
-import { FormattedMessage } from 'react-intl';
+import React from 'react'
+import clsx from 'clsx'
+import CheckCircleIcon from '@material-ui/icons/CheckCircle'
+import ErrorIcon from '@material-ui/icons/Error'
+import InfoIcon from '@material-ui/icons/Info'
+import CloseIcon from '@material-ui/icons/Close'
+import { orange, lightGreen } from '@material-ui/core/colors'
+import IconButton from '@material-ui/core/IconButton'
+import Snackbar from '@material-ui/core/Snackbar'
+import SnackbarContent from '@material-ui/core/SnackbarContent'
+import WarningIcon from '@material-ui/icons/Warning'
+import { makeStyles } from '@material-ui/core/styles'
+import { observable } from 'mobx'
+import { useObserver } from 'mobx-react-lite'
+import { FormattedMessage } from 'react-intl'
 
 
 const variantIcon = {
@@ -60,14 +60,14 @@ export function setMessage(message: string, type = "info" as keyof typeof varian
   Message.open = true
 }
 
-const handleClose = (event: React.SyntheticEvent | React.MouseEvent, reason?: string) => {
+const handleClose = (event: any, reason?: string) => {
   if (reason === 'clickaway') return
   Message.open = false
-};
+}
 
 export const GlobalSnackbar = () => {
 
-  const classes = useStyles();
+  const cn = useStyles()
   const Icon = variantIcon[Message.type]
 
   return useObserver(() => (
@@ -81,18 +81,17 @@ export const GlobalSnackbar = () => {
       onClose={handleClose}
       key={Message.message + Message.type}
     >
-
       <SnackbarContent
-        className={classes[Message.type]}
+        className={cn[Message.type]}
         message={
-          <span className={classes.message}>
-            <Icon className={clsx(classes.icon, classes.iconVariant)} />
+          <span className={cn.message}>
+            <Icon className={clsx(cn.icon, cn.iconVariant)} />
             <FormattedMessage id={Message.message}></FormattedMessage>
           </span>
         }
         action={[
           <IconButton key="close" aria-label="close" color="inherit" onClick={handleClose}>
-            <CloseIcon className={classes.icon} />
+            <CloseIcon className={cn.icon} />
           </IconButton>,
         ]}
       />

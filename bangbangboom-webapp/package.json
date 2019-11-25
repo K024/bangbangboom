@@ -14,7 +14,6 @@
     "pixi.js": "^5.1.5",
     "qs": "^6.9.0",
     "react": "^16.10.2",
-    "react-async-component": "^2.0.0",
     "react-dom": "^16.10.2",
     "react-intl": "^3.3.2",
     "react-lazyload": "^2.6.2",

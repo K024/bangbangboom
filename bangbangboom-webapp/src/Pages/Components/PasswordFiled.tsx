@@ -1,8 +1,8 @@
 import React, { useState, forwardRef } from "react"
 import { FormControl, InputLabel, Input, InputAdornment, IconButton, FormHelperText } from "@material-ui/core"
 import { TextFieldProps } from "@material-ui/core/TextField"
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Visibility from '@material-ui/icons/Visibility'
+import VisibilityOff from '@material-ui/icons/VisibilityOff'
 
 export const PasswordField = forwardRef<HTMLDivElement, TextFieldProps>((props, ref) => {
 
@@ -39,7 +39,7 @@ export const PasswordField = forwardRef<HTMLDivElement, TextFieldProps>((props, 
     value,
     variant = 'standard',
     ...other
-  } = props;
+  } = props
 
   const [showpass, setShowpass] = useState(false)
 
@@ -99,5 +99,5 @@ export const PasswordField = forwardRef<HTMLDivElement, TextFieldProps>((props, 
         </FormHelperText>
       )}
     </FormControl>
-  );
+  )
 })

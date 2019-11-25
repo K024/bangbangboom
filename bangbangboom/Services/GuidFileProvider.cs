@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
@@ -88,6 +89,46 @@ namespace bangbangboom.Services
             }
             path = Path.Combine(path, guid.Substring(i * 2));
             return new FileInfo(path);
+        }
+    }
+
+    public static class GuidFileProviderExtensions
+    {
+        public static async Task<string> SaveImageFileWithThumbnail(this GuidFileProvider provider, 
+            MediaFileProcessor processor, IFormFile file)
+        {
+            var id = "";
+            var fs = file.OpenReadStream();
+            if (!processor.TryProcessImage(fs, out var jpg)) return null;
+            id += await provider.SaveFileAsync(jpg);
+            if (processor.TryMinifyImage(jpg, out var min))
+            {
+                id += ":";
+                id += await provider.SaveFileAsync(min);
+            }
+            return id;
+        }
+
+        public static Stream GetImageWithThumbnail(this GuidFileProvider provider, string id, bool min = false, out string etag)
+        {
+            var ids = id.Split(':');
+            if (ids.Length == 2 && min)
+            {
+                etag = ids[1];
+                return provider.GetFileByGuid(ids[1]);
+            }
+            etag = ids[0];
+            return provider.GetFileByGuid(ids[0]);
+        }
+
+        public static void DeleteImageWithThumbnail(this GuidFileProvider provider, string id)
+        {
+            if (id is null) return;
+            var ids = id.Split(':');
+            foreach(var guid in ids)
+            {
+                provider.DeleteFile(guid);
+            }
         }
     }
 }

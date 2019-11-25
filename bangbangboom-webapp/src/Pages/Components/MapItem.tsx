@@ -5,7 +5,7 @@ import LazyLoad from "react-lazyload"
 import { Card, CardActionArea, Box, makeStyles, Typography, Grid } from "@material-ui/core"
 import PlayCircleFilledIcon from '@material-ui/icons/PlayCircleFilled'
 import FavoriteIcon from '@material-ui/icons/Favorite'
-import MusicNoteIcon from '@material-ui/icons/MusicNote';
+import MusicNoteIcon from '@material-ui/icons/MusicNote'
 import { UserProfile, UserName } from "./UserProfile"
 import { useHistory } from "react-router"
 

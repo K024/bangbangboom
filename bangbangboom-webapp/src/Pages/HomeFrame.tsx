@@ -2,17 +2,17 @@ import React, { ReactNode, useRef, useState } from "react"
 import { Box, makeStyles, Menu, MenuItem, Typography, ButtonBase, IconButton, Avatar, Fade, Popover } from "@material-ui/core"
 import MenuIcon from "@material-ui/icons/Menu"
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos'
-import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIosOutlined';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIosOutlined'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
 import clsx from "clsx"
 import { FormattedMessage } from "react-intl"
 import { useHistory } from "react-router"
 import { Locale } from "../Global/Locale"
 import { mediaQuery } from "../Global/Theme"
-import { LoginForm } from "./Components/LoginForm";
-import { UserState } from "./UserState";
-import { UserProfile } from "./Components/UserProfile";
-import { useObserver } from "mobx-react-lite";
+import { LoginForm } from "./Components/LoginForm"
+import { UserState } from "./UserState"
+import { UserProfile } from "./Components/UserProfile"
+import { useObserver } from "mobx-react-lite"
 
 const useStyles = makeStyles(theme => ({
   header: {
@@ -37,7 +37,6 @@ const useStyles = makeStyles(theme => ({
     height: "100%",
     display: "flex",
     alignItems: "center",
-    transition: "color 0.3s",
     margin: "0 5px",
     cursor: "pointer",
     "&>*": {

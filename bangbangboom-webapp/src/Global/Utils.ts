@@ -52,3 +52,44 @@ export function DebounceFunc<TArgs extends any[], TThis>(func: (this: TThis, ...
     }, minms)
   }
 }
+
+function padZero(n: number, len: number) {
+  let str = n.toString()
+  while (str.length < len) str = "0" + str
+  return str
+}
+
+export function TimeToString(s: number) {
+  s = Math.abs(s)
+  const minutes = Math.floor(s / 60)
+  s -= minutes * 60
+  const seconds = Math.floor(s)
+  s -= seconds
+  const milis = Math.floor(s * 1000)
+  return `${padZero(minutes, 2)}:${padZero(seconds, 2)}.${padZero(milis, 3)}`
+}
+
+export function MakeArray(end: number, start = 0, interval = 1) {
+  const arr: number[] = []
+  while (start < end) {
+    arr.push(start)
+    start += interval
+  }
+  return arr
+}
+
+export function lazyObject<Keys extends keyof any, Values>(obj: { [K in Keys]: () => Values }): Readonly<{ [K in Keys]: Values }> {
+  const o: any = {}
+  for (const key in obj) {
+    let value: any = null
+    Object.defineProperty(o, key, {
+      get() {
+        if (value === null) {
+          value = obj[key]()
+        }
+        return value
+      }
+    })
+  }
+  return o
+}

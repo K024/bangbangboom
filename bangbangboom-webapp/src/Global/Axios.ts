@@ -10,9 +10,9 @@ export const Api = axios.create({
 export const GetXSRFHeader = async () => {
     try {
         const result = await Api.get<string>('xsrf')
-        Api.defaults.headers.post['X-XSRF-TOKEN'] = result.data;
+        Api.defaults.headers.post['X-XSRF-TOKEN'] = result.data
     } catch (error) {
-        setMessage("net.error", "error")
+        setMessage("error.neterr", "error")
     }
 }
 GetXSRFHeader()

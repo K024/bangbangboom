@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { useObserver, useLocalStore, useComputed } from "mobx-react-lite"
+import { useObserver, useLocalStore } from "mobx-react-lite"
 import { makeStyles, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, Typography, Box } from "@material-ui/core"
 import { Api } from "../../Global/Axios"
 import { MapInfo } from "../../Global/Modals"
@@ -20,11 +20,7 @@ const useStyles = makeStyles(theme => ({
     minWidth: 650,
   },
   header: {
-    display: "inline-block",
-    margin: theme.spacing(1),
-    position: "relative",
-    left: 10,
-    top: -20
+    margin: theme.spacing(3, 1, 1)
   }
 }))
 
@@ -64,18 +60,16 @@ export const MyMapsPage = () => {
     })()
   }, [s])
 
-  const wips = useComputed(() => s.maps.filter(x => x.status === "wip" || x.status === "notpass"))
-  const reviewing = useComputed(() => s.maps.filter(x => x.status === "reviewing"))
-  const reviewed = useComputed(() => s.maps.filter(x => x.status === "reviewed" || x.status === "proved"))
+  const wips = useObserver(() => s.maps.filter(x => x.status === "wip" || x.status === "notpass"))
+  const reviewing = useObserver(() => s.maps.filter(x => x.status === "reviewing"))
+  const reviewed = useObserver(() => s.maps.filter(x => x.status === "reviewed" || x.status === "proved"))
 
   return useObserver(() => (
     <Box className={classes.root}>
+      <Typography className={classes.header} variant="h5">
+        <FormattedMessage id="mapstatus.wip" />
+      </Typography>
       <Paper className={classes.paper}>
-        <Paper className={classes.header}>
-          <Typography variant="h4">
-            <FormattedMessage id="mapstatus.wip" />
-          </Typography>
-        </Paper>
         <Table className={classes.table} aria-label="simple table">
           <HeaderPart />
           <TableBody>
@@ -94,10 +88,10 @@ export const MyMapsPage = () => {
           </TableBody>
         </Table>
       </Paper>
+      <Typography className={classes.header} variant="h5">
+        <FormattedMessage id="mapstatus.reviewing" />
+      </Typography>
       <Paper className={classes.paper}>
-        <Typography className={classes.header} variant="h4">
-          <FormattedMessage id="mapstatus.reviewing" />
-        </Typography>
         <Table className={classes.table} aria-label="simple table">
           <HeaderPart />
           <TableBody>
@@ -116,10 +110,10 @@ export const MyMapsPage = () => {
           </TableBody>
         </Table>
       </Paper>
+      <Typography className={classes.header} variant="h5">
+        <FormattedMessage id="mapstatus.reviewed" />
+      </Typography>
       <Paper className={classes.paper}>
-        <Typography className={classes.header} variant="h4">
-          <FormattedMessage id="mapstatus.reviewed" />
-        </Typography>
         <Table className={classes.table} aria-label="simple table">
           <HeaderPart />
           <TableBody>

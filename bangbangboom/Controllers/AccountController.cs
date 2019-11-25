@@ -179,9 +179,7 @@ namespace bangbangboom.Controllers
             [FromForm][Required] string Password)
         {
             var key = "Register:" + Email;
-            if (!cache.TryGetValue(key, out string token))
-                return StatusCode(401, "Invalid token.");
-            else if (token != Token)
+            if (!cache.TryGetValue(key, out string token) || token != Token)
                 return StatusCode(401, "Invalid token.");
             cache.Remove(key);
 

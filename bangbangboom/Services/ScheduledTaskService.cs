@@ -41,7 +41,7 @@ namespace bangbangboom.Services
                 using (var scope = services.CreateScope())
                 using (var context = scope.ServiceProvider.GetService<AppDbContext>())
                 {
-
+                    await Task.CompletedTask;
                     logger.LogInformation("Scheduled task finished at " + DateTime.Now);
                 }
             });

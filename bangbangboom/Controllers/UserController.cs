@@ -90,7 +90,8 @@ namespace bangbangboom.Controllers
 
         [HttpGet("{username}.{ext?}")]
         public async Task<object> Profile(
-            [Required]string username)
+            [Required]string username,
+            [FromQuery]string min)
         {
             var user = await userManager.FindByNameAsync(username);
             var fileid = user?.ProfileFileId;
@@ -98,9 +99,9 @@ namespace bangbangboom.Controllers
                 return StatusCode(404);
             try
             {
-                var fs = fileProvider.GetFileByGuid(fileid);
+                var fs = fileProvider.GetImageWithThumbnail(fileid, min != null, out var etag);
                 return File(fs, "image/jpeg", null,
-                    EntityTagHeaderValue.Parse(new StringSegment('"' + fileid + '"')), true);
+                    EntityTagHeaderValue.Parse(new StringSegment('"' + etag + '"')), true);
             }
             catch (FileNotFoundException)
             {
@@ -116,18 +117,16 @@ namespace bangbangboom.Controllers
         {
             var user = await userManager.GetUserAsync(User);
             if (file != null){
-                if (!processor.TryProcessImage(file.OpenReadStream(), out var jpg,
-                    maxsize: 200 * 1024))
-                    return StatusCode(400);
-                var fileid = await fileProvider.SaveFileAsync(jpg);
+                var newid = await fileProvider.SaveImageFileWithThumbnail(processor, file);
+                if (newid is null) return StatusCode(400, "Image may too big or not valid.");
                 if (user.ProfileFileId != null)
-                    fileProvider.DeleteFile(user.ProfileFileId);
-                user.ProfileFileId = fileid;
+                    fileProvider.DeleteImageWithThumbnail(user.ProfileFileId);
+                user.ProfileFileId = newid;
             }
             else
             {
                 if (user.ProfileFileId != null)
-                    fileProvider.DeleteFile(user.ProfileFileId);
+                    fileProvider.DeleteImageWithThumbnail(user.ProfileFileId);
                 user.ProfileFileId = null;
             }
             await context.SaveChangesAsync();

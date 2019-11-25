@@ -1,5 +1,5 @@
-import { observable } from "mobx";
-import { GameMapFromString, GameMapToString, Note, Point, GameMap, TimePoint, Single, Flick, Slide, IdItem } from "./core/MapCore";
+import { observable } from "mobx"
+import { GameMapFromString, GameMapToString, Note, Point, GameMap, TimePoint, Single, Flick, Slide, IdItem } from "./core/MapCore"
 
 function FromStorage() {
   return GameMapFromString(localStorage.getItem("gamemapstate") || "")
@@ -99,7 +99,7 @@ export const Actions = MakeActions({
       offset, bpm, bpb, notes: [], id: trackid
     }
     state.map.timepoints.push(tp)
-    state.map.timepoints.sort((a, b) => a.offset - b.offset)
+    state.map.timepoints = state.map.timepoints.slice().sort((a, b) => a.offset - b.offset)
   },
   removeTimePoint(trackid: string) {
     const i = state.map.timepoints.findIndex(tp => tp.id === trackid)
@@ -112,7 +112,7 @@ export const Actions = MakeActions({
       if (offset && offset > 0) t.offset = offset
       if (bpm && bpm > 0) t.bpm = bpm
       if (bpb && bpb > 0) t.bpb = Math.floor(bpb)
-      state.map.timepoints.sort((a, b) => a.offset - b.offset)
+      state.map.timepoints = state.map.timepoints.slice().sort((a, b) => a.offset - b.offset)
     } else return "failed"
   },
   addSingle(tpid: string, lane: number, offsetbeat: number, noteid: string) {
@@ -125,7 +125,7 @@ export const Actions = MakeActions({
       id: noteid
     }
     tp.notes.push(s)
-    tp.notes.sort(comparator)
+    tp.notes = tp.notes.slice().sort(comparator)
   },
   addFlick(tpid: string, lane: number, offsetbeat: number, noteid: string) {
     const tp = state.map.timepoints.find(x => x.id === tpid)
@@ -137,7 +137,7 @@ export const Actions = MakeActions({
       lane,
     }
     tp.notes.push(s)
-    tp.notes.sort(comparator)
+    tp.notes = tp.notes.slice().sort(comparator)
   },
   addSlide(tpid: string, lane1: number, offsetbeat1: number,
     lane2: number, offsetbeat2: number, noteid1: string, // tslint:disable-line
@@ -154,9 +154,9 @@ export const Actions = MakeActions({
         time: offsetbeat2, lane: lane2, id: noteid3
       }],
     }
-    s.notes.sort(comparator)
+    s.notes = s.notes.slice().sort(comparator)
     tp.notes.push(s)
-    tp.notes.sort(comparator)
+    tp.notes = tp.notes.slice().sort(comparator)
   },
   addSlideMid(tpid: string, slideid: string, lane: number, offsetbeat: number, noteid: string) {
     const tp = state.map.timepoints.find(x => x.id === tpid)
@@ -169,8 +169,8 @@ export const Actions = MakeActions({
         lane
       }
       s.notes.push(n)
-      s.notes.sort(comparator)
-      tp.notes.sort(comparator)
+      s.notes = s.notes.slice().sort(comparator)
+      tp.notes = tp.notes.slice().sort(comparator)
     } else return "failed"
   },
   moveSingleOrFlick(tpid: string, noteid: string, lane: number, offsetbeat: number, ntpid?: string) {
@@ -183,14 +183,14 @@ export const Actions = MakeActions({
       note.time = offsetbeat
       note.lane = lane
       if (!ntpid || ntpid === tpid) {
-        tp.notes.sort(comparator)
+        tp.notes = tp.notes.slice().sort(comparator)
         return
       }
       const ntp = state.map.timepoints.find(x => x.id === ntpid)
       if (!ntp) return "failed"
       tp.notes.splice(index, 1)
       ntp.notes.push(note)
-      ntp.notes.sort(comparator)
+      ntp.notes = ntp.notes.slice().sort(comparator)
     } else return "failed"
   },
   moveSlideNote(tpid: string, slideid: string, noteid: string, lane: number, offsetbeat: number) {
@@ -205,8 +205,8 @@ export const Actions = MakeActions({
       if (!n || (n2 && n2 !== n)) return "failed"
       n.lane = lane
       n.time = offsetbeat
-      s.notes.sort(comparator)
-      tp.notes.sort(comparator)
+      s.notes = s.notes.slice().sort(comparator)
+      tp.notes = tp.notes.slice().sort(comparator)
     } else return "failed"
   },
   setFlickEnd(tpid: string, slideid: string, flickend: boolean) {
@@ -242,7 +242,7 @@ export const Actions = MakeActions({
   }
 })
 
-export const GameMapState = state as DeepReadonly<typeof state>
+export const GameMapState = state
 
 
 

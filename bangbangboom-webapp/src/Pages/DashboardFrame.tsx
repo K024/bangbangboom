@@ -5,7 +5,7 @@ import { Box, Drawer, makeStyles, Divider, List, ListItem, ListItemText, Fade, I
 import { FormattedMessage } from "react-intl"
 import { useHistory } from "react-router"
 import MenuIcon from "@material-ui/icons/Menu"
-import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIosOutlined';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIosOutlined'
 
 const drawerWidth = 240
 

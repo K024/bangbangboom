@@ -1,29 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'
+import { theme } from './Global/Theme'
+import { ThemeProvider } from '@material-ui/styles'
+import { CssBaseline } from '@material-ui/core'
 import { useObserver } from 'mobx-react-lite'
 import { HashRouter as Router, Switch, Route } from "react-router-dom"
-import { LocaleProvider } from './Global/Locale';
-import { HomeFrame } from './Pages/HomeFrame';
-import { DashboardFrame } from './Pages/DashboardFrame';
-import { GlobalSnackbar } from './Global/Snackbar';
-import { Home } from './Pages/MainPages/Home';
-import { ThemeProvider } from '@material-ui/styles';
-import { theme } from './Global/Theme';
-import { CssBaseline } from '@material-ui/core';
-// import { MappingPage } from './Mapping/MappingPage';
-import { SearchPage } from './Pages/MainPages/Search';
-import { FavoritesPage } from './Pages/MainPages/Favorites';
-import { RegisterPage } from './Pages/MainPages/Register';
-import { MapDetailPage } from './Pages/MainPages/MapDetail';
-import { LoadCurrentUser } from './Pages/UserState';
-import { ProfilePage } from './Pages/DashboardPages/Profile';
-import { ForgotPassPage } from './Pages/MainPages/ForgotPass';
-import { NotFoundPage } from './Pages/MainPages/NotFound';
-import { MyMapsPage } from './Pages/DashboardPages/MyMaps';
-import { asyncComponent } from "react-async-component"
-
-const MappingPage = asyncComponent({
-  resolve: () => import("./Mapping/MappingPage").then(m => m.MappingPage) as any
-})
+import { LocaleProvider } from './Global/Locale'
+import { HomeFrame } from './Pages/HomeFrame'
+import { DashboardFrame } from './Pages/DashboardFrame'
+import { GlobalSnackbar } from './Global/Snackbar'
+import { Home } from './Pages/MainPages/Home'
+import { MappingPage } from './Mapping/MappingPage'
+import { SearchPage } from './Pages/MainPages/Search'
+import { FavoritesPage } from './Pages/MainPages/Favorites'
+import { RegisterPage } from './Pages/MainPages/Register'
+import { MapDetailPage } from './Pages/MainPages/MapDetail'
+import { LoadCurrentUser } from './Pages/UserState'
+import { ProfilePage } from './Pages/DashboardPages/Profile'
+import { ForgotPassPage } from './Pages/MainPages/ForgotPass'
+import { NotFoundPage } from './Pages/MainPages/NotFound'
+import { MyMapsPage } from './Pages/DashboardPages/MyMaps'
+import { AllMapsPage } from './Pages/DashboardPages/AllMaps'
+import { UsersPage } from './Pages/DashboardPages/Users'
+import { ReviewingsPage } from './Pages/DashboardPages/Reviewings'
+import { PlayPage } from './Pages/GamePages/PlayPage'
 
 const App = () => {
 
@@ -44,14 +43,14 @@ const App = () => {
                 <Switch>
                   <Route path="/dashboard" exact><ProfilePage /></Route>
                   <Route path="/dashboard/mymaps"><MyMapsPage /></Route>
-                  <Route path="/dashboard/reviewings">Reviewings</Route>
-                  <Route path="/dashboard/users">Users</Route>
-                  <Route path="/dashboard/allmaps">All maps</Route>
+                  <Route path="/dashboard/reviewings"><ReviewingsPage /></Route>
+                  <Route path="/dashboard/users"><UsersPage /></Route>
+                  <Route path="/dashboard/allmaps"><AllMapsPage /></Route>
                 </Switch>
               </DashboardFrame>
             </Route>
             <Route path="/game/:id">
-              <div>Game</div>
+              <div><PlayPage /></div>
             </Route>
             <Route path="/mapping">
               <MappingPage />
@@ -80,4 +79,4 @@ const App = () => {
   ))
 }
 
-export default App;
+export default App

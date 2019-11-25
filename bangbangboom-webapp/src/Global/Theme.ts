@@ -10,7 +10,8 @@ export const theme = createMuiTheme({
   overrides: {
     MuiButton: {
       root: {
-        textTransform: "inherit"
+        textTransform: "inherit",
+        transition: "color 0.2s"
       }
     }
   }

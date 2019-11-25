@@ -39,7 +39,7 @@ namespace bangbangboom.Data
         public string MusicFileId { get; set; }
         public string MapContent { get; set; }
         [MaxLength(100)]
-        public string ImageFileIdAndType { get; set; }
+        public string ImageFileId { get; set; }
 
         [Required]
         [MaxLength(10)]
@@ -77,7 +77,7 @@ namespace bangbangboom.Data
             reviewed = m.Reviewed;
             status = m.Status;
             hasmusic = m.MusicFileId != null;
-            hasimage = m.ImageFileIdAndType != null;
+            hasimage = m.ImageFileId != null;
         }
     }
 }

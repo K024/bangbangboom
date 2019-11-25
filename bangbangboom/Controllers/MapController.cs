@@ -25,13 +25,15 @@ namespace bangbangboom.Controllers
         private readonly UserManager<AppUser> userManager;
         private readonly AppDbContext context;
         private readonly GuidFileProvider fileProvider;
+        private readonly MediaFileProcessor mediaProcessor;
         public MapController(
-            UserManager<AppUser> userManager,
+            UserManager<AppUser> userManager, MediaFileProcessor mediaProcessor,
             AppDbContext context, GuidFileProvider fileProvider)
         {
             this.userManager = userManager;
             this.context = context;
             this.fileProvider = fileProvider;
+            this.mediaProcessor = mediaProcessor;
         }
 
         [HttpGet]
@@ -109,26 +111,27 @@ namespace bangbangboom.Controllers
                 return StatusCode(403, "Cannot modify reviewed map.");
 
             if (musicName != null) map.MusicName = musicName;
-            if (artist != null) map.Artist = artist;
-            if (mapName != null) map.MapName = mapName;
-            if (difficulty != null) map.Difficulty = difficulty ?? 20;
-            if (description != null) map.Description = description;
-            if (content != null) map.MapContent = content;
-            if (image != null)
+            else if (artist != null) map.Artist = artist;
+            else if (mapName != null) map.MapName = mapName;
+            else if (difficulty != null) map.Difficulty = difficulty ?? 20;
+            else if (description != null) map.Description = description;
+            else if (content != null) map.MapContent = content;
+            else if (image != null)
             {
                 try
                 {
-                    var type = image.ContentType;
-                    if (!type.StartsWith("image") || image.Length > 1024 * 1024 * 5) return StatusCode(400);
-                    var fileid = await fileProvider.SaveFileAsync(image.OpenReadStream());
-                    fileProvider.DeleteFile(map.ImageFileIdAndType.Split(':')[0]);
-                    map.ImageFileIdAndType = fileid + ":" + type;
+                    var newid = await fileProvider.SaveImageFileWithThumbnail(mediaProcessor, image);
+                    if (newid is null) return StatusCode(400, "Image may too big or not valid.");
+
+                    fileProvider.DeleteImageWithThumbnail(map.ImageFileId);
+                    map.ImageFileId = newid;
                 }
                 catch (Exception)
                 {
+                    return StatusCode(500);
                 }
             }
-            if (music != null)
+            else if (music != null)
             {
                 try
                 {
@@ -138,8 +141,10 @@ namespace bangbangboom.Controllers
                 }
                 catch (Exception)
                 {
+                    return StatusCode(500);
                 }
             }
+            else return StatusCode(400, "No change applied.");
 
             map.LastModified = DateTimeOffset.Now;
             map.Status = MapStatus.Wip;
@@ -156,8 +161,11 @@ namespace bangbangboom.Controllers
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
-            if (map.UploaderId != user.Id
-                || !await userManager.IsInRoleAsync(user, AppUserRole.Admin)) return StatusCode(403);
+            if (map.UploaderId != user.Id &&
+                !await userManager.IsInRoleAsync(user, AppUserRole.Admin)) return StatusCode(403);
+
+            if (map.ImageFileId != null) fileProvider.DeleteImageWithThumbnail(map.ImageFileId);
+            if (map.MusicFileId != null) fileProvider.DeleteFile(map.MusicFileId);
 
             context.Maps.Remove(map);
             await context.SaveChangesAsync();

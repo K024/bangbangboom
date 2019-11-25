@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -62,12 +63,14 @@ namespace bangbangboom
             {
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 8;
 
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
                 options.User.RequireUniqueEmail = true;
+                //options.SignIn.RequireConfirmedEmail = true;
             });
 
             services.Configure<SecurityStampValidatorOptions>(options =>
@@ -148,27 +151,35 @@ namespace bangbangboom
                     config.Run(context =>
                     {
                         context.Response.StatusCode = 500;
-                        return Task.CompletedTask;
+                        return context.Response.WriteAsync("Internal Server Error!");
                     });
                 });
                 app.UseHsts();
             }
-
             app.UseHttpsRedirection();
             app.UseDefaultFiles();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                OnPrepareResponse = c =>
+                {
+                    if (c.Context.Request.Path == "/index.html")
+                        c.Context.Response.Headers.Add("Cache-Control", "public, max-age=0");
+                    else
+                        c.Context.Response.Headers.Add("Cache-Control", "public, max-age=3600");
+                }
+            });
 
             app.UseAuthentication();
             app.UseMvc();
 
-            app.Use(async (req, next) =>
-            {
-                var uri = req.Request.Path.Value.ToLower();
-                if (uri == "/api" || uri.StartsWith("/api/"))
-                    req.Response.StatusCode = StatusCodes.Status404NotFound;
-                else
-                    await next();
-            });
+            //app.Use(async (req, next) =>
+            //{
+            //    var uri = req.Request.Path.Value.ToLower();
+            //    if (uri == "/api" || uri.StartsWith("/api/"))
+            //        req.Response.StatusCode = StatusCodes.Status404NotFound;
+            //    else
+            //        await next();
+            //});
             // app.UseSpa(config => { });
 
             dbContext.Database.EnsureCreated();

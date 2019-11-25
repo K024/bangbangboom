@@ -77,7 +77,7 @@ namespace bangbangboom.Controllers
             var user = await userManager.GetUserAsync(User);
             var comment = await context.Comments.FindAsync(id);
             if (comment is null) return StatusCode(404);
-            if (comment.UserId != user.Id ||
+            if (comment.UserId != user.Id &&
                 !await userManager.IsInRoleAsync(user, AppUserRole.Admin))
                 return StatusCode(403);
 

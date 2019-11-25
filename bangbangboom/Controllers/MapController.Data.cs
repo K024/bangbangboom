@@ -33,10 +33,11 @@ namespace bangbangboom.Controllers
 
         [HttpGet("{id}.{ext?}")]
         public async Task<object> Image(
-            [Required]long id)
+            [Required]long id,
+            [FromQuery]string min)
         {
             var map = await context.Maps.FindAsync(id);
-            if (map is null || map.ImageFileIdAndType is null) return StatusCode(404);
+            if (map is null || map.ImageFileId is null) return StatusCode(404);
             if (!MapStatus.CanPublicView.Contains(map.Status))
             {
                 var user = await userManager.GetUserAsync(User);
@@ -45,11 +46,10 @@ namespace bangbangboom.Controllers
             }
             try
             {
-                var idAndType = map.ImageFileIdAndType.Split(':');
-                var file = fileProvider.GetFileByGuid(idAndType[0]);
+                var file = fileProvider.GetImageWithThumbnail(map.ImageFileId, min != null, out var etag);
 
-                return File(file, idAndType[1], null,
-                    EntityTagHeaderValue.Parse(new StringSegment('"' + idAndType[0] + '"')), true);
+                return File(file, "image/jpeg", null,
+                    EntityTagHeaderValue.Parse(new StringSegment('"' + etag + '"')), true);
             }
             catch (Exception)
             {

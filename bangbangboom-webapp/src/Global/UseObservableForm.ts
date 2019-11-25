@@ -1,4 +1,4 @@
-import { useLocalStore, useComputed } from "mobx-react-lite"
+import { useLocalStore } from "mobx-react-lite"
 import { useEffect, useState } from "react"
 
 export type FormDescription<K extends string> = Record<K, {
@@ -48,19 +48,16 @@ export function useObservableForm<K extends string>(descriptionFunc: () => FormD
     return ret
   })
 
-
-  const formValid = useComputed(() => {
-    for (const key in form) {
-      if (form[key].error) return false
-      if (form[key].required && !form[key].value) return false
+  return useLocalStore(() => ({
+    get form() { return form },
+    get formValid() {
+      for (const key in form) {
+        if (form[key].error) return false
+        if (form[key].required && !form[key].value) return false
+      }
+      return true
     }
-    return true
-  })
-
-  return {
-    form,
-    formValid
-  }
+  }))
 }
 
 export function FormValue<K extends string>(form: Record<K, FormProps>) {
