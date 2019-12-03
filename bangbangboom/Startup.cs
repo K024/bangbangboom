@@ -136,7 +136,7 @@ namespace bangbangboom
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, AppDbContext dbContext)
+        public void Configure(IApplicationBuilder app, IServiceProvider serviceProvider)
         {
             app.UseResponseCompression();
             if (env.IsDevelopment())
@@ -154,9 +154,9 @@ namespace bangbangboom
                         return context.Response.WriteAsync("Internal Server Error!");
                     });
                 });
-                app.UseHsts();
+                //app.UseHsts();
             }
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions()
             {
@@ -182,7 +182,53 @@ namespace bangbangboom
             //});
             // app.UseSpa(config => { });
 
-            dbContext.Database.EnsureCreated();
+            Init(serviceProvider);
+        }
+
+        private async void Init(IServiceProvider provider)
+        {
+            using (var scope = provider.CreateScope())
+            using (var context = scope.ServiceProvider.GetService<AppDbContext>())
+            using (var usermanager = scope.ServiceProvider.GetService<UserManager<AppUser>>())
+            using (var rolemanager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>())
+            {
+
+                await context.Database.EnsureCreatedAsync();
+
+                var user = await usermanager.FindByIdAsync("admin");
+                if (user is null)
+                {
+                    var logger = scope.ServiceProvider.GetService<ILogger<Startup>>();
+
+                    var email = Configuration.GetSection("Admin")["Email"];
+                    var password = Configuration.GetSection("Admin")["Password"];
+                    if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
+                    {
+                        using (var transaction = await context.Database.BeginTransactionAsync())
+                        {
+                            user = new AppUser()
+                            {
+                                Id = Guid.NewGuid().ToString(),
+                                UserName = "admin",
+                                Email = email,
+                            };
+                            await usermanager.CreateAsync(user, password);
+                            if (!await rolemanager.RoleExistsAsync(Controllers.AppUserRole.Admin))
+                                await rolemanager.CreateAsync(new IdentityRole(Controllers.AppUserRole.Admin));
+                            if (!await rolemanager.RoleExistsAsync(Controllers.AppUserRole.Reviewer))
+                                await rolemanager.CreateAsync(new IdentityRole(Controllers.AppUserRole.Reviewer));
+                            await usermanager.AddToRolesAsync(user, new[] {
+                                Controllers.AppUserRole.Admin, Controllers.AppUserRole.Reviewer });
+                            logger.LogInformation("Admin account created.");
+                            transaction.Commit();
+                        }
+                    } 
+                    else
+                    {
+                        logger.LogWarning("No admin account created.");
+                    }
+                }
+            }
         }
     }
 }

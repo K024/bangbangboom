@@ -8,7 +8,7 @@ import { MergeListDistinct } from "../../Global/Utils"
 import { useObserver, useLocalStore } from "mobx-react-lite"
 import { MapPreviewList } from "../Components/MapItem"
 import { FormattedMessage } from "react-intl"
-import { ButtonProgress } from "../Components/CoverProgress"
+import { CoverProgress } from "../Components/CoverProgress"
 
 const HomePageMaps = observable({
   maps: [] as MapInfo[],
@@ -56,10 +56,10 @@ export const Home = () => {
     <Typography variant="h2">Home</Typography>
     <MapPreviewList maps={HomePageMaps.maps} />
     {!HomePageMaps.nomore &&
-      <ButtonProgress loading={s.loading} m={1}>
+      <CoverProgress loading={s.loading} m={1}>
         <Button onClick={LoadMore} disabled={s.loading} fullWidth>
           <FormattedMessage id="label.loadmore" />
         </Button>
-      </ButtonProgress>}
+      </CoverProgress>}
   </>))
 }

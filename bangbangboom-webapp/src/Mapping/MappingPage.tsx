@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import { ThemeProvider } from "@material-ui/styles"
 import { useObserver } from "mobx-react-lite"
-import { Tabs, Tab, Box, createMuiTheme, CssBaseline, IconButton, makeStyles, Fade } from "@material-ui/core"
+import { Tabs, Tab, Box, createMuiTheme, CssBaseline, IconButton, makeStyles, Fade, CircularProgress } from "@material-ui/core"
 import { lightBlue, pink, red } from "@material-ui/core/colors"
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIosOutlined'
 import UndoIcon from '@material-ui/icons/Undo'
@@ -15,8 +15,10 @@ import { ToolBar } from "./Components/ToolBar"
 import { MetaPage } from "./Pages/Meta"
 import { TimingPage } from "./Pages/Timing"
 import { TrackMappingPage } from "./Pages/TrackMapping"
-import { undoState, SaveToStorage } from "./GameMapState"
+import { undoState, GameMapState } from "./GameMapState"
 import { setMessage } from "../Global/Snackbar"
+import { ConnectionInfo, ConnectionState } from "./ConnectionState"
+import { GameMapToString } from "./core/MapCore"
 
 const darktheme = createMuiTheme({
   palette: {
@@ -68,16 +70,19 @@ export const MappingPage = () => {
   const cn = useStyles()
   const history = useHistory()
 
-  useEffect(() => StartMapping(), [])
+  useEffect(StartMapping, [])
 
-  const handleSave = () => {
-    SaveToStorage()
-    setMessage("info.success", "success")
+  const handleSave = async () => {
+    const res = await ConnectionInfo.saveMapContent(GameMapToString(GameMapState.map))
+    if (res !== false)
+      setMessage("info.success", "success")
+    return res
   }
 
-  const handleTestPlay = () => {
-    handleSave()
-    history.push("/play/local")
+  const handleTestPlay = async () => {
+    const res = await handleSave()
+    if (res !== false)
+      history.push("/play/local")
   }
 
   useEffect(() => {
@@ -89,7 +94,7 @@ export const MappingPage = () => {
             if (e.shiftKey) undoState.Redo()
             else undoState.Undo()
           }; break
-        case "s": if (e.ctrlKey) handleSave(); e.preventDefault(); break
+        case "s": if (e.ctrlKey) { handleSave(); e.preventDefault(); } break
       }
     }
     window.addEventListener("keydown", listener)
@@ -119,8 +124,12 @@ export const MappingPage = () => {
               <IconButton onClick={() => undoState.Redo()} disabled={!undoState.canRedo}>
                 <RedoIcon /></IconButton></Box>
             <Box>
-              <IconButton onClick={handleSave}>
-                <SaveAltIcon /></IconButton></Box>
+              <IconButton onClick={handleSave}
+                disabled={ConnectionState.readonly || ConnectionState.loading}>
+                {ConnectionState.loading
+                  ? <CircularProgress size={24} />
+                  : <SaveAltIcon />
+                }</IconButton></Box>
             <Box pr={1}>
               <IconButton onClick={handleTestPlay}>
                 <PlayCircleFilledIcon /></IconButton></Box>

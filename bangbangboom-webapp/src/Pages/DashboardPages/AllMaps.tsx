@@ -87,5 +87,4 @@ export const AllMapsPage = () => {
       </Paper>
     </Box>
   ))
-
 }

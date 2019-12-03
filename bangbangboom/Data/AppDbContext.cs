@@ -83,6 +83,9 @@ namespace bangbangboom.Data
         public DbSet<Map> Maps { get; set; }
         public DbSet<Meta> Metas { get; set; }
         public DbSet<PlayRecord> PlayRecords { get; set; }
+
+        public DbQuery<AppUserInfo> AppUserInfos { get; set; }
+        public DbQuery<MapInfo> MapInfos { get; set; }
     }
 
     public static class PageExtension

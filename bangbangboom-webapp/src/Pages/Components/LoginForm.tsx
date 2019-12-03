@@ -6,7 +6,7 @@ import { FormattedMessage } from "react-intl"
 import { PasswordField } from "./PasswordFiled"
 import { useObservableForm, FormValue } from "../../Global/UseObservableForm"
 import { useHistory } from "react-router"
-import { ButtonProgress } from "./CoverProgress"
+import { CoverProgress } from "./CoverProgress"
 import { LoadCurrentUser } from "../UserState"
 import { setMessage } from "../../Global/Snackbar"
 import { Api, HandleErr, Xform } from "../../Global/Axios"
@@ -66,22 +66,31 @@ export const LoginForm = ({ onClose = () => { } }) => {
     s.loading = false
   }, [s, onClose, form])
 
+  const keydown = (e: React.KeyboardEvent) => {
+    switch (e.key.toLowerCase()) {
+      case "enter":
+        if (formValid)
+          login()
+        break
+    }
+  }
+
   return useObserver(() => (
     <Box className={classes.root} display="flex" flexDirection="column" alignItems="stretch">
-      <TextField
+      <TextField onKeyDown={keydown}
         label={<FormattedMessage id="label.usernameemail" />}
         {...form.username}>
       </TextField>
-      <PasswordField
+      <PasswordField onKeyDown={keydown}
         label={<FormattedMessage id="label.password" />}
         {...form.password}>
       </PasswordField>
-      <ButtonProgress position="relative" loading={s.loading}>
+      <CoverProgress position="relative" loading={s.loading}>
         <Button variant="contained" color="primary" disabled={!formValid || s.loading || s.success}
           onClick={login} fullWidth>
           <FormattedMessage id="label.login" />
         </Button>
-      </ButtonProgress>
+      </CoverProgress>
       <Box display="flex" justifyContent="space-around">
         <Button onClick={() => handleForward("/register")}><FormattedMessage id="label.register" /></Button>
         <Button onClick={() => handleForward("/forgotpass")}><FormattedMessage id="label.forgotpass" /></Button>

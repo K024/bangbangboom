@@ -8,7 +8,7 @@ import { UsernameReg, PasswordReg, LoadCurrentUser, UserState } from "../UserSta
 import { Api, Xform, HandleErr } from "../../Global/Axios"
 import { setMessage } from "../../Global/Snackbar"
 import { DebounceFunc } from "../../Global/Utils"
-import { ButtonProgress as CoverProgress } from "../Components/CoverProgress"
+import { CoverProgress } from "../Components/CoverProgress"
 import { Redirect } from "react-router"
 import { PasswordField } from "../Components/PasswordFiled"
 

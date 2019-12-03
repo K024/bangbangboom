@@ -113,9 +113,10 @@ export const Tracks = ({ className = "" }) => {
     const x = e.clientX - rect.left
     s.mouse.time = y / TracksState.timeHeightFactor
     let l = Math.floor((x / rect.width) * 10 - 1.5)
+    l = TracksState.mirror ? 6 - l : l
     if (l < 0) l = -1
     if (l > 6) l = -1
-    s.mouse.lane = TracksState.mirror ? 6 - l : l
+    s.mouse.lane = l
   }
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {

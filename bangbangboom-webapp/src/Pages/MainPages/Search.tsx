@@ -5,7 +5,7 @@ import { setMessage } from "../../Global/Snackbar"
 import { MapInfo } from "../../Global/Modals"
 import { Typography, Button, TextField, Box, IconButton, InputAdornment } from "@material-ui/core"
 import { MapPreviewList } from "../Components/MapItem"
-import { ButtonProgress } from "../Components/CoverProgress"
+import { CoverProgress } from "../Components/CoverProgress"
 import { FormattedMessage } from "react-intl"
 import SearchIcon from '@material-ui/icons/Search'
 
@@ -62,11 +62,11 @@ export const SearchPage = () => {
       </Box>
       <MapPreviewList maps={list} />
       {!nomore &&
-        <ButtonProgress loading={loading} m={1}>
+        <CoverProgress loading={loading} m={1}>
           <Button onClick={loadMore} disabled={loading} fullWidth>
             <FormattedMessage id="label.loadmore" />
           </Button>
-        </ButtonProgress>}
+        </CoverProgress>}
       {nomore && list.length === 0 &&
         <Box m={2} textAlign="center">
           <Typography variant="h6">

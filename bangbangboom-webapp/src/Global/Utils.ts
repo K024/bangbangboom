@@ -93,3 +93,31 @@ export function lazyObject<Keys extends keyof any, Values>(obj: { [K in Keys]: (
   }
   return o
 }
+
+export function selectFile(accept = "*", multiple = false) {
+  return new Promise<File[]>((res, rej) => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = accept
+    input.multiple = multiple
+    input.click()
+    input.addEventListener("change", () => {
+      if (input.files && input.files.length) {
+        res(Array.from(input.files))
+      }
+    })
+  })
+}
+
+export function readFile(file: File, encode = "UTF-8") {
+  return new Promise<string>((res, rej) => {
+    const reader = new FileReader()
+    reader.readAsText(file, encode)
+    reader.onload = e => {
+      if (e && e.target) {
+        const content = (e.target as any).result as string
+        res(content)
+      }
+    }
+  })
+}

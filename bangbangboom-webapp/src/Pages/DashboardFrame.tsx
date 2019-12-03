@@ -97,7 +97,7 @@ export const DashboardFrame = ({ children = {} as ReactNode }) => {
     <Fade in>
       <Box className={classes.root}>
         <MyDrawer open={open} setOpen={setOpen}></MyDrawer>
-        <Box flexGrow={1}>
+        <Box flexGrow={1} width={0}>
           <Box className={classes.header}>
             <Box className={classes.sm}>
               <IconButton onClick={() => setOpen(!open)}><MenuIcon /></IconButton>

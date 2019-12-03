@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import { useObserver } from "mobx-react-lite"
 import { makeStyles, RadioGroup, FormControlLabel, Radio, Select, MenuItem, IconButton, Switch, Tooltip, Grid, FormControl, InputLabel } from "@material-ui/core"
-import { TracksState, ToolTypes, zoomin, zoomout } from "./Tracks.State"
+import { TracksState, ToolTypes, zoomin, zoomout, StartTrackMapping } from "./Tracks.State"
 import { Tracks } from "../Components/Tracks"
 import { ScrollBar } from "../Components/ScrollBar"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -66,6 +66,8 @@ export const TrackMappingPage = ({ className = "" }) => {
     window.addEventListener("keydown", listener)
     return () => { window.removeEventListener("keydown", listener) }
   }, [])
+
+  useEffect(StartTrackMapping, [])
 
   const intl = useIntl()
   const shortcut = intl.formatMessage({ id: "label.shortcut" }) + ": "

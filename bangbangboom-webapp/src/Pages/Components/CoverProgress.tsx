@@ -10,9 +10,9 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-export type ButtonProgressProps = { children: ReactNode, loading: boolean, size?: number } & BoxProps
+export type CoverProgressProps = { children: ReactNode, loading: boolean, size?: number } & BoxProps
 
-export const ButtonProgress = ({ children, loading, size = 24, ...others }: ButtonProgressProps) => {
+export const CoverProgress = ({ children, loading, size = 24, ...others }: CoverProgressProps) => {
   const classes = useStyles()
   return (
     <Box position="relative" {...others}>
@@ -21,6 +21,5 @@ export const ButtonProgress = ({ children, loading, size = 24, ...others }: Butt
         <CircularProgress size={size}
           style={{ marginTop: -size / 2, marginLeft: -size / 2 }}
           className={classes.buttonProgress} />}
-    </Box>
-  )
+    </Box>)
 }

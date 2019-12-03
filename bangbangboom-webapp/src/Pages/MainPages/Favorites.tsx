@@ -5,7 +5,7 @@ import { setMessage } from "../../Global/Snackbar"
 import { MapInfo } from "../../Global/Modals"
 import { Typography, Button, Box } from "@material-ui/core"
 import { MapPreviewList } from "../Components/MapItem"
-import { ButtonProgress } from "../Components/CoverProgress"
+import { CoverProgress } from "../Components/CoverProgress"
 import { FormattedMessage } from "react-intl"
 import { UserState } from "../UserState"
 
@@ -57,11 +57,11 @@ export const FavoritesPage = () => {
         : <>
           <MapPreviewList maps={s.list} />
           {!s.nomore &&
-            <ButtonProgress loading={s.loading} m={1}>
+            <CoverProgress loading={s.loading} m={1}>
               <Button onClick={loadMore} disabled={s.loading} fullWidth>
                 <FormattedMessage id="label.loadmore" />
               </Button>
-            </ButtonProgress>}
+            </CoverProgress>}
         </>}
     </>
   ))

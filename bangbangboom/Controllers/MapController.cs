@@ -122,8 +122,8 @@ namespace bangbangboom.Controllers
                 {
                     var newid = await fileProvider.SaveImageFileWithThumbnail(mediaProcessor, image);
                     if (newid is null) return StatusCode(400, "Image may too big or not valid.");
-
-                    fileProvider.DeleteImageWithThumbnail(map.ImageFileId);
+                    if (!string.IsNullOrEmpty(map.ImageFileId))
+                        fileProvider.DeleteImageWithThumbnail(map.ImageFileId);
                     map.ImageFileId = newid;
                 }
                 catch (Exception)
@@ -136,7 +136,8 @@ namespace bangbangboom.Controllers
                 try
                 {
                     var fileid = await fileProvider.SaveFileAsync(music.OpenReadStream());
-                    fileProvider.DeleteFile(map.MusicFileId);
+                    if (!string.IsNullOrEmpty(map.MusicFileId))
+                        fileProvider.DeleteFile(map.MusicFileId);
                     map.MusicFileId = fileid;
                 }
                 catch (Exception)

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -99,8 +100,8 @@ namespace bangbangboom.Controllers
                 return StatusCode(404);
             try
             {
-                var fs = fileProvider.GetImageWithThumbnail(fileid, min != null, out var etag);
-                return File(fs, "image/jpeg", null,
+                var fs = fileProvider.GetImageWithThumbnail(fileid, out var etag, min != null);
+                return File(fs, "image/jpeg", DateTimeOffset.MinValue,
                     EntityTagHeaderValue.Parse(new StringSegment('"' + etag + '"')), true);
             }
             catch (FileNotFoundException)

@@ -46,9 +46,9 @@ namespace bangbangboom.Controllers
             }
             try
             {
-                var file = fileProvider.GetImageWithThumbnail(map.ImageFileId, min != null, out var etag);
+                var file = fileProvider.GetImageWithThumbnail(map.ImageFileId, out var etag, min != null);
 
-                return File(file, "image/jpeg", null,
+                return File(file, "image/jpeg", DateTimeOffset.MinValue,
                     EntityTagHeaderValue.Parse(new StringSegment('"' + etag + '"')), true);
             }
             catch (Exception)
@@ -71,7 +71,7 @@ namespace bangbangboom.Controllers
             try
             {
                 var file = fileProvider.GetFileByGuid(map.MusicFileId);
-                return File(file, "audio/mp3", null,
+                return File(file, "audio/mp3", DateTimeOffset.MinValue,
                     EntityTagHeaderValue.Parse(new StringSegment('"' + map.MusicFileId + '"')), true);
             }
             catch (Exception)

@@ -131,7 +131,7 @@ export const ProfilePage = () => {
         <Box className={classes.avatarbox}>
           <UserProfile user={UserState.user} classes={{ root: classes.avatar }} />
           <Box className={classes.line}>
-            <Button color="secondary" onClick={handleDeleteProfile} disabled={s.loading}>
+            <Button color="secondary" onClick={handleDeleteProfile} disabled={s.loading || !UserState.user.hasprofile}>
               <FormattedMessage id="label.delete" />
             </Button>
             <Button color="primary" onClick={handleUploadProfile} disabled={s.loading}>

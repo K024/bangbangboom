@@ -31,7 +31,8 @@ const useStyles = makeStyles(theme => ({
       width: "100%",
       height: "100%",
       backgroundColor: "cornflowerblue",
-      willChange: "opacity"
+      willChange: "opacity",
+      opacity: 0,
     },
     "& :first-child>*": {
       backgroundColor: "darkorange",

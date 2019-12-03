@@ -49,7 +49,7 @@ const App = () => {
                 </Switch>
               </DashboardFrame>
             </Route>
-            <Route path="/game/:id">
+            <Route path="/play/:id">
               <div><PlayPage /></div>
             </Route>
             <Route path="/mapping">

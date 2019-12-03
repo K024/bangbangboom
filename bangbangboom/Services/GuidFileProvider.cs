@@ -73,7 +73,7 @@ namespace bangbangboom.Services
         {
             StringBuilder hex = new StringBuilder(bytes.Length * 2);
             foreach (byte b in bytes)
-                hex.AppendFormat("{0:x2}", b);
+                hex.Append(b.ToString("x2"));
             return hex.ToString();
         }
 
@@ -109,7 +109,7 @@ namespace bangbangboom.Services
             return id;
         }
 
-        public static Stream GetImageWithThumbnail(this GuidFileProvider provider, string id, bool min = false, out string etag)
+        public static Stream GetImageWithThumbnail(this GuidFileProvider provider, string id, out string etag, bool min = false)
         {
             var ids = id.Split(':');
             if (ids.Length == 2 && min)

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react"
 import { FormattedMessage, FormattedDate } from "react-intl"
-import { useLocalStore } from "mobx-react-lite"
+import { useLocalStore, useObserver } from "mobx-react-lite"
 
 export type DateTimeProps = { date: string | Date }
 
@@ -39,7 +39,7 @@ export const DateTime = ({ date }: DateTimeProps) => {
     return () => { clearTimeout(toid) }
   }, [s, date])
 
-  return s.display
+  return useObserver(() => s.display)
 }
 
 

@@ -6,9 +6,7 @@ import { Api } from "../../Global/Axios"
 import { MapInfo } from "../../Global/Modals"
 import { GameSettings } from "./GameSettings"
 import { setMessage } from "../../Global/Snackbar"
-import { MetaState } from "../../Mapping/MappingState"
-import { GameMapToString } from "../../Mapping/core/MapCore"
-import { GameMapState } from "../../Mapping/GameMapState"
+import { getConnectionLoadConfig } from "../../Mapping/ConnectionState"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -42,25 +40,18 @@ export const PlayPage = () => {
       try {
         let loadconfig: GameLoadConfig
         if (id !== "local") {
-          const res = await Api.get<MapInfo>("/api/map/info", { params: { id } })
+          const res = await Api.get<MapInfo>("map/info", { params: { id } })
           if (unmounted) return
           loadconfig = {
             musicSrc: "/api/map/music/" + id,
             backgroundSrc: "/api/map/image/" + id,
             mapSrc: "/api/map/content/" + id,
             skin: "/assets/default",
-            songName: (res.data.musicname || "(empty)") + " - " + (res.data.mapname || "(empty)")
+            songName: (res.data.musicname || "(empty)")
+              + " - " + (res.data.mapname || "(empty)")
           }
         } else {
-          const mapstr = GameMapToString(GameMapState.map)
-          const url = URL.createObjectURL(new Blob([mapstr]))
-          loadconfig = {
-            musicSrc: MetaState.musicSrc,
-            backgroundSrc: MetaState.backgroundImageSrc,
-            mapSrc: url,
-            skin: "/assets/default",
-            songName: "local"
-          }
+          loadconfig = getConnectionLoadConfig()
         }
         if (!ref.current) throw new Error("Error")
         game = new Game(ref.current, GameSettings, loadconfig)
@@ -71,7 +62,7 @@ export const PlayPage = () => {
         callback()
       }
     })()
-    return callback
+    return () => { unmounted = true }
   }, [id, history])
 
 

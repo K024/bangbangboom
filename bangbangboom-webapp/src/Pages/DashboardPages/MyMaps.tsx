@@ -1,7 +1,7 @@
 import React, { useEffect } from "react"
 import { useObserver, useLocalStore } from "mobx-react-lite"
 import { makeStyles, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, Typography, Box } from "@material-ui/core"
-import { Api } from "../../Global/Axios"
+import { Api, HandleErr } from "../../Global/Axios"
 import { MapInfo } from "../../Global/Modals"
 import { setMessage } from "../../Global/Snackbar"
 import { FormattedMessage } from "react-intl"
@@ -9,15 +9,13 @@ import { CanNone } from "../Components/CanNone"
 import { DateTime } from "../Components/DateTime"
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    margin: theme.spacing(2),
-  },
   paper: {
     width: "100%",
-    overflowX: "auto"
+    maxWidth: "100%",
+    overflow: "auto"
   },
   table: {
-    minWidth: 650,
+    minWidth: 800,
   },
   header: {
     margin: theme.spacing(3, 1, 1)
@@ -28,15 +26,27 @@ const HeaderPart = () => (
   <TableHead>
     <TableRow>
       <TableCell>Id</TableCell>
-      <TableCell align="right"><FormattedMessage id="label.music" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.artist" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.mapname" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.difficulty" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.lastmodified" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.status" /></TableCell>
-      <TableCell align="right"></TableCell>
+      <TableCell><FormattedMessage id="label.music" /></TableCell>
+      <TableCell><FormattedMessage id="label.artist" /></TableCell>
+      <TableCell><FormattedMessage id="label.mapname" /></TableCell>
+      <TableCell><FormattedMessage id="label.difficulty" /></TableCell>
+      <TableCell><FormattedMessage id="label.lastmodified" /></TableCell>
+      <TableCell><FormattedMessage id="label.status" /></TableCell>
+      <TableCell></TableCell>
     </TableRow>
   </TableHead>)
+
+const mapRow = (m: MapInfo) => (
+  <TableRow key={m.id}>
+    <TableCell component="th" scope="row">{m.id}</TableCell>
+    <TableCell><CanNone value={m.musicname} /></TableCell>
+    <TableCell><CanNone value={m.artist} /></TableCell>
+    <TableCell><CanNone value={m.mapname} /></TableCell>
+    <TableCell>{m.difficulty || "-"}</TableCell>
+    <TableCell><DateTime date={m.lastmodified} /></TableCell>
+    <TableCell><FormattedMessage id={"mapstatus." + m.status} /></TableCell>
+    <TableCell><Button><FormattedMessage id="label.delete" /></Button></TableCell>
+  </TableRow>)
 
 export const MyMapsPage = () => {
 
@@ -44,11 +54,11 @@ export const MyMapsPage = () => {
 
   const s = useLocalStore(() => ({
     loading: false,
-    maps: [] as MapInfo[]
-  }))
-
-  useEffect(() => {
-    (async () => {
+    maps: [] as MapInfo[],
+    get wips() { return s.maps.filter(x => x.status === "wip" || x.status === "notpass") },
+    get reviewing() { return s.maps.filter(x => x.status === "reviewing") },
+    get reviewed() { return s.maps.filter(x => x.status === "reviewed" || x.status === "proved") },
+    async load() {
       s.loading = true
       try {
         const res = await Api.get<MapInfo[]>("map/mymaps")
@@ -57,80 +67,50 @@ export const MyMapsPage = () => {
         setMessage("error.neterr", "error")
       }
       s.loading = false
-    })()
+    }
+  }))
+
+
+  const handleCreate = async () => {
+    s.loading = true
+    try {
+      await Api.post("map/add")
+      await s.load()
+      setMessage("info.success", "success")
+    } catch (error) {
+      const err = HandleErr<string>(error)
+      if (err && err.status === 403 && err.data.substr(0, 7) === "To many")
+        setMessage("notice.tomanyunreviewed", "error")
+      else
+        setMessage("error.neterr", "error")
+    }
+    s.loading = false
+  }
+
+  useEffect(() => {
+    s.load()
   }, [s])
 
-  const wips = useObserver(() => s.maps.filter(x => x.status === "wip" || x.status === "notpass"))
-  const reviewing = useObserver(() => s.maps.filter(x => x.status === "reviewing"))
-  const reviewed = useObserver(() => s.maps.filter(x => x.status === "reviewed" || x.status === "proved"))
-
   return useObserver(() => (
-    <Box className={classes.root}>
-      <Typography className={classes.header} variant="h5">
-        <FormattedMessage id="mapstatus.wip" />
-      </Typography>
-      <Paper className={classes.paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <HeaderPart />
-          <TableBody>
-            {wips.map(m => (
-              <TableRow key={m.id}>
-                <TableCell component="th" scope="row">{m.id}</TableCell>
-                <TableCell align="right"><CanNone value={m.musicname} /></TableCell>
-                <TableCell align="right"><CanNone value={m.artist} /></TableCell>
-                <TableCell align="right"><CanNone value={m.mapname} /></TableCell>
-                <TableCell align="right">{m.difficulty || "-"}</TableCell>
-                <TableCell align="right"><DateTime date={m.lastmodified} /></TableCell>
-                <TableCell align="right"><FormattedMessage id={"mapstatus." + m.status} /></TableCell>
-                <TableCell align="right"><Button><FormattedMessage id="label.delete" /></Button></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper>
-      <Typography className={classes.header} variant="h5">
-        <FormattedMessage id="mapstatus.reviewing" />
-      </Typography>
-      <Paper className={classes.paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <HeaderPart />
-          <TableBody>
-            {reviewing.map(m => (
-              <TableRow key={m.id}>
-                <TableCell component="th" scope="row">{m.id}</TableCell>
-                <TableCell align="right"><CanNone value={m.musicname} /></TableCell>
-                <TableCell align="right"><CanNone value={m.artist} /></TableCell>
-                <TableCell align="right"><CanNone value={m.mapname} /></TableCell>
-                <TableCell align="right">{m.difficulty || "-"}</TableCell>
-                <TableCell align="right"><DateTime date={m.lastmodified} /></TableCell>
-                <TableCell align="right"><FormattedMessage id={"mapstatus." + m.status} /></TableCell>
-                <TableCell align="right"><Button><FormattedMessage id="label.delete" /></Button></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper>
-      <Typography className={classes.header} variant="h5">
-        <FormattedMessage id="mapstatus.reviewed" />
-      </Typography>
-      <Paper className={classes.paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <HeaderPart />
-          <TableBody>
-            {reviewed.map(m => (
-              <TableRow key={m.id}>
-                <TableCell component="th" scope="row">{m.id}</TableCell>
-                <TableCell align="right"><CanNone value={m.musicname} /></TableCell>
-                <TableCell align="right"><CanNone value={m.artist} /></TableCell>
-                <TableCell align="right"><CanNone value={m.mapname} /></TableCell>
-                <TableCell align="right">{m.difficulty || "-"}</TableCell>
-                <TableCell align="right"><DateTime date={m.lastmodified} /></TableCell>
-                <TableCell align="right"><FormattedMessage id={"mapstatus." + m.status} /></TableCell>
-                <TableCell align="right"><Button><FormattedMessage id="label.delete" /></Button></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Paper>
+    <Box m={2}>
+      <Button disabled={s.loading} onClick={handleCreate}>
+        <FormattedMessage id="label.create" />
+      </Button>
+      {[{ id: "mapstatus.wip", rows: s.wips },
+      { id: "mapstatus.reviewing", rows: s.reviewing },
+      { id: "mapstatus.reviewed", rows: s.reviewed },].map(x =>
+        <React.Fragment key={x.id}>
+          <Typography className={classes.header} variant="h5">
+            <FormattedMessage id={x.id} />
+          </Typography>
+          <Paper className={classes.paper}>
+            <Table className={classes.table}>
+              <HeaderPart />
+              <TableBody>
+                {x.rows.map(mapRow)}
+              </TableBody>
+            </Table>
+          </Paper>
+        </React.Fragment>)}
     </Box>))
 }

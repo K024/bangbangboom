@@ -1,5 +1,5 @@
 import React, { ReactNode, useState } from "react"
-import { TextField, Box, IconButton, Link } from "@material-ui/core"
+import { TextField, Box, IconButton, Link, Grid } from "@material-ui/core"
 import CheckIcon from '@material-ui/icons/Check'
 import CloseIcon from '@material-ui/icons/Close'
 import { FormattedMessage } from "react-intl"
@@ -14,25 +14,41 @@ export const Editable = ({ children, value, onChange, canEdit = true, boxPorps, 
   const [editing, setEditing] = useState(false)
   const [v, setV] = useState(value)
 
+  const submit = () => {
+    setEditing(false)
+    onChange(v)
+  }
+  const cancel = () => {
+    setEditing(false)
+    setV(value)
+  }
+  const keydown = (e: React.KeyboardEvent) => {
+    switch (e.key.toLowerCase()) {
+      case "escape": cancel(); break
+      case "enter": submit(); break
+    }
+  }
+
   if (editing && canEdit) return (
     <Box display="inline-flex" {...boxPorps}>
-      <TextField value={v} onChange={e => setV(e.target.value)} {...textFieldProps} />
-      <IconButton size="small" onClick={() => { setEditing(false); setV(value) }}>
+      <TextField value={v} onChange={e => setV(e.target.value)} onKeyDown={keydown}
+        {...textFieldProps} />
+      <IconButton size="small" onClick={cancel}>
         <CloseIcon color="secondary" />
       </IconButton>
-      <IconButton size="small" onClick={() => { setEditing(false); onChange(v) }}>
+      <IconButton size="small" onClick={submit}>
         <CheckIcon color="primary" />
       </IconButton>
     </Box>)
 
   return (
-    <>
-      {children}
+    <Grid container spacing={2} alignItems="baseline">
+      <Grid item>{children}</Grid>
       {canEdit &&
-        <Link onClick={(e: React.SyntheticEvent) => { e.preventDefault(); setEditing(true) }}>
+        <Grid item><Link onClick={(e: React.SyntheticEvent) => { e.preventDefault(); setEditing(true) }}>
           <FormattedMessage id="label.edit" />
-        </Link>}
-    </>)
+        </Link></Grid>}
+    </Grid>)
 }
 
 

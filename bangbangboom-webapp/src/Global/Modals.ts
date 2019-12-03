@@ -36,3 +36,5 @@ export type MapInfo = {
   hasimage: boolean
 }
 
+export const CanModifyStatus = ["wip", "reviewing", "notpass"] as ReadonlyArray<string>
+

@@ -1,19 +1,11 @@
 import { observable } from "mobx"
-import { GameMapFromString, GameMapToString, Note, Point, GameMap, TimePoint, Single, Flick, Slide, IdItem } from "./core/MapCore"
+import { GameMapFromString, Note, Point, GameMap, TimePoint, Single, Flick, Slide, IdItem } from "./core/MapCore"
 
-function FromStorage() {
-  return GameMapFromString(localStorage.getItem("gamemapstate") || "")
-}
-
-let initmap = FromStorage()
+let initmap = GameMapFromString("")
 
 const state = observable({
   map: JSON.parse(JSON.stringify(initmap)) as GameMap
 })
-
-export function SaveToStorage() {
-  localStorage.setItem("gamemapstate", GameMapToString(state.map))
-}
 
 const done: Array<() => void> = []
 const todo: Array<() => void> = []
