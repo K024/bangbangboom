@@ -1,17 +1,17 @@
 import React, { useEffect } from "react"
-import { TableHead, TableRow, TableCell, makeStyles, Box, Typography, Paper, Table, TableBody, Button } from "@material-ui/core"
+import { makeStyles, Box, Typography, Paper, Table, TableBody, Button, Dialog, DialogTitle, DialogActions, Grid } from "@material-ui/core"
 import { FormattedMessage } from "react-intl"
 import { useLocalStore, useObserver } from "mobx-react-lite"
-import { MapInfo } from "../../Global/Modals"
-import { Api } from "../../Global/Axios"
+import { MapInfo, CanPublicViewStatus } from "../../Global/Modals"
+import { Api, HandleErr, Xform } from "../../Global/Axios"
 import { setMessage } from "../../Global/Snackbar"
-import { CanNone } from "../Components/CanNone"
-import { DateTime } from "../Components/DateTime"
+import { MapTableHeader, MapTableRow } from "../Components/MapTable"
+import { CoverProgress } from "../Components/CoverProgress"
+import { findex } from "../../Mapping/core/Utils"
+import { ConnectionState } from "../../Mapping/ConnectionState"
+import { useHistory } from "react-router"
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    margin: theme.spacing(2),
-  },
   paper: {
     width: "100%",
     overflowX: "auto"
@@ -21,23 +21,15 @@ const useStyles = makeStyles(theme => ({
   },
   header: {
     margin: theme.spacing(3, 1, 1)
+  },
+  tools: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    zIndex: 2,
+    padding: theme.spacing(1, 3)
   }
 }))
-
-const HeaderPart = () => (
-  <TableHead>
-    <TableRow>
-      <TableCell>Id</TableCell>
-      <TableCell align="right"><FormattedMessage id="label.music" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.artist" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.mapname" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.difficulty" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.lastmodified" /></TableCell>
-      <TableCell align="right"><FormattedMessage id="label.status" /></TableCell>
-      <TableCell align="right"></TableCell>
-    </TableRow>
-  </TableHead>)
-
 
 export const AllMapsPage = () => {
 
@@ -45,46 +37,109 @@ export const AllMapsPage = () => {
 
   const s = useLocalStore(() => ({
     loading: false,
-    maps: [] as MapInfo[]
+    maps: [] as MapInfo[],
+    selected: null as MapInfo | null,
+    dialog: false,
+    nomore: false,
+
+    async loadmore() {
+      const last = findex(s.maps, -1)
+      s.loading = true
+      try {
+        const res = await Api.get<MapInfo[]>("map/all", { params: { end: last && last.id } })
+        if (res.data.length === 0) s.nomore = true
+        s.maps.push(...res.data)
+      } catch (error) {
+        const err = HandleErr(error)
+        if (err && err.status === 403)
+          setMessage("error.forbidden", "error")
+        else
+          setMessage("error.neterr", "error")
+      }
+      s.loading = false
+    }
   }))
 
   useEffect(() => {
-    (async () => {
-      s.loading = true
-      try {
-        const res = await Api.get<MapInfo[]>("map/all")
-        s.maps = res.data
-      } catch (error) {
-        setMessage("error.neterr", "error")
-      }
-      s.loading = false
-    })()
+    s.loadmore()
   }, [s])
 
+  const handleDelete = async () => {
+    if (!s.selected) return
+    s.loading = true
+    try {
+      await Api.post("map/delete", Xform({ id: s.selected.id }))
+      setMessage("info.success", "success")
+      s.maps = s.maps.filter(x => x !== s.selected)
+      s.selected = null
+    } catch (error) {
+      const err = HandleErr(error)
+      if (err && err.status === 403)
+        setMessage("error.forbidden", "error")
+      else
+        setMessage("error.neterr", "error")
+    }
+    s.loading = false
+    s.dialog = false
+  }
+
+  const history = useHistory()
+  const handleConnect = () => {
+    ConnectionState.source =
+      (s.selected && s.selected.id.toString()) || ""
+    history.push("/mapping/meta")
+  }
+
   return useObserver(() => (
-    <Box className={classes.root}>
+    <Box m={2}>
+      <Paper className={classes.tools}>
+        <Grid container spacing={2} justify="center">
+          <Grid item>
+            <Button disabled={!s.selected ||
+              CanPublicViewStatus.indexOf(s.selected.status) < 0} color="primary"
+              onClick={handleConnect} variant="outlined">
+              <FormattedMessage id="label.connect" /></Button>
+          </Grid>
+          <Grid item>
+            <Button disabled={!s.selected} color="secondary"
+              onClick={() => s.dialog = true} variant="outlined">
+              <FormattedMessage id="label.delete" /></Button>
+          </Grid>
+        </Grid>
+      </Paper>
+
       <Typography className={classes.header} variant="h5">
         <FormattedMessage id="label.all" />
       </Typography>
       <Paper className={classes.paper}>
         <Table className={classes.table} aria-label="simple table">
-          <HeaderPart />
+          <MapTableHeader />
           <TableBody>
-            {s.maps.map(m => (
-              <TableRow key={m.id}>
-                <TableCell component="th" scope="row">{m.id}</TableCell>
-                <TableCell align="right"><CanNone value={m.musicname} /></TableCell>
-                <TableCell align="right"><CanNone value={m.artist} /></TableCell>
-                <TableCell align="right"><CanNone value={m.mapname} /></TableCell>
-                <TableCell align="right">{m.difficulty || "-"}</TableCell>
-                <TableCell align="right"><DateTime date={m.lastmodified} /></TableCell>
-                <TableCell align="right"><FormattedMessage id={"mapstatus." + m.status} /></TableCell>
-                <TableCell align="right"><Button><FormattedMessage id="label.delete" /></Button></TableCell>
-              </TableRow>
-            ))}
+            {s.maps.map(m => {
+              return <MapTableRow key={m.id} m={m} hover selected={m === s.selected} onClick={() => s.selected = s.selected === m ? null : m} />
+            })}
           </TableBody>
         </Table>
       </Paper>
+
+      {!s.nomore &&
+        <Grid container justify="center">
+          <Button style={{ margin: 8 }} disabled={s.loading} onClick={s.loadmore}>
+            <FormattedMessage id="label.loadmore" />
+          </Button>
+        </Grid>}
+
+      <Dialog open={s.dialog}
+        onClose={() => s.dialog = false}>
+        <DialogTitle><FormattedMessage id="sentence.suretodelete" /></DialogTitle>
+        <DialogActions>
+          <CoverProgress loading={s.loading}>
+            <Button disabled={s.loading} onClick={handleDelete} color="primary">
+              <FormattedMessage id="label.confirm" />
+            </Button>
+          </CoverProgress>
+        </DialogActions>
+      </Dialog>
     </Box>
   ))
 }

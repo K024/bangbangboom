@@ -42,41 +42,50 @@ function createLocalSlot(name: string) {
 const localslot = createLocalSlot("localslot")
 let onlineslot: MapInfo
 
-export const ConnectionState = CreateAutoSaveObservableStore("connectionstate", {
+const source = CreateAutoSaveObservableStore("connectionsource", {
   source: "local",
+})
+export const ConnectionState = observable({
+  get source() { return source.source },
+  set source(v) { source.source = v },
   loading: false,
   connected: false,
   readonly: true
 })
 
-reaction(() => ConnectionState.source, async s => {
-  ConnectionState.connected = false
-  ConnectionState.readonly = true
-  if (!s) return
-  if (s === "local") {
-    ConnectionState.loading = false
-    ConnectionState.connected = true
-    ConnectionState.readonly = false
-    ResetMap(localslot.mapcontent)
-  } else {
-    ConnectionState.loading = true
-    try {
-      const res = await Api.get<MapInfo>("map/info", { params: { id: s } })
-      onlineslot = observable(res.data)
+let started = false
+export function StartConnection() {
+  if (started) return
+  started = true
+  reaction(() => ConnectionState.source, async s => {
+    ConnectionState.connected = false
+    ConnectionState.readonly = true
+    if (!s) return
+    if (s === "local") {
+      ConnectionState.loading = false
       ConnectionState.connected = true
-      const map = await Api.get<string>("map/content/" + s)
-      ResetMap(map.data)
-      if (!UserState.user) await LoadCurrentUser()
-      if (UserState.user && (onlineslot.uploader.username === UserState.user.username
-        || CanModifyStatus.indexOf(onlineslot.status)) >= 0) {
-        ConnectionState.readonly = false
+      ConnectionState.readonly = false
+      ResetMap(localslot.mapcontent)
+    } else {
+      ConnectionState.loading = true
+      try {
+        const res = await Api.get<MapInfo>("map/info", { params: { id: s } })
+        onlineslot = observable(res.data)
+        ConnectionState.connected = true
+        const map = await Api.get<string>("map/content/" + s)
+        ResetMap(map.data)
+        if (!UserState.user) await LoadCurrentUser()
+        if (UserState.user && (onlineslot.uploader.username === UserState.user.username
+          || CanModifyStatus.indexOf(onlineslot.status)) >= 0) {
+          ConnectionState.readonly = false
+        }
+      } catch (error) {
+        handleError(error)
       }
-    } catch (error) {
-      handleError(error)
+      ConnectionState.loading = false
     }
-    ConnectionState.loading = false
-  }
-}, { fireImmediately: true })
+  }, { fireImmediately: true })
+}
 
 
 function CommonGetter<T extends keyof (MapInfo | typeof localslot)>(propname: T) {

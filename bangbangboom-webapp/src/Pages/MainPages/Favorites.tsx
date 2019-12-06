@@ -28,18 +28,6 @@ export const FavoritesPage = () => {
     list: [] as MapInfo[],
     nomore: false,
   }))
-
-  useEffect(() => {
-    if (!UserState.user) return
-    s.loading = true
-    GetFavorites().then(v => {
-      s.loading = false
-      s.page = 2
-      s.list = v
-      if (v.length === 0) s.nomore = true
-    })
-  }, [s])
-
   const loadMore = async () => {
     s.loading = true
     const res = await GetFavorites(s.page)
@@ -48,6 +36,18 @@ export const FavoritesPage = () => {
     s.list.push(...res)
     if (res.length === 0) s.nomore = true
   }
+
+  useEffect(() => {
+    if (!UserState.user) return
+    s.loading = true
+    GetFavorites().then(v => {
+      s.loading = false
+      s.page++
+      s.list = v
+      if (v.length === 0) s.nomore = true
+    })
+  }, [s])
+
 
   return useObserver(() => (
     <>

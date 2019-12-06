@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react"
+import React, { useEffect } from "react"
 import { makeStyles, Typography, Table, TableHead, TableRow, TableCell, TableBody, Button, TextField, IconButton, Switch, FormControlLabel, Grid, InputAdornment } from "@material-ui/core"
 import { useObserver, useLocalStore } from "mobx-react-lite"
 import { FormattedMessage } from "react-intl"
@@ -64,6 +64,36 @@ export const TimingPage = () => {
       bpm: 120,
       bpb: 4,
       offset: 1
+    },
+    set() {
+      const { offset, bpm, bpb } = s.input
+      const item = GameMapState.map.timepoints.find(t => t.offset === offset)
+      if (item && s.selectedTp !== item) {
+        s.selectedTp = item
+        return
+      }
+      if (s.selectedTp) {
+        Actions.setTimePoint(s.selectedTp.id, offset, bpm, bpb)
+      } else {
+        Actions.addTimePoint(uuid(), offset, bpm, bpb)
+      }
+    },
+    stopmeasure: DebounceFunc(() => {
+      s.measure.measuring = false
+      s.set()
+    }, 2000),
+    startmeasure() {
+      if (!s.selectedTp || !PlayState.playing) return
+      if (!s.measure.measuring) s.measure.taps = []
+      s.measure.measuring = true
+      s.stopmeasure()
+      s.measure.taps.push(PlayState.position)
+      if (s.measure.taps.length >= 5) {
+        const { bpm, offset } = calcmeasure(s.measure.taps)
+        s.input.bpm = bpm
+        s.input.offset = offset
+      }
+      s.set()
     }
   }))
 
@@ -73,45 +103,11 @@ export const TimingPage = () => {
     s.selectedTp = null
   }
 
-  const set = useCallback(() => {
-    const { offset, bpm, bpb } = s.input
-    const item = GameMapState.map.timepoints.find(t => t.offset === offset)
-    if (item && s.selectedTp !== item) {
-      s.selectedTp = item
-      return
-    }
-    if (s.selectedTp) {
-      Actions.setTimePoint(s.selectedTp.id, offset, bpm, bpb)
-    } else {
-      Actions.addTimePoint(uuid(), offset, bpm, bpb)
-    }
-  }, [s])
-
-  const stopmeasure = useCallback(DebounceFunc(() => {
-    s.measure.measuring = false
-    set()
-  }, 2000), [s, set])
-
-
-  const measure = useCallback(() => {
-    if (!s.selectedTp || !PlayState.playing) return
-    if (!s.measure.measuring) s.measure.taps = []
-    s.measure.measuring = true
-    stopmeasure()
-    s.measure.taps.push(PlayState.position)
-    if (s.measure.taps.length >= 5) {
-      const { bpm, offset } = calcmeasure(s.measure.taps)
-      s.input.bpm = bpm
-      s.input.offset = offset
-    }
-    set()
-  }, [s, set, stopmeasure])
-
-  const movebeat = function (forward = false) {
+  const movebeat = (forward = false) => {
     let back = 60 / (s.input.bpm || 120)
     if (forward) back = -back
     s.input.offset = s.input.offset - back
-    if (s.selectedTp) set()
+    if (s.selectedTp) s.set()
   }
 
   useEffect(() => reaction(() => s.selectedTp, tp => {
@@ -125,12 +121,12 @@ export const TimingPage = () => {
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       switch (e.key.toLowerCase()) {
-        case "t": measure(); break
+        case "t": s.startmeasure(); break
       }
     }
     window.addEventListener("keydown", listener)
     return () => { window.removeEventListener("keydown", listener) }
-  }, [measure])
+  }, [s])
 
   return useObserver(() => (
     <Grid container className={cn.timing} spacing={3}>
@@ -169,7 +165,7 @@ export const TimingPage = () => {
           <TimingPad mute={s.mute} selectedTp={s.selectedTp} />
         </Grid>
         <Grid item>
-          <Button fullWidth disableRipple onClick={measure} disabled={!s.selectedTp}>
+          <Button fullWidth disableRipple onClick={s.startmeasure} disabled={!s.selectedTp}>
             <FormattedMessage id={!s.selectedTp ?
               "sentence.selectorcreatetimepoint" : "sentence.tap5timesormoretomeasure"} />
           </Button>
@@ -203,11 +199,11 @@ export const TimingPage = () => {
         </Grid>
         <Grid item container wrap="wrap" spacing={2}>
           <Grid item>
-            <Button onClick={set} disabled={!s.selectedTp}>
+            <Button onClick={s.set} disabled={!s.selectedTp}>
               <FormattedMessage id="label.modify" />
             </Button></Grid>
           <Grid item>
-            <Button onClick={set} disabled={!!s.selectedTp}>
+            <Button onClick={s.set} disabled={!!s.selectedTp}>
               <FormattedMessage id="label.create" />
             </Button></Grid>
           <Grid item style={{ marginLeft: "auto" }}>

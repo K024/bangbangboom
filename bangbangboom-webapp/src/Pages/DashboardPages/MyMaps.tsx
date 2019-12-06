@@ -1,12 +1,14 @@
 import React, { useEffect } from "react"
 import { useObserver, useLocalStore } from "mobx-react-lite"
-import { makeStyles, Paper, Table, TableHead, TableRow, TableCell, TableBody, Button, Typography, Box } from "@material-ui/core"
-import { Api, HandleErr } from "../../Global/Axios"
-import { MapInfo } from "../../Global/Modals"
+import { makeStyles, Paper, Table, TableBody, Button, Typography, Box, Dialog, DialogTitle, DialogActions, Grid } from "@material-ui/core"
+import { Api, HandleErr, Xform } from "../../Global/Axios"
+import { MapInfo, CanPublicViewStatus } from "../../Global/Modals"
 import { setMessage } from "../../Global/Snackbar"
 import { FormattedMessage } from "react-intl"
-import { CanNone } from "../Components/CanNone"
-import { DateTime } from "../Components/DateTime"
+import { MapTableHeader, MapTableRow } from "../Components/MapTable"
+import { CoverProgress } from "../Components/CoverProgress"
+import { ConnectionState } from "../../Mapping/ConnectionState"
+import { useHistory } from "react-router"
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -19,34 +21,15 @@ const useStyles = makeStyles(theme => ({
   },
   header: {
     margin: theme.spacing(3, 1, 1)
+  },
+  tools: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    zIndex: 2,
+    padding: theme.spacing(1, 3)
   }
 }))
-
-const HeaderPart = () => (
-  <TableHead>
-    <TableRow>
-      <TableCell>Id</TableCell>
-      <TableCell><FormattedMessage id="label.music" /></TableCell>
-      <TableCell><FormattedMessage id="label.artist" /></TableCell>
-      <TableCell><FormattedMessage id="label.mapname" /></TableCell>
-      <TableCell><FormattedMessage id="label.difficulty" /></TableCell>
-      <TableCell><FormattedMessage id="label.lastmodified" /></TableCell>
-      <TableCell><FormattedMessage id="label.status" /></TableCell>
-      <TableCell></TableCell>
-    </TableRow>
-  </TableHead>)
-
-const mapRow = (m: MapInfo) => (
-  <TableRow key={m.id}>
-    <TableCell component="th" scope="row">{m.id}</TableCell>
-    <TableCell><CanNone value={m.musicname} /></TableCell>
-    <TableCell><CanNone value={m.artist} /></TableCell>
-    <TableCell><CanNone value={m.mapname} /></TableCell>
-    <TableCell>{m.difficulty || "-"}</TableCell>
-    <TableCell><DateTime date={m.lastmodified} /></TableCell>
-    <TableCell><FormattedMessage id={"mapstatus." + m.status} /></TableCell>
-    <TableCell><Button><FormattedMessage id="label.delete" /></Button></TableCell>
-  </TableRow>)
 
 export const MyMapsPage = () => {
 
@@ -55,6 +38,12 @@ export const MyMapsPage = () => {
   const s = useLocalStore(() => ({
     loading: false,
     maps: [] as MapInfo[],
+    dialog: false,
+    selected: null as null | MapInfo,
+
+    dialogmessage: "",
+    dialogaction: () => { },
+
     get wips() { return s.maps.filter(x => x.status === "wip" || x.status === "notpass") },
     get reviewing() { return s.maps.filter(x => x.status === "reviewing") },
     get reviewed() { return s.maps.filter(x => x.status === "reviewed" || x.status === "proved") },
@@ -70,6 +59,9 @@ export const MyMapsPage = () => {
     }
   }))
 
+  useEffect(() => {
+    s.load()
+  }, [s])
 
   const handleCreate = async () => {
     s.loading = true
@@ -87,12 +79,108 @@ export const MyMapsPage = () => {
     s.loading = false
   }
 
-  useEffect(() => {
-    s.load()
-  }, [s])
+  const handleDelete = async () => {
+    if (!s.selected) return
+    s.loading = true
+    try {
+      await Api.post("map/delete", Xform({ id: s.selected.id }))
+      setMessage("info.success", "success")
+      s.maps = s.maps.filter(x => x !== s.selected)
+      s.selected = null
+    } catch (error) {
+      const err = HandleErr(error)
+      if (err && err.status === 403)
+        setMessage("error.forbidden", "error")
+      else
+        setMessage("error.neterr", "error")
+    }
+    s.loading = false
+    s.dialog = false
+  }
+
+  const handleRecall = async () => {
+    if (!s.selected) return
+    s.loading = true
+    try {
+      await Api.post("map/recall", Xform({ id: s.selected.id }))
+      setMessage("info.success", "success")
+      s.selected.status = "wip"
+    } catch (error) {
+      const err = HandleErr(error)
+      if (err && err.status === 403)
+        setMessage("error.forbidden", "error")
+      else
+        setMessage("error.neterr", "error")
+    }
+    s.loading = false
+    s.dialog = false
+  }
+
+  const history = useHistory()
+  const handleConnect = () => {
+    ConnectionState.source =
+      (s.selected && s.selected.id.toString()) || ""
+    history.push("/mapping/meta")
+  }
+
+  const handlePublish = async () => {
+    if (!s.selected) return
+    s.loading = true
+    try {
+      await Api.post("map/publish", Xform({ id: s.selected.id }))
+      setMessage("info.success", "success")
+      s.selected.status = "reviewing"
+    } catch (error) {
+      const err = HandleErr(error)
+      if (err && err.status === 403)
+        setMessage("error.forbidden", "error")
+      else
+        setMessage("error.neterr", "error")
+    }
+    s.loading = false
+  }
+
+  const openDeleteDialog = () => {
+    s.dialogaction = handleDelete
+    s.dialogmessage = "sentence.suretodelete"
+    s.dialog = true
+  }
+  const openRecallDialog = () => {
+    s.dialogaction = handleRecall
+    s.dialogmessage = "sentence.suretorecall"
+    s.dialog = true
+  }
 
   return useObserver(() => (
     <Box m={2}>
+      <Paper className={classes.tools}>
+        <Grid container spacing={2} justify="center">
+          <Grid item>
+            <Button disabled={s.loading || !s.selected} color="primary"
+              onClick={handleConnect} variant="outlined">
+              <FormattedMessage id="label.connect" /></Button>
+          </Grid>
+          <Grid item>
+            <Button disabled={s.loading || !s.selected ||
+              s.selected.status !== "wip"} color="primary"
+              onClick={handlePublish} variant="outlined">
+              <FormattedMessage id="label.publish" /></Button>
+          </Grid>
+          <Grid item>
+            <Button disabled={s.loading || !s.selected ||
+              CanPublicViewStatus.indexOf(s.selected.status) < 0}
+              color="secondary"
+              onClick={openRecallDialog} variant="outlined">
+              <FormattedMessage id="label.recall" /></Button>
+          </Grid>
+          <Grid item>
+            <Button disabled={s.loading || !s.selected} color="secondary"
+              onClick={openDeleteDialog} variant="outlined">
+              <FormattedMessage id="label.delete" /></Button>
+          </Grid>
+        </Grid>
+      </Paper>
+
       <Button disabled={s.loading} onClick={handleCreate}>
         <FormattedMessage id="label.create" />
       </Button>
@@ -105,12 +193,26 @@ export const MyMapsPage = () => {
           </Typography>
           <Paper className={classes.paper}>
             <Table className={classes.table}>
-              <HeaderPart />
+              <MapTableHeader />
               <TableBody>
-                {x.rows.map(mapRow)}
+                {x.rows.map(m => <MapTableRow hover selected={m === s.selected}
+                  onClick={() => s.selected = s.selected === m ? null : m} m={m} />)}
               </TableBody>
             </Table>
           </Paper>
         </React.Fragment>)}
+
+
+      <Dialog open={s.dialog}
+        onClose={() => s.dialog = false}>
+        <DialogTitle><FormattedMessage id={s.dialogmessage} /></DialogTitle>
+        <DialogActions>
+          <CoverProgress loading={s.loading}>
+            <Button disabled={s.loading} onClick={s.dialogaction} color="primary">
+              <FormattedMessage id="label.confirm" />
+            </Button>
+          </CoverProgress>
+        </DialogActions>
+      </Dialog>
     </Box>))
 }

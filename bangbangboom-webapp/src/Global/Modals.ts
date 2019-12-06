@@ -37,4 +37,5 @@ export type MapInfo = {
 }
 
 export const CanModifyStatus = ["wip", "reviewing", "notpass"] as ReadonlyArray<string>
+export const CanPublicViewStatus = ["reviewing", "reviewed", "proved"] as ReadonlyArray<string>
 

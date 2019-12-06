@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useLayoutEffect } from "react"
 import { FormattedMessage, FormattedDate } from "react-intl"
 import { useLocalStore, useObserver } from "mobx-react-lite"
 
@@ -13,7 +13,7 @@ export const DateTime = ({ date }: DateTimeProps) => {
     display: <></>,
   }))
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const d = typeof date === "string" ? new Date(date) : date
     let toid = 0
 
@@ -29,12 +29,13 @@ export const DateTime = ({ date }: DateTimeProps) => {
       } else if (diff < 24 * onehour) {
         const hour = Math.ceil(diff / onehour)
         const next = hour * onehour - diff
-        s.display = <FormattedMessage id="number.minutesago" values={{ count: hour }} />
+        s.display = <FormattedMessage id="number.hoursago" values={{ count: hour }} />
         toid = setTimeout(update, next) as any
       } else {
         s.display = <FormattedDate value={d} />
       }
     }
+    update()
 
     return () => { clearTimeout(toid) }
   }, [s, date])

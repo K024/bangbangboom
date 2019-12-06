@@ -17,7 +17,7 @@ import { TimingPage } from "./Pages/Timing"
 import { TrackMappingPage } from "./Pages/TrackMapping"
 import { undoState, GameMapState } from "./GameMapState"
 import { setMessage } from "../Global/Snackbar"
-import { ConnectionInfo, ConnectionState } from "./ConnectionState"
+import { ConnectionInfo, ConnectionState, StartConnection } from "./ConnectionState"
 import { GameMapToString } from "./core/MapCore"
 
 const darktheme = createMuiTheme({
@@ -86,6 +86,7 @@ export const MappingPage = () => {
   }
 
   useEffect(() => {
+    StartConnection()
     const listener = (e: KeyboardEvent) => {
       switch (e.key.toLowerCase()) {
         case " ": togglePlay(); break

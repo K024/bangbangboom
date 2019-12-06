@@ -11,7 +11,8 @@ const drawerWidth = 240
 
 const useStyles = makeStyles(theme => ({
   root: {
-    display: "flex"
+    display: "flex",
+    height: "100vh",
   },
   drawer: {
     [theme.breakpoints.up('sm')]: {
@@ -29,7 +30,12 @@ const useStyles = makeStyles(theme => ({
     width: "100%",
     "&>*": {
       margin: 5
-    }
+    },
+  },
+  content: {
+    position: "relative",
+    height: "100%",
+    overflow: "auto"
   },
   ...mediaQuery,
 }))
@@ -97,7 +103,7 @@ export const DashboardFrame = ({ children = {} as ReactNode }) => {
     <Fade in>
       <Box className={classes.root}>
         <MyDrawer open={open} setOpen={setOpen}></MyDrawer>
-        <Box flexGrow={1} width={0}>
+        <Box flexGrow={1} width={0} className={classes.content}>
           <Box className={classes.header}>
             <Box className={classes.sm}>
               <IconButton onClick={() => setOpen(!open)}><MenuIcon /></IconButton>

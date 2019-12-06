@@ -2,7 +2,7 @@ import React from "react"
 import { MapInfo } from "../../Global/Modals"
 import { useObserver } from "mobx-react-lite"
 import LazyLoad from "react-lazyload"
-import { Card, CardActionArea, Box, makeStyles, Typography, Grid } from "@material-ui/core"
+import { Card, Box, makeStyles, Typography, Grid } from "@material-ui/core"
 import PlayCircleFilledIcon from '@material-ui/icons/PlayCircleFilled'
 import FavoriteIcon from '@material-ui/icons/Favorite'
 import MusicNoteIcon from '@material-ui/icons/MusicNote'
@@ -13,21 +13,23 @@ const useStyles = makeStyles(theme => ({
   root: {
     transition: "all 0.3s",
     "&:hover": {
-      transform: "scale(1.05) rotate(2deg)",
-      boxShadow: "0 6px 2px -4px rgba(0, 0, 0, 0.4), 0 4px 4px 0 rgba(0, 0, 0, 0.28), 0 2px 10px 0 rgba(0, 0, 0, 0.24)"
+      transform: "scale(1.02) rotate(1deg)",
+      boxShadow: "0 6px 2px -4px rgba(0, 0, 0, 0.2), 0 4px 4px 0 rgba(0, 0, 0, 0.14), 0 2px 10px 0 rgba(0, 0, 0, 0.14)"
     },
   },
   media: {
     position: "relative",
     "&:before": {
       width: "100%",
-      paddingTop: "60%",
+      paddingTop: "40%",
       display: "block",
-      content: " ",
-    }
+      content: '""',
+    },
+    overflow: "hidden"
   },
   image: {
     position: "absolute",
+    width: "100%",
     top: "50%",
     left: 0,
     right: 0,
@@ -59,15 +61,15 @@ const useStyles = makeStyles(theme => ({
     right: theme.spacing(2),
     top: theme.spacing(2),
     color: "white",
-    textShadow: "1px 1px 1px #000",
     alignItems: "flex-end",
+    filter: "drop-shadow( 1px 1px 1px rgba(0, 0, 0, .7))"
   },
   bottom: {
     display: "flex",
     flexDirection: "column",
     position: "absolute",
     left: theme.spacing(2),
-    bottom: theme.spacing(2),
+    bottom: theme.spacing(1),
     right: theme.spacing(2),
     color: "white",
   },
@@ -99,39 +101,46 @@ export const MapItem = ({ mapInfo }: MapItemProps) => {
   const history = useHistory()
 
   return useObserver(() => (
-    <Card>
-      <CardActionArea onClick={() => history.push("/map/" + mapInfo.id)}>
-        <Box className={classes.media}>
-          <LazyLoad>
-            {mapInfo.hasimage && <img className={classes.image} src={`/api/image/${mapInfo.id}`} alt="" />}
-          </LazyLoad>
-          <Box className={classes.gradient} />
-          <Box className={classes.left}>
-            {mapInfo.status === "proved" && <Typography className={classes.proved}>Proved</Typography>}
+    <Card className={classes.root} onClick={() => history.push("/map/" + mapInfo.id)}>
+      <Box className={classes.media}>
+        <LazyLoad>
+          {mapInfo.hasimage && <img className={classes.image} src={`/api/map/image/${mapInfo.id}`} alt="" />}
+        </LazyLoad>
+        <Box className={classes.gradient} />
+        <Box className={classes.left}>
+          {mapInfo.status === "proved" && <Typography className={classes.proved}>Proved</Typography>}
+        </Box>
+        <Box className={classes.right}>
+          <Box className={classes.content}>
+            {mapInfo.plays || 0}
+            <PlayCircleFilledIcon />
           </Box>
-          <Box className={classes.right}>
-            <Box className={classes.content}>
-              {mapInfo.plays || 0}
-              <PlayCircleFilledIcon />
-            </Box>
-            <Box className={classes.content}>
-              {mapInfo.favorites || 0}
-              <FavoriteIcon />
-            </Box>
-          </Box>
-          <Box className={classes.bottom}>
-            <Typography variant="h5">{mapInfo.musicname}</Typography>
-            <Typography variant="subtitle1">{mapInfo.artist}</Typography>
+          <Box className={classes.content}>
+            {mapInfo.favorites || 0}
+            <FavoriteIcon />
           </Box>
         </Box>
-        <Box className={classes.content}>
-          <UserProfile user={mapInfo.uploader} />
-          <UserName user={mapInfo.uploader} />
-          <Typography className={classes.end}>{mapInfo.mapname}</Typography>
-          <MusicNoteIcon className={classes.end} />
-          <Box className={classes.end}>{mapInfo.difficulty || 0}</Box>
+        <Box className={classes.bottom}>
+          <Typography variant="h5">{mapInfo.musicname}</Typography>
+          <Typography variant="subtitle1">{mapInfo.artist}</Typography>
         </Box>
-      </CardActionArea>
+      </Box>
+      <Box mx={2} my={1}>
+        <Grid container spacing={2} alignItems="center" wrap="nowrap">
+          <Grid item>
+            <UserProfile style={{ width: 32, height: 32 }} user={mapInfo.uploader} />
+          </Grid>
+          <Grid item xs>
+            <UserName user={mapInfo.uploader} />
+          </Grid>
+          <Grid item>
+            <Typography className={classes.end}>{mapInfo.mapname}</Typography>
+          </Grid>
+          <Grid item style={{ display: "flex", alignItems: "center" }}>
+            <MusicNoteIcon className={classes.end} />{mapInfo.difficulty || 0}
+          </Grid>
+        </Grid>
+      </Box>
     </Card>
   ))
 }
