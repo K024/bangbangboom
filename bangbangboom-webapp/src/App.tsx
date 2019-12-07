@@ -23,6 +23,7 @@ import { AllMapsPage } from './Pages/DashboardPages/AllMaps'
 import { UsersPage } from './Pages/DashboardPages/Users'
 import { ReviewingsPage } from './Pages/DashboardPages/Reviewings'
 import { PlayPage } from './Pages/GamePages/PlayPage'
+import { SettingsPage } from './Pages/MainPages/Settings'
 
 const App = () => {
 
@@ -61,7 +62,7 @@ const App = () => {
                   <Route path="/" exact><Home /></Route>
                   <Route path="/search"><SearchPage /></Route>
                   <Route path="/favorites"><FavoritesPage /></Route>
-                  <Route path="/settings">Settings</Route>
+                  <Route path="/settings"><SettingsPage /></Route>
                   <Route path="/register"><RegisterPage /></Route>
                   <Route path="/forgotpass"><ForgotPassPage /></Route>
                   <Route path="/map/:id"><MapDetailPage /></Route>

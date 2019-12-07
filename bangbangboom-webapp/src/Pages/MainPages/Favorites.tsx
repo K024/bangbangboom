@@ -8,61 +8,63 @@ import { MapPreviewList } from "../Components/MapItem"
 import { CoverProgress } from "../Components/CoverProgress"
 import { FormattedMessage } from "react-intl"
 import { UserState } from "../UserState"
+import { reaction } from "mobx"
 
 
-const GetFavorites = async (page = 1) => {
+const GetFavorites = async (end?: string) => {
   try {
-    const res = await Api.get<MapInfo[]>("favorite/all", { params: { page } })
+    const res = await Api.get<{ data: MapInfo[], end: string }>("favorite/all", { params: { end } })
     return res.data
   } catch (error) {
     setMessage("error.neterr", "error")
-    return []
+    return
   }
 }
 
 export const FavoritesPage = () => {
 
   const s = useLocalStore(() => ({
-    page: 1,
     loading: false,
     list: [] as MapInfo[],
+    end: undefined as undefined | string,
     nomore: false,
+    async loadMore() {
+      s.loading = true
+      const res = await GetFavorites(s.end)
+      if (!res) return
+      s.loading = false
+      s.list.push(...res.data)
+      s.list = s.list.splice(0)
+      s.end = res.end
+      if (res.data.length === 0) s.nomore = true
+    },
   }))
-  const loadMore = async () => {
-    s.loading = true
-    const res = await GetFavorites(s.page)
-    s.loading = false
-    s.page = s.page + 1
-    s.list.push(...res)
-    if (res.length === 0) s.nomore = true
-  }
 
   useEffect(() => {
-    if (!UserState.user) return
-    s.loading = true
-    GetFavorites().then(v => {
-      s.loading = false
-      s.page++
-      s.list = v
-      if (v.length === 0) s.nomore = true
-    })
+    return reaction(() => UserState.user, u => {
+      if (!u) return
+      s.list = []
+      s.loadMore()
+    }, { fireImmediately: true })
   }, [s])
 
 
   return useObserver(() => (
     <>
       <Typography variant="h2">Favorites</Typography>
-      {!UserState.user
-        ? <Box m={1}><FormattedMessage id="info.pleaselogin" /></Box>
-        : <>
-          <MapPreviewList maps={s.list} />
-          {!s.nomore &&
-            <CoverProgress loading={s.loading} m={1}>
-              <Button onClick={loadMore} disabled={s.loading} fullWidth>
-                <FormattedMessage id="label.loadmore" />
-              </Button>
-            </CoverProgress>}
-        </>}
+      <Box p={1}>
+        {!UserState.user
+          ? <FormattedMessage id="info.pleaselogin" />
+          : <>
+            <MapPreviewList maps={s.list} />
+            {!s.nomore &&
+              <CoverProgress loading={s.loading} m={1}>
+                <Button onClick={s.loadMore} disabled={s.loading} fullWidth>
+                  <FormattedMessage id="label.loadmore" />
+                </Button>
+              </CoverProgress>}
+          </>}
+      </Box>
     </>
   ))
 }

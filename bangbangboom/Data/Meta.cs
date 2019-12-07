@@ -5,10 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Data
-{
-    public class Meta
-    {
+namespace bangbangboom.Data {
+    public class Meta {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 

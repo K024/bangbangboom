@@ -11,14 +11,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Data
-{
-    public class AppDbContext : IdentityDbContext<AppUser>
-    {
+namespace bangbangboom.Data {
+    public class AppDbContext : IdentityDbContext<AppUser> {
         public static Action<DbContextOptionsBuilder> DefaultBuildOption;
 
-        public static AppDbContext GetDefault()
-        {
+        public static AppDbContext GetDefault() {
             var builder = new DbContextOptionsBuilder<AppDbContext>();
             DefaultBuildOption(builder);
             return new AppDbContext(builder.Options);
@@ -26,15 +23,15 @@ namespace bangbangboom.Data
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
             if (!optionsBuilder.IsConfigured)
                 DefaultBuildOption(optionsBuilder);
-            optionsBuilder.UseLazyLoadingProxies();
         }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AppUser>()
+                .HasIndex(u => u.RegisterDate);
 
             modelBuilder.Entity<Comment>()
                 .HasOne<AppUser>().WithMany()
@@ -65,11 +62,17 @@ namespace bangbangboom.Data
                 .HasOne<AppUser>().WithMany()
                 .HasForeignKey(m => m.UploaderId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Map>()
+                .HasIndex(m => m.Reviewed);
+            modelBuilder.Entity<Map>()
+                .HasIndex(m => m.Status);
 
             modelBuilder.Entity<PlayRecord>()
                 .HasOne<Map>().WithMany()
                 .HasForeignKey(p => p.MapId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PlayRecord>()
+                .HasIndex(r => r.UserId);
 
             modelBuilder.Entity<Meta>()
                 .HasIndex(m => m.Usage);
@@ -83,18 +86,6 @@ namespace bangbangboom.Data
         public DbSet<Map> Maps { get; set; }
         public DbSet<Meta> Metas { get; set; }
         public DbSet<PlayRecord> PlayRecords { get; set; }
-
-        public DbQuery<AppUserInfo> AppUserInfos { get; set; }
-        public DbQuery<MapInfo> MapInfos { get; set; }
-    }
-
-    public static class PageExtension
-    {
-        public static IQueryable<T> Page<T>(this IQueryable<T> q, int page = 1, int pagesize = 24)
-        {
-            var p = page - 1;
-            return q.Skip(p * pagesize).Take(pagesize);
-        }
     }
 
 }

@@ -14,13 +14,11 @@ using Microsoft.Net.Http.Headers;
 using System.IO;
 using Microsoft.AspNetCore.Identity;
 
-namespace bangbangboom.Controllers
-{
+namespace bangbangboom.Controllers {
 
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public partial class MapController : ControllerBase
-    {
+    public partial class MapController : ControllerBase {
 
         private readonly UserManager<AppUser> userManager;
         private readonly AppDbContext context;
@@ -28,8 +26,7 @@ namespace bangbangboom.Controllers
         private readonly MediaFileProcessor mediaProcessor;
         public MapController(
             UserManager<AppUser> userManager, MediaFileProcessor mediaProcessor,
-            AppDbContext context, GuidFileProvider fileProvider)
-        {
+            AppDbContext context, GuidFileProvider fileProvider) {
             this.userManager = userManager;
             this.context = context;
             this.fileProvider = fileProvider;
@@ -38,15 +35,14 @@ namespace bangbangboom.Controllers
 
         [HttpGet]
         public async Task<object> Info(
-            [FromQuery][Required]long id)
-        {
-            var map = await (
+            [FromQuery][Required]long id) {
+            var res = await (
                 from m in context.Maps
                 where m.Id == id
                 join u in context.Users on m.UploaderId equals u.Id
-                select new MapInfo(m)
-                {
-                    uploader = new AppUserInfo(u),
+                select new  {
+                    map = m,
+                    uploader = u,
                     plays = (
                         from pl in context.PlayRecords
                         where pl.MapId == m.Id
@@ -56,9 +52,13 @@ namespace bangbangboom.Controllers
                         where fa.MapId == m.Id
                         select 1).Count(),
                 }).FirstOrDefaultAsync();
-            if (map is null) return StatusCode(404);
-            if (!MapStatus.CanPublicView.Contains(map.status))
-            {
+            if (res is null) return StatusCode(404);
+            var map = new MapInfo(res.map) {
+                uploader = new AppUserInfo(res.uploader),
+                plays = res.plays,
+                favorites = res.favorites
+            };
+            if (!MapStatus.CanPublicView.Contains(map.status)) {
                 var user = await userManager.GetUserAsync(User);
                 if (user is null || user.UserName != map.uploader.username)
                     return StatusCode(403);
@@ -69,8 +69,7 @@ namespace bangbangboom.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<object> Add()
-        {
+        public async Task<object> Add() {
             var user = await userManager.GetUserAsync(User);
             var count = await (
                 from m in context.Maps
@@ -79,8 +78,7 @@ namespace bangbangboom.Controllers
 
             if (count >= 3) return StatusCode(403, "To many unreviewed maps.");
 
-            var map = new Map()
-            {
+            var map = new Map() {
                 UploaderId = user.Id,
                 Status = MapStatus.Wip,
             };
@@ -101,8 +99,7 @@ namespace bangbangboom.Controllers
             [FromForm][MaxLength(400)] string description,
             [FromForm] string content,
             IFormFile image,
-            IFormFile music)
-        {
+            IFormFile music) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
@@ -116,36 +113,26 @@ namespace bangbangboom.Controllers
             else if (difficulty != null) map.Difficulty = difficulty ?? 20;
             else if (description != null) map.Description = description;
             else if (content != null) map.MapContent = content;
-            else if (image != null)
-            {
-                try
-                {
+            else if (image != null) {
+                try {
                     var newid = await fileProvider.SaveImageFileWithThumbnail(mediaProcessor, image);
                     if (newid is null) return StatusCode(400, "Image may too big or not valid.");
                     if (!string.IsNullOrEmpty(map.ImageFileId))
                         fileProvider.DeleteImageWithThumbnail(map.ImageFileId);
                     map.ImageFileId = newid;
-                }
-                catch (Exception)
-                {
+                } catch (Exception) {
                     return StatusCode(500);
                 }
-            }
-            else if (music != null)
-            {
-                try
-                {
+            } else if (music != null) {
+                try {
                     var fileid = await fileProvider.SaveFileAsync(music.OpenReadStream());
                     if (!string.IsNullOrEmpty(map.MusicFileId))
                         fileProvider.DeleteFile(map.MusicFileId);
                     map.MusicFileId = fileid;
-                }
-                catch (Exception)
-                {
+                } catch (Exception) {
                     return StatusCode(500);
                 }
-            }
-            else return StatusCode(400, "No change applied.");
+            } else return StatusCode(400, "No change applied.");
 
             map.LastModified = DateTimeOffset.Now;
             map.Status = MapStatus.Wip;
@@ -157,8 +144,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Delete(
-            [FromForm][Required] long id)
-        {
+            [FromForm][Required] long id) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);

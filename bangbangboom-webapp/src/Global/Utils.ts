@@ -13,7 +13,7 @@ export function MergeListDistinct<T>(list1: T[], list2: T[], comparator: (a: T, 
       ret.push(list2[p2])
       p2++
     } else {
-      ret.push(list1[p1])
+      ret.push(list2[p1])
       p1++
       p2++
     }

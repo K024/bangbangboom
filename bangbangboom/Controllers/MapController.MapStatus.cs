@@ -14,10 +14,8 @@ using Microsoft.Net.Http.Headers;
 using System.IO;
 using Microsoft.AspNetCore.Identity;
 
-namespace bangbangboom.Controllers
-{
-    public static class MapStatus
-    {
+namespace bangbangboom.Controllers {
+    public static class MapStatus {
         public readonly static string Wip = "wip";
         public readonly static string Reviewing = "reviewing";
         public readonly static string NotPass = "notpass";

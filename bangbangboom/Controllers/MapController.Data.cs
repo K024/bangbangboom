@@ -1,6 +1,7 @@
 ﻿using bangbangboom.Data;
 using bangbangboom.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using System;
@@ -8,21 +9,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Controllers
-{
+namespace bangbangboom.Controllers {
 
-    public partial class MapController : ControllerBase
-    {
+    public partial class MapController : ControllerBase {
 
         [HttpGet("{id}.{ext?}")]
         public async Task<object> Content(
-            [Required]long id)
-        {
+            [Required]long id) {
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
 
-            if (!MapStatus.CanPublicView.Contains(map.Status))
-            {
+            if (!MapStatus.CanPublicView.Contains(map.Status)) {
                 var user = await userManager.GetUserAsync(User);
                 if (user is null || user.Id != map.UploaderId)
                     return StatusCode(403);
@@ -34,50 +31,60 @@ namespace bangbangboom.Controllers
         [HttpGet("{id}.{ext?}")]
         public async Task<object> Image(
             [Required]long id,
-            [FromQuery]string min)
-        {
+            [FromQuery]string min) {
             var map = await context.Maps.FindAsync(id);
             if (map is null || map.ImageFileId is null) return StatusCode(404);
-            if (!MapStatus.CanPublicView.Contains(map.Status))
-            {
+            if (!MapStatus.CanPublicView.Contains(map.Status)) {
                 var user = await userManager.GetUserAsync(User);
                 if (user is null || user.Id != map.UploaderId)
                     return StatusCode(403);
             }
-            try
-            {
+            try {
                 var file = fileProvider.GetImageWithThumbnail(map.ImageFileId, out var etag, min != null);
 
                 return File(file, "image/jpeg", DateTimeOffset.MinValue,
                     EntityTagHeaderValue.Parse(new StringSegment('"' + etag + '"')), true);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 return StatusCode(404, "File not found.");
             }
         }
         [HttpGet("{id}.{ext?}")]
         public async Task<object> Music(
-            [Required] long id)
-        {
+            [Required] long id) {
             var map = await context.Maps.FindAsync(id);
             if (map is null || map.MusicFileId is null) return StatusCode(404);
-            if (!MapStatus.CanPublicView.Contains(map.Status))
-            {
+            if (!MapStatus.CanPublicView.Contains(map.Status)) {
                 var user = await userManager.GetUserAsync(User);
                 if (user is null || user.Id != map.UploaderId)
                     return StatusCode(403);
             }
-            try
-            {
+            try {
                 var file = fileProvider.GetFileByGuid(map.MusicFileId);
                 return File(file, "audio/mp3", DateTimeOffset.MinValue,
                     EntityTagHeaderValue.Parse(new StringSegment('"' + map.MusicFileId + '"')), true);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 return StatusCode(404, "File not found.");
             }
+        }
+
+        [HttpPost]
+        public async Task<object> AddPlayRecord(
+            [FromForm][Required]long id) {
+            var map = await (
+                from m in context.Maps
+                where m.Id == id
+                select m).FirstOrDefaultAsync();
+            if (map == null) return StatusCode(404);
+
+            var user = await userManager.GetUserAsync(User);
+            if (user != null) {
+                await context.PlayRecords.AddAsync(new PlayRecord() {
+                    UserId = user.Id,
+                    MapId = map.Id
+                });
+                await context.SaveChangesAsync();
+            }
+            return Ok();
         }
     }
 }

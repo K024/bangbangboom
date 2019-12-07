@@ -9,48 +9,45 @@ using bangbangboom.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace bangbangboom
-{
-    public class Startup
-    {
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
-        {
-            Configuration = configuration;
-            this.env = env;
+namespace bangbangboom {
+    public class Startup {
+        public Startup(IConfiguration configuration, IWebHostEnvironment environment) {
+            configs = configuration;
+            env = environment;
         }
 
-        private readonly IHostingEnvironment env;
-        public IConfiguration Configuration { get; }
+        public readonly IWebHostEnvironment env;
+        public readonly IConfiguration configs;
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
+        public void ConfigureServices(IServiceCollection services) {
             services.AddOptions();
             services.AddLogging();
             services.AddMemoryCache();
 
             services.Configure<GzipCompressionProviderOptions>(
                 options => options.Level = CompressionLevel.Fastest);
-            services.AddResponseCompression(options =>
-            {
+            services.AddResponseCompression(options => {
                 options.Providers.Add<GzipCompressionProvider>();
                 options.EnableForHttps = true;
             });
 
-            AppDbContext.DefaultBuildOption += options =>
-                this.ConfigureDatabase(options);
+            AppDbContext.DefaultBuildOption += options => {
+                var connectionString = configs.GetConnectionString("MySql");
+                options.UseMySql(connectionString);
+            };
 
             services.AddDbContext<AppDbContext>(options =>
                 AppDbContext.DefaultBuildOption(options));
@@ -59,8 +56,7 @@ namespace bangbangboom
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<AppDbContext>();
 
-            services.Configure<IdentityOptions>(options =>
-            {
+            services.Configure<IdentityOptions>(options => {
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
@@ -70,98 +66,65 @@ namespace bangbangboom
                 options.User.AllowedUserNameCharacters =
                 "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
                 options.User.RequireUniqueEmail = true;
-                //options.SignIn.RequireConfirmedEmail = true;
             });
 
             services.Configure<SecurityStampValidatorOptions>(options =>
-                options.ValidationInterval = TimeSpan.FromSeconds(10));
+                options.ValidationInterval = TimeSpan.FromMinutes(5));
 
             services.Configure<DataProtectionTokenProviderOptions>(options =>
                 options.TokenLifespan = TimeSpan.FromHours(2));
 
-            void ConfigCookie(CookieBuilder cookie)
-            {
-                cookie.SecurePolicy = CookieSecurePolicy.None;
-                cookie.SameSite = SameSiteMode.None;
-                cookie.HttpOnly = true;
-                cookie.Path = "/api/";
-                cookie.Expiration = TimeSpan.FromDays(30);
-            }
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                ConfigCookie(options.Cookie);
+            services.ConfigureApplicationCookie(options => {
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
 
                 options.SlidingExpiration = true;
 
                 options.Events.OnRedirectToAccessDenied =
-                options.Events.OnRedirectToLogin = context =>
-                {
+                options.Events.OnRedirectToLogin = context => {
                     context.Response.StatusCode = 401;
                     return Task.CompletedTask;
                 };
             });
 
-            services.AddAntiforgery(options =>
-            {
-                ConfigCookie(options.Cookie);
+            services.AddAntiforgery(options => {
                 options.HeaderName = "X-XSRF-TOKEN";
             });
 
             services.Configure<GuidFileProviderOptions>(options =>
-                options.BaseDir = Path.Combine(env.ContentRootPath, ".hashfiles"));
+                options.BaseDir = Path.Combine(env.ContentRootPath, configs["AppFiles"] ?? ".appfiles"));
             services.AddSingleton<GuidFileProvider>();
-
             services.AddSingleton<MediaFileProcessor>();
-
-            services.AddSingleton<Microsoft.Extensions.Hosting.IHostedService, ScheduedTaskService>();
-
-            ConfiureProductionServices(services);
-
-            services.AddMvc(options =>
-                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-        }
-
-        protected virtual void ConfigureDatabase(DbContextOptionsBuilder options)
-        {
-            var connectionString = Configuration.GetConnectionString("MySql");
-            options.UseMySql(connectionString);
-        }
-
-        protected virtual void ConfiureProductionServices(IServiceCollection services)
-        {
+            services.AddSingleton<IHostedService, ScheduedTaskService>();
             services.AddSingleton<IEmailSender, EmailSender>();
+
+            services.AddSingleton<AutoValidateAntiforgeryTokenAuthorizationFilter>();
+            services.AddControllers(options =>
+                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IServiceProvider serviceProvider)
-        {
+
+        public void Configure(IApplicationBuilder app, IServiceProvider serviceProvider) {
+
             app.UseResponseCompression();
-            if (env.IsDevelopment())
-            {
+
+            if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
-            }
-            else
-            {
-                app.UseExceptionHandler(config =>
-                {
-                    config.Run(context =>
-                    {
+            } else {
+                app.UseExceptionHandler(config => {
+                    config.Run(context => {
                         context.Response.StatusCode = 500;
                         return context.Response.WriteAsync("Internal Server Error!");
                     });
                 });
-                //app.UseHsts();
             }
-            //app.UseHttpsRedirection();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions() {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             app.UseDefaultFiles();
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                OnPrepareResponse = c =>
-                {
+            app.UseStaticFiles(new StaticFileOptions() {
+                OnPrepareResponse = c => {
                     if (c.Context.Request.Path == "/index.html")
                         c.Context.Response.Headers.Add("Cache-Control", "public, max-age=0");
                     else
@@ -169,66 +132,15 @@ namespace bangbangboom
                 }
             });
 
+            app.UseRouting();
             app.UseAuthentication();
-            app.UseMvc();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoint => {
+                endpoint.MapControllers();
+            });
 
-            //app.Use(async (req, next) =>
-            //{
-            //    var uri = req.Request.Path.Value.ToLower();
-            //    if (uri == "/api" || uri.StartsWith("/api/"))
-            //        req.Response.StatusCode = StatusCodes.Status404NotFound;
-            //    else
-            //        await next();
-            //});
-            // app.UseSpa(config => { });
-
-            Init(serviceProvider);
+            this.InitData(serviceProvider);
         }
 
-        private async void Init(IServiceProvider provider)
-        {
-            using (var scope = provider.CreateScope())
-            using (var context = scope.ServiceProvider.GetService<AppDbContext>())
-            using (var usermanager = scope.ServiceProvider.GetService<UserManager<AppUser>>())
-            using (var rolemanager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>())
-            {
-
-                await context.Database.EnsureCreatedAsync();
-
-                var user = await usermanager.FindByIdAsync("admin");
-                if (user is null)
-                {
-                    var logger = scope.ServiceProvider.GetService<ILogger<Startup>>();
-
-                    var email = Configuration.GetSection("Admin")["Email"];
-                    var password = Configuration.GetSection("Admin")["Password"];
-                    if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
-                    {
-                        using (var transaction = await context.Database.BeginTransactionAsync())
-                        {
-                            user = new AppUser()
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                UserName = "admin",
-                                Email = email,
-                            };
-                            await usermanager.CreateAsync(user, password);
-                            if (!await rolemanager.RoleExistsAsync(Controllers.AppUserRole.Admin))
-                                await rolemanager.CreateAsync(new IdentityRole(Controllers.AppUserRole.Admin));
-                            if (!await rolemanager.RoleExistsAsync(Controllers.AppUserRole.Reviewer))
-                                await rolemanager.CreateAsync(new IdentityRole(Controllers.AppUserRole.Reviewer));
-                            await usermanager.AddToRolesAsync(user, new[] {
-                                Controllers.AppUserRole.Admin, Controllers.AppUserRole.Reviewer });
-                            logger.LogInformation("Admin account created.");
-                            transaction.Commit();
-                        }
-                    } 
-                    else
-                    {
-                        logger.LogWarning("No admin account created.");
-                    }
-                }
-            }
-        }
     }
 }

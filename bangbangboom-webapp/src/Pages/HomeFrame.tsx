@@ -72,7 +72,7 @@ const useStyles = makeStyles(theme => ({
 
 const menuList = [
   { text: "menu.search", to: "/search" },
-  { text: "menu.ranking", to: "/ranking" },
+  // { text: "menu.ranking", to: "/ranking" },
   { text: "menu.favorites", to: "/favorites" },
   { text: "menu.mapping", to: "/mapping/meta" },
   { text: "menu.settings", to: "/settings" },

@@ -14,61 +14,56 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Controllers
-{
+namespace bangbangboom.Controllers {
 
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public partial class UserController : ControllerBase
-    {
+    public partial class UserController : ControllerBase {
         private readonly UserManager<AppUser> userManager;
         private readonly AppDbContext context;
         private readonly GuidFileProvider fileProvider;
         public UserController(
-            UserManager<AppUser> userManager, AppDbContext context, GuidFileProvider provider)
-        {
+            UserManager<AppUser> userManager, AppDbContext context, GuidFileProvider provider) {
             this.userManager = userManager;
             this.context = context;
             fileProvider = provider;
         }
 
         [HttpGet]
-        public async Task<object> Me()
-        {
+        public async Task<object> Me() {
             var user = await userManager.GetUserAsync(User);
 
             if (user is null) return StatusCode(204);
 
-            return new AppUserInfo(user)
-            {
+            return new AppUserInfo(user) {
                 roles = (await userManager.GetRolesAsync(user)).ToArray(),
             };
         }
 
         [HttpGet]
         public async Task<object> Info(
-            [FromForm][Required]string username)
-        {
-            var userq =
+            [FromForm][Required]string username) {
+            var res = await (
                 from u in context.Users
-                where u.NormalizedUserName == userManager.NormalizeKey(username)
-                select new AppUserInfo(u)
-                {
+                where u.NormalizedUserName == userManager.NormalizeName(username)
+                select new {
+                    user = u,
                     uploadedmaps = (
                         from m in context.Maps
                         where m.UploaderId == u.Id
                         select 1).Count()
-                };
-            var user = await userq.FirstOrDefaultAsync();
-            if (user == null) return StatusCode(404);
+                }).FirstOrDefaultAsync();
+            if (res == null) return StatusCode(404);
+            var user = new AppUserInfo(res.user) {
+                uploadedmaps = res.uploadedmaps
+            };
             return user;
         }
 
         [Authorize]
         [HttpPost]
         public async Task<object> SetNickName(
-            [FromForm][MaxLength(20)] string nickname)
-        {
+            [FromForm][MaxLength(20)] string nickname) {
             var user = await userManager.GetUserAsync(User);
             nickname = nickname?.Trim();
             if (string.IsNullOrWhiteSpace(nickname))
@@ -81,8 +76,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> SetWhatsUp(
-            [FromForm][MaxLength(300)] string whatsup)
-        {
+            [FromForm][MaxLength(300)] string whatsup) {
             var user = await userManager.GetUserAsync(User);
             user.WhatsUp = whatsup;
             await context.SaveChangesAsync();
@@ -92,20 +86,16 @@ namespace bangbangboom.Controllers
         [HttpGet("{username}.{ext?}")]
         public async Task<object> Profile(
             [Required]string username,
-            [FromQuery]string min)
-        {
+            [FromQuery]string min) {
             var user = await userManager.FindByNameAsync(username);
             var fileid = user?.ProfileFileId;
             if (fileid == null)
                 return StatusCode(404);
-            try
-            {
+            try {
                 var fs = fileProvider.GetImageWithThumbnail(fileid, out var etag, min != null);
                 return File(fs, "image/jpeg", DateTimeOffset.MinValue,
                     EntityTagHeaderValue.Parse(new StringSegment('"' + etag + '"')), true);
-            }
-            catch (FileNotFoundException)
-            {
+            } catch (FileNotFoundException) {
                 return StatusCode(404);
             }
         }
@@ -114,18 +104,15 @@ namespace bangbangboom.Controllers
         [HttpPost]
         public async Task<object> UploadProfile(
             IFormFile file,
-            [FromServices] MediaFileProcessor processor)
-        {
+            [FromServices] MediaFileProcessor processor) {
             var user = await userManager.GetUserAsync(User);
-            if (file != null){
+            if (file != null) {
                 var newid = await fileProvider.SaveImageFileWithThumbnail(processor, file);
                 if (newid is null) return StatusCode(400, "Image may too big or not valid.");
                 if (user.ProfileFileId != null)
                     fileProvider.DeleteImageWithThumbnail(user.ProfileFileId);
                 user.ProfileFileId = newid;
-            }
-            else
-            {
+            } else {
                 if (user.ProfileFileId != null)
                     fileProvider.DeleteImageWithThumbnail(user.ProfileFileId);
                 user.ProfileFileId = null;

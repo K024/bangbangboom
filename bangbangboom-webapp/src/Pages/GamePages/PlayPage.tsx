@@ -2,11 +2,12 @@ import React, { useEffect, useRef } from "react"
 import { useParams, useHistory } from "react-router"
 import { makeStyles } from "@material-ui/core"
 import { Game, GameLoadConfig } from "bangbangboom-game"
-import { Api } from "../../Global/Axios"
+import { Api, Xform } from "../../Global/Axios"
 import { MapInfo } from "../../Global/Modals"
 import { GameSettings } from "./GameSettings"
 import { setMessage } from "../../Global/Snackbar"
 import { getConnectionLoadConfig } from "../../Mapping/ConnectionState"
+import { UserState } from "../UserState"
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -20,6 +21,14 @@ const useStyles = makeStyles(theme => ({
     height: "100%"
   }
 }))
+
+async function addRecord(id: string) {
+  if (!UserState.user) return
+  try {
+    await Api.post("map/addplayrecord", Xform({ id }))
+  } catch (error) {
+  }
+}
 
 export const PlayPage = () => {
 
@@ -64,6 +73,11 @@ export const PlayPage = () => {
     })()
     return () => { unmounted = true }
   }, [id, history])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => addRecord(id), 30 * 1000)
+    return () => { clearTimeout(timeout) }
+  }, [id])
 
 
   return (

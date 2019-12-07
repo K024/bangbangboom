@@ -5,11 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Data
-{
+namespace bangbangboom.Data {
 
-    public class Comment
-    {
+    public class Comment {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
@@ -31,19 +29,18 @@ namespace bangbangboom.Data
         public bool Locked { get; set; }
     }
 
-    public class CommentInfo
-    {
-        public long id;
-        public long mapid;
-        public AppUserInfo user;
-        public long? parentcommentid;
-        public DateTimeOffset datetime;
-        public string content;
-        public bool locked;
+#pragma warning disable IDE1006 // 命名样式
+    public class CommentInfo {
+        public long id { get; set; }
+        public long mapid { get; set; }
+        public AppUserInfo user { get; set; }
+        public long? parentcommentid { get; set; }
+        public DateTimeOffset datetime { get; set; }
+        public string content { get; set; }
+        public bool locked { get; set; }
 
         // public CommentInfo() { }
-        public CommentInfo(Comment c)
-        {
+        public CommentInfo(Comment c) {
             id = c.Id;
             mapid = c.MapId;
             parentcommentid = c.ParentCommentId;

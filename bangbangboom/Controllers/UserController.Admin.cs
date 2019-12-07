@@ -14,38 +14,42 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Controllers
-{
-    public static class AppUserRole
-    {
+namespace bangbangboom.Controllers {
+    public static class AppUserRole {
         public readonly static string Admin = "admin";
         public readonly static string Reviewer = "reviewer";
     }
 
-    public partial class UserController : ControllerBase
-    {
+    public partial class UserController : ControllerBase {
 
         [Authorize]
         [HttpGet]
         public async Task<object> All(
-            [FromQuery][Range(1, 10000)] int? page)
-        {
+            [FromQuery]DateTimeOffset? end) {
+            var time = end ?? DateTimeOffset.Now;
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Admin))
                 return StatusCode(403);
-            var users =
+            var users = await (
                from u in context.Users
-               where u.EmailConfirmed
+               where u.RegisterDate < time
+               join ur in context.UserRoles on u.Id equals ur.UserId into grouping
+               from ur in grouping.DefaultIfEmpty()
+               join r in context.Roles on ur.RoleId equals r.Id into grouping2
+               from r in grouping2.DefaultIfEmpty()
                orderby u.RegisterDate descending
-               select new AppUserInfo(u);
-            return users.Page(page ?? 1);
+               select new { u, r }).Take(24).ToListAsync();
+            var res = users.GroupBy(r => r.u);
+            return new {
+                data = res.Select(g => new AppUserInfo(g.Key) { roles = g.Where(x => x.r != null).Select(x => x.r.Name).ToArray() }),
+                end = res.LastOrDefault()?.Key?.RegisterDate
+            };
         }
 
         [Authorize]
         [HttpPost]
         public async Task<object> SetAdmin(
-            [FromForm][Required] string username)
-        {
+            [FromForm][Required] string username) {
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Admin))
                 return StatusCode(403);
@@ -59,8 +63,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> SetReviewer(
-            [FromForm][Required] string username)
-        {
+            [FromForm][Required] string username) {
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Admin))
                 return StatusCode(403);
@@ -74,8 +77,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> UnsetReviewer(
-            [FromForm][Required] string username)
-        {
+            [FromForm][Required] string username) {
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Admin))
                 return StatusCode(403);
@@ -93,8 +95,7 @@ namespace bangbangboom.Controllers
         [HttpPost]
         public async Task<object> BlockUser(
             [FromForm] int? days,
-            [FromForm][Required] string username)
-        {
+            [FromForm][Required] string username) {
             var user = await userManager.GetUserAsync(User);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Admin))
                 return StatusCode(403);

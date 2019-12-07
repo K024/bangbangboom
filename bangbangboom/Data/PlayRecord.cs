@@ -5,13 +5,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Data
-{
-    public class PlayRecord
-    {
+namespace bangbangboom.Data {
+    public class PlayRecord {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } 
+        public long Id { get; set; }
 
+        [Required]
         [MaxLength(100)]
         public string UserId { get; set; }
 

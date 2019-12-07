@@ -10,37 +10,37 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Controllers
-{
+namespace bangbangboom.Controllers {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class CommentController : ControllerBase
-    {
+    public class CommentController : ControllerBase {
 
         private readonly UserManager<AppUser> userManager;
         private readonly AppDbContext context;
 
         public CommentController(
-            UserManager<AppUser> userManager, AppDbContext context)
-        {
+            UserManager<AppUser> userManager, AppDbContext context) {
             this.userManager = userManager;
             this.context = context;
         }
 
         [HttpGet]
         public async Task<object> Map(
-            [FromQuery][Required] long MapId)
-        {
-            var commentsq =
+            [FromQuery][Required] long MapId) {
+            var res = await (
                 from c in context.Comments
                 where c.MapId == MapId
                 join u in context.Users on c.UserId equals u.Id
-                select new CommentInfo(c)
-                {
-                    user = new AppUserInfo(u),
-                };
+                select new {
+                    comment = c,
+                    user = u,
+                }).ToListAsync();
 
-            return await commentsq.ToListAsync();
+            var commentsq = res.Select(r => new CommentInfo(r.comment) {
+                user = new AppUserInfo(r.user)
+            });
+
+            return commentsq;
         }
 
         [Authorize]
@@ -48,8 +48,7 @@ namespace bangbangboom.Controllers
         public async Task<object> Send(
             [FromForm][Required] long MapId,
             [FromForm] long? ReplyId,
-            [FromForm][Required][MaxLength(200)] string comment)
-        {
+            [FromForm][Required][MaxLength(200)] string comment) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(MapId);
             if (map is null) return StatusCode(404);
@@ -57,8 +56,7 @@ namespace bangbangboom.Controllers
             if (ReplyId != null)
                 parent = await context.Comments.FindAsync(ReplyId);
 
-            context.Comments.Add(new Comment()
-            {
+            context.Comments.Add(new Comment() {
                 UserId = user.Id,
                 ParentCommentId = parent?.Id,
                 MapId = map.Id,
@@ -72,8 +70,7 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Delete(
-            [FromForm][Required] long id)
-        {
+            [FromForm][Required] long id) {
             var user = await userManager.GetUserAsync(User);
             var comment = await context.Comments.FindAsync(id);
             if (comment is null) return StatusCode(404);
@@ -86,13 +83,10 @@ namespace bangbangboom.Controllers
                 where c.ParentCommentId == id
                 select c).CountAsync();
 
-            if (children > 0)
-            {
+            if (children > 0) {
                 comment.Locked = true;
                 comment.Content = "";
-            }
-            else
-            {
+            } else {
                 context.Comments.Remove(comment);
             }
             await context.SaveChangesAsync();

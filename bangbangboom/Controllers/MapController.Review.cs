@@ -9,17 +9,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Controllers
-{
+namespace bangbangboom.Controllers {
 
-    public partial class MapController : ControllerBase
-    {
+    public partial class MapController : ControllerBase {
 
         [Authorize]
         [HttpPost]
         public async Task<object> Publish(
-            [FromForm][Required]long id)
-        {
+            [FromForm][Required]long id) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
@@ -35,21 +32,17 @@ namespace bangbangboom.Controllers
         public async Task<object> Review(
             [FromForm][Required] long id,
             [FromForm] bool? pass,
-            [FromForm] bool? proved)
-        {
+            [FromForm] bool? proved) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
             if (map.Status != MapStatus.Reviewing) return StatusCode(403);
             if (!await userManager.IsInRoleAsync(user, AppUserRole.Reviewer)) return StatusCode(403);
 
-            if (pass ?? false)
-            {
+            if (pass ?? false) {
                 map.Status = proved ?? false ? MapStatus.Proved : MapStatus.Reviewed;
                 map.Reviewed = DateTimeOffset.Now;
-            }
-            else
-            {
+            } else {
                 map.Status = MapStatus.NotPass;
                 map.Reviewed = null;
             }
@@ -60,12 +53,11 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Recall(
-            [FromForm][Required]long id)
-        {
+            [FromForm][Required]long id) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
             if (map is null) return StatusCode(404);
-            if (!MapStatus.CanPublicView.Contains(map.Status) || 
+            if (!MapStatus.CanPublicView.Contains(map.Status) ||
                 (user.Id != map.UploaderId && !await userManager.IsInRoleAsync(user, AppUserRole.Reviewer)))
                 return StatusCode(403);
             map.Status = MapStatus.Wip;

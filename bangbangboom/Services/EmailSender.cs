@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
@@ -11,31 +10,27 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Services
-{
-    public class EmailSender : IEmailSender
-    {
+namespace bangbangboom.Services {
+    public interface IEmailSender {
+        Task SendEmailAsync(string email, string subject, string htmlMessage, bool isHtml = false);
+    }
+    public class EmailSender : IEmailSender {
         private readonly IEmailSender sender;
 
-        public EmailSender(IConfiguration config)
-        {
-            //IEmailSenderExtentions.Domain = config["Domain"] ?? "localhost";
+        public EmailSender(IConfiguration config) {
             var cfg = config.GetSection("SMTP");
-            if (cfg.Value != null)
+            if (cfg.Exists())
                 sender = new SmtpSender(cfg["server"], cfg.GetValue<int>("port"), cfg["user"], cfg["password"]);
             else
                 sender = new DesktopSender();
         }
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
-        {
-            await sender.SendEmailAsync(email, subject, htmlMessage);
-        }
+        public Task SendEmailAsync(string email, string subject, string htmlMessage, bool isHtml = false) 
+            => sender.SendEmailAsync(email, subject, htmlMessage, isHtml);
+        
     }
 
-    public class DesktopSender : IEmailSender
-    {
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
-        {
+    public class DesktopSender : IEmailSender {
+        public async Task SendEmailAsync(string email, string subject, string htmlMessage, bool isHtml = false) {
             var filename = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 "Desktop", $"Email {DateTime.Now.ToString("MM-dd")}.txt");
             var output = new StreamWriter(new FileStream(
@@ -53,15 +48,12 @@ Message:
         }
     }
 
-    public class SmtpSender : IEmailSender
-    {
+    public class SmtpSender : IEmailSender {
         public readonly SmtpClient client;
         public readonly string username;
 
-        public SmtpSender(string server, int port, string username, string password)
-        {
-            client = new SmtpClient(server, port)
-            {
+        public SmtpSender(string server, int port, string username, string password) {
+            client = new SmtpClient(server, port) {
                 DeliveryMethod = SmtpDeliveryMethod.Network,
                 UseDefaultCredentials = false,
                 Credentials = new NetworkCredential(username, password),
@@ -71,29 +63,26 @@ Message:
             this.username = username;
         }
 
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
-        {
-            var msg = new MailMessage(username, email)
-            {
+        public async Task SendEmailAsync(string email, string subject, string htmlMessage, bool isHtml = false) {
+            var msg = new MailMessage(username, email) {
                 Subject = subject,
                 Body = htmlMessage,
-                BodyEncoding = Encoding.UTF8
+                BodyEncoding = Encoding.UTF8,
+                IsBodyHtml = isHtml,
             };
             await client.SendMailAsync(msg);
         }
     }
 
-    public static class IEmailSenderExtentions
-    {
+    public static class IEmailSenderExtentions {
         public static async Task SendTokenEmailAsync(this IEmailSender sender,
-            string email, string token)
-        {
+            string email, string token) {
             var subject = "bangbangboom Verification Email";
             var message =
                 $"Your verification token is:\n\n" +
-                $"<h2> {token} </h2>\n\n" +
+                $"<h2>{token}</h2>\n\n" +
                 $"Note: This token is valid for 2 hours.\n";
-            await sender.SendEmailAsync(email, subject, message);
+            await sender.SendEmailAsync(email, subject, message, true);
         }
     }
 }

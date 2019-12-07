@@ -6,13 +6,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Data
-{
+namespace bangbangboom.Data {
 
-    public class Map
-    {
+    public class Map {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } 
+        public long Id { get; set; }
 
         [Required]
         public string UploaderId { get; set; }
@@ -46,27 +44,26 @@ namespace bangbangboom.Data
         public string Status { get; set; } = "";
     }
 
-    public class MapInfo
-    {
-        public long id;
-        public AppUserInfo uploader;
-        public string musicname;
-        public string artist;
-        public string mapname;
-        public int difficulty;
-        public string description;
-        public int plays;
-        public int favorites;
-        public DateTimeOffset created;
-        public DateTimeOffset lastmodified;
-        public DateTimeOffset? reviewed;
-        public string status;
-        public bool hasmusic;
-        public bool hasimage;
+#pragma warning disable IDE1006 // 命名样式
+    public class MapInfo {
+        public long id { get; set; }
+        public AppUserInfo uploader { get; set; }
+        public string musicname { get; set; }
+        public string artist { get; set; }
+        public string mapname { get; set; }
+        public int difficulty { get; set; }
+        public string description { get; set; }
+        public int plays { get; set; }
+        public int favorites { get; set; }
+        public DateTimeOffset created { get; set; }
+        public DateTimeOffset lastmodified { get; set; }
+        public DateTimeOffset? reviewed { get; set; }
+        public string status { get; set; }
+        public bool hasmusic { get; set; }
+        public bool hasimage { get; set; }
 
         // public MapInfo() { }
-        public MapInfo(Map m)
-        {
+        public MapInfo(Map m) {
             id = m.Id;
             musicname = m.MusicName;
             artist = m.Artist;

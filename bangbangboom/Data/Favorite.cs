@@ -5,10 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Data
-{
-    public class Favorite
-    {
+namespace bangbangboom.Data {
+    public class Favorite {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
 
