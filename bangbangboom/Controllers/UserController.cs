@@ -4,9 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using System;
@@ -14,45 +12,58 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Controllers
-{
+namespace bangbangboom.Controllers {
+
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class UserController : ControllerBase
-    {
+    public partial class UserController : ControllerBase {
         private readonly UserManager<AppUser> userManager;
+        private readonly AppDbContext context;
+        private readonly GuidFileProvider fileProvider;
         public UserController(
-            UserManager<AppUser> userManager)
-        {
+            UserManager<AppUser> userManager, AppDbContext context, GuidFileProvider provider) {
             this.userManager = userManager;
+            this.context = context;
+            fileProvider = provider;
         }
 
-        [Authorize]
         [HttpGet]
-        public async Task<object> Me()
-        {
+        public async Task<object> Me() {
             var user = await userManager.GetUserAsync(User);
-            return AppUserDetailed.FromAppUser(user);
+
+            if (user is null) return StatusCode(204);
+
+            return new AppUserInfo(user) {
+                roles = (await userManager.GetRolesAsync(user)).ToArray(),
+            };
         }
 
-        [HttpGet("{username}")]
+        [HttpGet]
         public async Task<object> Info(
-            [Required]string username)
-        {
-            var user = await userManager.FindByNameAsync(username);
-            if (user is null) return StatusCode(404);
-            return AppUserDetailed.FromAppUser(user);
+            [FromForm][Required]string username) {
+            var res = await (
+                from u in context.Users
+                where u.NormalizedUserName == userManager.NormalizeName(username)
+                select new {
+                    user = u,
+                    uploadedmaps = (
+                        from m in context.Maps
+                        where m.UploaderId == u.Id
+                        select 1).Count()
+                }).FirstOrDefaultAsync();
+            if (res == null) return StatusCode(404);
+            var user = new AppUserInfo(res.user) {
+                uploadedmaps = res.uploadedmaps
+            };
+            return user;
         }
 
         [Authorize]
         [HttpPost]
         public async Task<object> SetNickName(
-            [FromForm][MaxLength(20)] string nickname,
-            [FromServices] AppDbContext context)
-        {
+            [FromForm][MaxLength(20)] string nickname) {
             var user = await userManager.GetUserAsync(User);
             nickname = nickname?.Trim();
             if (string.IsNullOrWhiteSpace(nickname))
@@ -65,32 +76,26 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> SetWhatsUp(
-            [FromForm][MaxLength(300)] string whatsup,
-            [FromServices] AppDbContext context)
-        {
+            [FromForm][MaxLength(300)] string whatsup) {
             var user = await userManager.GetUserAsync(User);
             user.WhatsUp = whatsup;
             await context.SaveChangesAsync();
             return Ok();
         }
 
-        [HttpGet("{username}")]
+        [HttpGet("{username}.{ext?}")]
         public async Task<object> Profile(
             [Required]string username,
-            [FromServices] HashFileProvider fileProvider)
-        {
+            [FromQuery]string min) {
             var user = await userManager.FindByNameAsync(username);
-            var hash = user?.ProfileFileHash;
-            if (hash == null)
+            var fileid = user?.ProfileFileId;
+            if (fileid == null)
                 return StatusCode(404);
-            try
-            {
-                var fs = fileProvider.GetFileByHash(hash);
-                return File(fs, "image/jpeg", null,
-                    EntityTagHeaderValue.Parse(new StringSegment('"' + hash + '"')), true);
-            }
-            catch (FileNotFoundException)
-            {
+            try {
+                var fs = fileProvider.GetImageWithThumbnail(fileid, out var etag, min != null);
+                return File(fs, "image/jpeg", DateTimeOffset.MinValue,
+                    EntityTagHeaderValue.Parse(new StringSegment('"' + etag + '"')), true);
+            } catch (FileNotFoundException) {
                 return StatusCode(404);
             }
         }
@@ -98,104 +103,24 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> UploadProfile(
-            [Required] IFormFile file,
-            [FromServices] HashFileProvider fileProvider,
-            [FromServices] AppDbContext context,
-            [FromServices] MediaFileProcessor processor)
-        {
-            if (!processor.TryProcessImage(file.OpenReadStream(), out var jpg,
-                maxsize: 200 * 1024))
-                return StatusCode(400);
+            IFormFile file,
+            [FromServices] MediaFileProcessor processor) {
             var user = await userManager.GetUserAsync(User);
-            var hash = await fileProvider.SaveFileAsync(jpg);
-            if (user.ProfileFileHash != null)
-                fileProvider.DeleteFile(user.ProfileFileHash);
-            user.ProfileFileHash = hash;
+            if (file != null) {
+                var newid = await fileProvider.SaveImageFileWithThumbnail(processor, file);
+                if (newid is null) return StatusCode(400, "Image may too big or not valid.");
+                if (user.ProfileFileId != null)
+                    fileProvider.DeleteImageWithThumbnail(user.ProfileFileId);
+                user.ProfileFileId = newid;
+            } else {
+                if (user.ProfileFileId != null)
+                    fileProvider.DeleteImageWithThumbnail(user.ProfileFileId);
+                user.ProfileFileId = null;
+            }
             await context.SaveChangesAsync();
             return Ok();
         }
 
-
-        [Authorize]
-        [HttpPost]
-        public async Task<object> AddFavorite(
-            [FromForm][Required] long mapId,
-            [FromServices] AppDbContext context)
-        {
-            var user = await userManager.GetUserAsync(User);
-            var map = await context.Maps.FindAsync(mapId);
-            if (map is null || map.Deleted) return StatusCode(404);
-
-            if (user.Favorites.AsQueryable().Where(f => f.Map == map).Count() <= 0)
-            {
-                user.Favorites.Add(new Favorite() { Map = map });
-                await context.SaveChangesAsync();
-            }
-
-            return Ok();
-        }
-
-
-        [Authorize]
-        [HttpPost]
-        public async Task<object> RemoveFavorite(
-            [FromForm][Required] long mapId,
-            [FromServices] AppDbContext context)
-        {
-            var user = await userManager.GetUserAsync(User);
-            var favorite = context.Favorites.AsQueryable().Where(f => f.MapId == mapId).FirstOrDefault();
-
-            if (favorite != null)
-            {
-                user.Favorites.Remove(favorite);
-                await context.SaveChangesAsync();
-            }
-
-            return Ok();
-        }
-
-
-        [Authorize]
-        [HttpGet]
-        public async Task<object> Favorites(
-            [FromQuery][Range(1, 10000)] int? page)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            var favorites =
-                from f in user.Favorites.AsQueryable()
-                where !f.Map.Deleted
-                orderby f.DateTime descending
-                select MapShort.FormMap(f.Map);
-
-            return favorites.Page(page ?? 1);
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<object> MyMusics(
-            [FromQuery][Range(1, 10000)] int? page)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            return user.UploadedMusics.AsQueryable()
-                .OrderByDescending(m => m.Date)
-                .Select(m => MusicShort.FromMusic(m))
-                .Page(page ?? 1);
-        }
-
-        [HttpGet]
-        [Authorize]
-        public async Task<object> MyMaps(
-            [FromQuery][Range(1, 10000)] int? page)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            return user.UploadedMaps.AsQueryable()
-                .OrderByDescending(m => m.Date)
-                .Select(m => MapShort.FormMap(m))
-                .Page(page ?? 1);
-        }
 
     }
 }

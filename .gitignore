@@ -16,8 +16,8 @@ nohup*
 # production settings
 appsettings.Production.json
 
-# hashfileprovider directory
-.hashfiles
+# guidfileprovider directory
+.appfiles
 
 # Personal test file
 .Test.cs

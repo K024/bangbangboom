@@ -1,0 +1,9 @@
+{
+  "app.hello": "你好",
+  "menu.search": "搜索",
+  "menu.ranking": "排行",
+  "menu.favorites": "收藏",
+  "menu.mapping": "作图",
+  "menu.settings": "设置",
+  "error.neterr": "网络错误!"
+}

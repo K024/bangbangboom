@@ -14,161 +14,75 @@ using Microsoft.Net.Http.Headers;
 using System.IO;
 using Microsoft.AspNetCore.Identity;
 
-namespace bangbangboom.Controllers
-{
+namespace bangbangboom.Controllers {
+
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class MapController : ControllerBase
-    {
+    public partial class MapController : ControllerBase {
 
         private readonly UserManager<AppUser> userManager;
+        private readonly AppDbContext context;
+        private readonly GuidFileProvider fileProvider;
+        private readonly MediaFileProcessor mediaProcessor;
         public MapController(
-            UserManager<AppUser> userManager)
-        {
+            UserManager<AppUser> userManager, MediaFileProcessor mediaProcessor,
+            AppDbContext context, GuidFileProvider fileProvider) {
             this.userManager = userManager;
+            this.context = context;
+            this.fileProvider = fileProvider;
+            this.mediaProcessor = mediaProcessor;
         }
 
         [HttpGet]
-        public object Info(
-            [FromQuery][Required]long id,
-            [FromServices] AppDbContext context)
-        {
-            var map = context.Maps.IncludeAll()
-                .Where(m => m.Id == id)
-                .FirstOrDefault();
-            if (map is null || map.Deleted) return StatusCode(404);
-            return MapDetailed.FormMap(map);
-        }
-
-        [HttpGet]
-        public object Search(
-            [FromQuery][Required][MaxLength(50)] string key,
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
-        {
-            var maps =
-               from m in context.Maps.IncludeAll()
-               where (m.Music.Title.Contains(key) || m.Music.TitleUnicode.Contains(key)
-               || m.Music.Artist.Contains(key) || m.Music.ArtistUnicode.Contains(key)
-               || m.MapName.Contains(key) || m.Uploader.UserName.Contains(key) || m.Uploader.NickName.Contains(key)
-               || m.Music.Description.Contains(key) || m.Description.Contains(key)) && !m.Deleted
-               orderby m.Date descending
-               select MapShort.FormMap(m);
-
-            return maps.Page(page ?? 1);
-        }
-
-        [HttpGet]
-        public object Latest(
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
-        {
-            var maps =
-                from m in context.Maps.IncludeAll()
-                where !m.Deleted
-                orderby m.Date descending
-                select MapShort.FormMap(m);
-            return maps.Page(page ?? 1);
-        }
-
-
-        [HttpGet]
-        public object LatestProved(
-            [FromQuery][Range(1, 10000)] int? page,
-            [FromServices] AppDbContext context)
-        {
-            var maps =
-                from m in context.Maps.IncludeAll()
-                where !m.Deleted && m.Proved
-                orderby m.Date descending
-                select MapShort.FormMap(m);
-            var p = page ?? 1 - 1;
-            return maps.Page(page ?? 1);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<object> Content(
-            [Required]long id,
-            [FromServices] AppDbContext context)
-        {
-            var map = await context.Maps.FindAsync(id);
-            if (map is null || map.Deleted) return StatusCode(404);
-            if (map.Locked) return StatusCode(403);
-
-            var user = await userManager.GetUserAsync(User);
-            if (user != null)
-                await context.PlayRecords.AddAsync(new PlayRecord() { Map = map, User = user });
-            else
-                await context.PlayRecords.AddAsync(new PlayRecord() { Map = map });
-
-            await context.SaveChangesAsync();
-
-            return Ok(map.MapContent);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<object> Image(
-            [Required]long id,
-            [FromServices] AppDbContext context,
-            [FromServices] HashFileProvider fileProvider)
-        {
-            var map = await context.Maps.FindAsync(id);
-            if (map is null || map.Deleted) return StatusCode(404);
-            if (map.Locked) return StatusCode(403);
-
-            var hashAndType = map.ImageFileHashAndType.Split(':');
-            var file = fileProvider.GetFileByHash(hashAndType[0]);
-
-            return File(file, hashAndType[1], null,
-                EntityTagHeaderValue.Parse(new StringSegment('"' + hashAndType[0] + '"')), true);
-        }
-        [HttpGet("{id}")]
-        public async Task<object> Music(
-            [Required] long id,
-            [FromServices] AppDbContext context)
-        {
-            var map = await context.Maps.FindAsync(id);
-            if (map is null || map.Deleted) return StatusCode(404);
-            if (map.Locked) return StatusCode(403);
-
-            return RedirectToAction("File", "Music", new { id = map.MusicId });
+        public async Task<object> Info(
+            [FromQuery][Required]long id) {
+            var res = await (
+                from m in context.Maps
+                where m.Id == id
+                join u in context.Users on m.UploaderId equals u.Id
+                select new  {
+                    map = m,
+                    uploader = u,
+                    plays = (
+                        from pl in context.PlayRecords
+                        where pl.MapId == m.Id
+                        select 1).Count(),
+                    favorites = (
+                        from fa in context.Favorites
+                        where fa.MapId == m.Id
+                        select 1).Count(),
+                }).FirstOrDefaultAsync();
+            if (res is null) return StatusCode(404);
+            var map = new MapInfo(res.map) {
+                uploader = new AppUserInfo(res.uploader),
+                plays = res.plays,
+                favorites = res.favorites
+            };
+            if (!MapStatus.CanPublicView.Contains(map.status)) {
+                var user = await userManager.GetUserAsync(User);
+                if (user is null || user.UserName != map.uploader.username)
+                    return StatusCode(403);
+            }
+            return map;
         }
 
 
         [Authorize]
         [HttpPost]
-        public async Task<object> Upload(
-            [FromForm][Required] long musicId,
-            [FromForm][Required][MaxLength(100)] string mapName,
-            [FromForm][Required][Range(0, 100)] int difficulty,
-            [FromForm][Required][MaxLength(400)] string description,
-            [FromForm][Required] string content,
-            [Required] IFormFile image,
-            [FromServices] HashFileProvider fileProvider,
-            [FromServices] AppDbContext context)
-        {
+        public async Task<object> Add() {
             var user = await userManager.GetUserAsync(User);
-            var music = await context.Musics.FindAsync(musicId);
-            if (music is null || music.Deleted) return StatusCode(404);
+            var count = await (
+                from m in context.Maps
+                where m.UploaderId == user.Id && MapStatus.CanModify.Contains(m.Status)
+                select 1).CountAsync();
 
-            if (mapName.Any(c => c > 127))
-                return StatusCode(400);
+            if (count >= 3) return StatusCode(403, "To many unreviewed maps.");
 
-            var type = image.ContentType;
-            if (!type.StartsWith("image") || image.Length > 1024 * 1024 * 5) return StatusCode(400);
-            var hash = await fileProvider.SaveFileAsync(image.OpenReadStream());
-
-            var map = new Map()
-            {
-                Uploader = user,
-                Music = music,
-                MapName = mapName,
-                Difficulty = difficulty,
-                Description = description,
-                MapContent = content,
-                ImageFileHashAndType = hash + ":" + type
+            var map = new Map() {
+                UploaderId = user.Id,
+                Status = MapStatus.Wip,
             };
-            await context.Maps.AddAsync(map);
+            context.Maps.Add(map);
             await context.SaveChangesAsync();
             return Ok(map.Id);
         }
@@ -177,44 +91,51 @@ namespace bangbangboom.Controllers
         [Authorize]
         [HttpPost]
         public async Task<object> Modify(
-            [FromForm] long id,
-            [FromForm] long? musicId,
+            [FromForm][Required] long id,
+            [FromForm][MaxLength(100)] string musicName,
+            [FromForm][MaxLength(100)] string artist,
             [FromForm][MaxLength(100)] string mapName,
             [FromForm][Range(0, 100)] int? difficulty,
             [FromForm][MaxLength(400)] string description,
             [FromForm] string content,
             IFormFile image,
-            [FromServices] HashFileProvider fileProvider,
-            [FromServices] AppDbContext context)
-        {
+            IFormFile music) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
-            if (map is null || map.Deleted) return StatusCode(404);
-            if (map.Uploader != user) return StatusCode(403);
+            if (map is null) return StatusCode(404);
+            if (map.UploaderId != user.Id) return StatusCode(403);
+            if (!MapStatus.CanModify.Contains(map.Status))
+                return StatusCode(403, "Cannot modify reviewed map.");
 
-            if (mapName != null && mapName.Any(c => c > 127))
-                return StatusCode(400);
+            if (musicName != null) map.MusicName = musicName;
+            else if (artist != null) map.Artist = artist;
+            else if (mapName != null) map.MapName = mapName;
+            else if (difficulty != null) map.Difficulty = difficulty ?? 20;
+            else if (description != null) map.Description = description;
+            else if (content != null) map.MapContent = content;
+            else if (image != null) {
+                try {
+                    var newid = await fileProvider.SaveImageFileWithThumbnail(mediaProcessor, image);
+                    if (newid is null) return StatusCode(400, "Image may too big or not valid.");
+                    if (!string.IsNullOrEmpty(map.ImageFileId))
+                        fileProvider.DeleteImageWithThumbnail(map.ImageFileId);
+                    map.ImageFileId = newid;
+                } catch (Exception) {
+                    return StatusCode(500);
+                }
+            } else if (music != null) {
+                try {
+                    var fileid = await fileProvider.SaveFileAsync(music.OpenReadStream());
+                    if (!string.IsNullOrEmpty(map.MusicFileId))
+                        fileProvider.DeleteFile(map.MusicFileId);
+                    map.MusicFileId = fileid;
+                } catch (Exception) {
+                    return StatusCode(500);
+                }
+            } else return StatusCode(400, "No change applied.");
 
-            if (musicId != null)
-            {
-                var music = await context.Musics.FindAsync(musicId);
-                if (music is null || music.Deleted) return StatusCode(404);
-                map.Music = music;
-            }
-            if (mapName != null) map.MapName = mapName;
-            if (difficulty != null) map.Difficulty = difficulty ?? 20;
-            if (description != null) map.Description = description;
-            if (content != null) map.MapContent = content;
-            if (image != null)
-            {
-                var type = image.ContentType;
-                if (!type.StartsWith("image") || image.Length > 1024 * 1024 * 5) return StatusCode(400);
-                var hash = await fileProvider.SaveFileAsync(image.OpenReadStream());
-                fileProvider.DeleteFile(map.ImageFileHashAndType.Split(':')[0]);
-                map.ImageFileHashAndType = hash + ":" + type;
-            }
-
-            map.LastModified = DateTime.Now;
+            map.LastModified = DateTimeOffset.Now;
+            map.Status = MapStatus.Wip;
 
             await context.SaveChangesAsync();
             return Ok();
@@ -222,101 +143,20 @@ namespace bangbangboom.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<object> Rate(
-            [FromForm][Required] long id,
-            [FromForm][Required][Range(1, 5)] int score,
-            [FromServices] AppDbContext context)
-        {
+        public async Task<object> Delete(
+            [FromForm][Required] long id) {
             var user = await userManager.GetUserAsync(User);
             var map = await context.Maps.FindAsync(id);
-            if (map is null || map.Deleted || map.Locked) return StatusCode(404);
+            if (map is null) return StatusCode(404);
+            if (map.UploaderId != user.Id &&
+                !await userManager.IsInRoleAsync(user, AppUserRole.Admin)) return StatusCode(403);
 
-            var rate = context.Rates.Where(r => r.User == user && r.Map == map).FirstOrDefault();
+            if (map.ImageFileId != null) fileProvider.DeleteImageWithThumbnail(map.ImageFileId);
+            if (map.MusicFileId != null) fileProvider.DeleteFile(map.MusicFileId);
 
-            if (rate is null)
-            {
-                await context.Rates.AddAsync(new Rate() { Map = map, User = user, RateScore = score });
-            }
-            else
-            {
-                rate.RateScore = score;
-            }
+            context.Maps.Remove(map);
             await context.SaveChangesAsync();
             return Ok();
         }
-
-        public class MyRateInfo
-        {
-            public bool rated = false;
-            public int score = 0;
-            public bool favorite = false;
-        }
-
-        [Authorize]
-        [HttpGet]
-        public async Task<object> MyRate(
-            [FromQuery][Required] long id,
-            [FromServices] AppDbContext context)
-        {
-            var user = await userManager.GetUserAsync(User);
-            var rate = await context.Rates.Where(r => r.MapId == id && r.User == user).FirstOrDefaultAsync();
-            var favorite = user.Favorites.AsQueryable().Where(f => f.MapId == id).FirstOrDefault();
-            if (rate is null) return new MyRateInfo() { favorite = favorite != null };
-            return new MyRateInfo() { rated = true, score = rate.RateScore, favorite = favorite != null };
-        }
-
-        [Authorize]
-        [HttpGet]
-        public async Task<object> MyFavorite(
-            [FromQuery][Required] long id)
-        {
-            var user = await userManager.GetUserAsync(User);
-            var r = user.Favorites.AsQueryable().Where(f => f.MapId == id).FirstOrDefault();
-            if (r is null) return "false";
-            return "true";
-        }
-
-        [Authorize]
-        [HttpPost]
-        public async Task<object> CancelRate(
-            [FromForm][Required] long id,
-            [FromServices] AppDbContext context)
-        {
-            var user = await userManager.GetUserAsync(User);
-
-            var rate = context.Rates.Where(r => r.User == user && r.MapId == id).FirstOrDefault();
-
-            if (rate is null) return StatusCode(404);
-
-            context.Rates.Remove(rate);
-
-            await context.SaveChangesAsync();
-            return Ok();
-        }
-
-        [HttpPost]
-        public async Task<object> Report(
-            [FromForm][Required] long id,
-            [FromForm][Required][MaxLength(400)] string reason,
-            [FromServices] AppDbContext context)
-        {
-            var user = await userManager.GetUserAsync(User);
-            var map = await context.Maps.FindAsync(id);
-            if (map is null || map.Deleted || map.Locked) return StatusCode(404);
-
-            var ip = Request.HttpContext.Connection.RemoteIpAddress;
-
-            await context.Reports.AddAsync(new Report()
-            {
-                From = "ip:" + ip.ToString() + " user:" + (user?.UserName ?? "(anonymous)"),
-                Type = "map",
-                Target = id.ToString(),
-                Reason = reason
-            });
-
-            await context.SaveChangesAsync();
-            return Ok();
-        }
-
     }
 }

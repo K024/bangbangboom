@@ -6,154 +6,75 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace bangbangboom.Data
-{
+namespace bangbangboom.Data {
 
-    public class Map
-    {
+    public class Map {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; } 
+        public long Id { get; set; }
 
         [Required]
         public string UploaderId { get; set; }
-        public virtual AppUser Uploader { get; set; }
 
-        public long MusicId { get; set; }
-        public virtual Music Music { get; set; }
+        [MaxLength(100)]
+        public string MusicName { get; set; }
 
-        [Required]
+        [MaxLength(100)]
+        public string Artist { get; set; }
+
         [MaxLength(100)]
         public string MapName { get; set; }
 
-        public double Difficulty { get; set; }
+        public int Difficulty { get; set; }
 
-        [Required]
         [MaxLength(400)]
         public string Description { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public DateTime Date { get; set; } = DateTime.Now;
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public DateTime LastModified { get; set; } = DateTime.Now;
+        public DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset LastModified { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset? Reviewed { get; set; }
 
-        [Required]
-        public string MapContent { get; set; }
-        [Required]
         [MaxLength(100)]
-        public string ImageFileHashAndType { get; set; }
+        public string MusicFileId { get; set; }
+        public string MapContent { get; set; }
+        [MaxLength(100)]
+        public string ImageFileId { get; set; }
 
-        public bool Proved { get; set; } = false;
-        public virtual IList<Rate> Rates { get; set; }
-        public virtual IList<PlayRecord> PlayRecords { get; set; }
-        public virtual IList<Comment> Comments { get; set; }
-        public virtual IList<Favorite> Favorites { get; set; }
-
-        public bool Locked { get; set; } = false;
-        public bool Deleted { get; set; } = false;
+        [Required]
+        [MaxLength(10)]
+        public string Status { get; set; } = "";
     }
 
-    public static class MapExtension
-    {
-        public static IQueryable<Map> IncludeAll(this IQueryable<Map> q) =>
-            q.Include(m => m.Music).ThenInclude(m => m.Uploader)
-            .Include(m => m.Uploader)
-            .Include(m => m.Rates)
-            .Include(m => m.PlayRecords)
-            .Include(m => m.Favorites);
-    }
+#pragma warning disable IDE1006 // 命名样式
+    public class MapInfo {
+        public long id { get; set; }
+        public AppUserInfo uploader { get; set; }
+        public string musicname { get; set; }
+        public string artist { get; set; }
+        public string mapname { get; set; }
+        public int difficulty { get; set; }
+        public string description { get; set; }
+        public int plays { get; set; }
+        public int favorites { get; set; }
+        public DateTimeOffset created { get; set; }
+        public DateTimeOffset lastmodified { get; set; }
+        public DateTimeOffset? reviewed { get; set; }
+        public string status { get; set; }
+        public bool hasmusic { get; set; }
+        public bool hasimage { get; set; }
 
-    public class MapShort
-    {
-        public long id;
-        public string mapname;
-        public double difficulty;
-        public bool proved;
-        public double rate;
-        public long plays;
-        public long favorites;
-        public MusicShort music;
-        public AppUserShort uploader;
-        public bool locked;
-
-        public static MapShort FormMap(Map m)
-        {
-            return new MapShort()
-            {
-                id = m.Id,
-                mapname = m.MapName,
-                difficulty = m.Difficulty,
-                proved = m.Proved,
-                rate = m.Rates.AsQueryable().DefaultIfEmpty(new Rate()).Average(r => r.RateScore),
-                plays = m.PlayRecords.AsQueryable().Count(),
-                favorites = m.Favorites.AsQueryable().Count(),
-                music = MusicShort.FromMusic(m.Music),
-                uploader = AppUserShort.FromAppUser(m.Uploader),
-                locked = m.Locked,
-            };
+        // public MapInfo() { }
+        public MapInfo(Map m) {
+            id = m.Id;
+            musicname = m.MusicName;
+            artist = m.Artist;
+            mapname = m.MapName;
+            difficulty = m.Difficulty;
+            created = m.Created;
+            lastmodified = m.LastModified;
+            reviewed = m.Reviewed;
+            status = m.Status;
+            hasmusic = m.MusicFileId != null;
+            hasimage = m.ImageFileId != null;
         }
-
-    }
-
-    public class RateDetail
-    {
-        public int r1;
-        public int r2;
-        public int r3;
-        public int r4;
-        public int r5;
-
-        public static RateDetail FromRates(IEnumerable<Rate> rates)
-        {
-            var groups = rates.GroupBy(r => r.RateScore);
-            var d = new RateDetail();
-            foreach(var g in groups)
-            {
-                switch(g.Key)
-                {
-                    case 1: d.r1 = g.Count(); break;
-                    case 2: d.r2 = g.Count(); break;
-                    case 3: d.r3 = g.Count(); break;
-                    case 4: d.r4 = g.Count(); break;
-                    case 5: d.r5 = g.Count(); break;
-                }
-            }
-            return d;
-        }
-    }
-    public class MapDetailed
-    {
-        public long id;
-        public string mapname;
-        public double difficulty;
-        public bool proved;
-        public string description;
-        public RateDetail rate;
-        public long plays;
-        public long favorites;
-        public DateTime date;
-        public DateTime lastmodified;
-        public MusicDetailed music;
-        public AppUserShort uploader;
-        public bool locked;
-
-        public static MapDetailed FormMap(Map m)
-        {
-            return new MapDetailed()
-            {
-                id = m.Id,
-                mapname = m.MapName,
-                difficulty = m.Difficulty,
-                proved = m.Proved,
-                description = m.Description,
-                rate = RateDetail.FromRates(m.Rates),
-                plays = m.PlayRecords.AsQueryable().Count(),
-                favorites = m.Favorites.AsQueryable().Count(),
-                date = m.Date,
-                lastmodified = m.LastModified,
-                music = MusicDetailed.FromMusic(m.Music),
-                uploader = AppUserShort.FromAppUser(m.Uploader),
-                locked = m.Locked,
-            };
-        }
-
     }
 }
