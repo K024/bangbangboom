@@ -101,9 +101,9 @@ export const Actions = MakeActions({
   setTimePoint(trackid: string, offset?: number, bpm?: number, bpb?: number) {
     const t = state.map.timepoints.find(tp => tp.id === trackid)
     if (t) {
-      if (offset && offset > 0) t.offset = offset
-      if (bpm && bpm > 0) t.bpm = bpm
-      if (bpb && bpb > 0) t.bpb = Math.floor(bpb)
+      if (typeof offset === "number") t.offset = offset
+      if (typeof bpm === "number") t.bpm = bpm
+      if (typeof bpb === "number") t.bpb = Math.floor(bpb)
       state.map.timepoints = state.map.timepoints.slice().sort((a, b) => a.offset - b.offset)
     } else return "failed"
   },

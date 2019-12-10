@@ -116,8 +116,11 @@ export const TimingPad = (props: TimingPadProps) => {
     const div = ref.current
     if (div)
       s.opacities.forEach((v, i) => {
-        const c = div.children[i].firstChild as HTMLDivElement
-        if (c) c.style.opacity = v as any
+        const d = div.children[i] as HTMLDivElement
+        if (!d) return
+        const c = d.firstChild as HTMLDivElement
+        if (!c) return
+        c.style.opacity = v as any
       })
   }), [s, p])
 

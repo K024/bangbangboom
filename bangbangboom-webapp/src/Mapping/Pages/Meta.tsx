@@ -1,5 +1,5 @@
 import React from "react"
-import { makeStyles, TextField, Button, Slider, Switch, Grid, Typography, FormControlLabel } from "@material-ui/core"
+import { makeStyles, Button, Slider, Switch, Grid, Typography, FormControlLabel } from "@material-ui/core"
 import { useObserver, useLocalStore } from "mobx-react-lite"
 import { FormattedMessage } from "react-intl"
 import { MetaState } from "../MappingState"
@@ -11,6 +11,7 @@ import { ConnectionState, ConnectionInfo } from "../ConnectionState"
 import { CoverProgress } from "../../Pages/Components/CoverProgress"
 import { Editable } from "../../Pages/Components/Editable"
 import { selectFile, readFile } from "../../Global/Utils"
+import { NumberInput } from "../../Pages/Components/NumberInput"
 
 const useStyles = makeStyles(theme => ({
   panel: {
@@ -70,9 +71,10 @@ export const MetaPage = () => {
     <>
       <Grid item container alignItems="flex-end" spacing={2}>
         <Grid item>
-          <TextField value={s.musicid || ""}
+          <NumberInput number={s.musicid}
             label={<FormattedMessage id="label.musicid" />}
-            onChange={e => s.musicid = parseInt(e.target.value) || 0} />
+            validator={s => /^[0-9]+$/.test(s) && parseInt(s)}
+            onNumberChange={(e, v) => s.musicid = v} />
         </Grid>
         <Grid item><Button disabled={ConnectionState.loading}
           onClick={() => ConnectionState.source = s.musicid.toString()}

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { makeStyles, Typography, Table, TableHead, TableRow, TableCell, TableBody, Button, TextField, IconButton, Switch, FormControlLabel, Grid, InputAdornment } from "@material-ui/core"
+import { makeStyles, Typography, Table, TableHead, TableRow, TableCell, TableBody, Button, IconButton, Switch, FormControlLabel, Grid, InputAdornment } from "@material-ui/core"
 import { useObserver, useLocalStore } from "mobx-react-lite"
 import { FormattedMessage } from "react-intl"
 import { TimePoint } from "../core/MapCore"
@@ -11,6 +11,7 @@ import { uuid } from "../core/Utils"
 import NavigateBeforeIcon from '@material-ui/icons/NavigateBefore'
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
 import { reaction } from "mobx"
+import { NumberInput } from "../../Pages/Components/NumberInput"
 
 const useStyles = makeStyles(theme => ({
   timing: {
@@ -172,8 +173,9 @@ export const TimingPage = () => {
         </Grid>
         <Grid item container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label={<FormattedMessage id="label.offset" />} inputProps={{ type: "number", step: "0.001" }}
-              value={s.input.offset.toFixed(5)} onChange={e => s.input.offset = parseFloat(e.target.value) || 1} />
+            <NumberInput fullWidth label={<FormattedMessage id="label.offset" />} inputProps={{ type: "number", step: "0.001" }}
+              number={s.input.offset}
+              onNumberChange={(e, v) => s.input.offset = v} />
           </Grid>
           <Grid item xs={12} sm={6} container>
             <IconButton onClick={() => movebeat(false)}>
@@ -187,14 +189,17 @@ export const TimingPage = () => {
             </Button>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="BPM" inputProps={{ type: "number", step: "0.001" }}
-              value={s.input.bpm.toFixed(5)} onChange={e => s.input.bpm = parseFloat(e.target.value) || 120} />
+            <NumberInput fullWidth label="BPM" inputProps={{ type: "number", step: "0.001" }}
+              number={s.input.bpm}
+              onNumberChange={(e, v) => s.input.bpm = v} />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField
+            <NumberInput
               InputProps={{ endAdornment: <InputAdornment position="end">/4</InputAdornment> }}
               fullWidth label={<FormattedMessage id="label.meter" />} inputProps={{ type: "number", step: "1" }}
-              value={s.input.bpb} onChange={e => s.input.bpb = parseInt(e.target.value) || 4} />
+              number={s.input.bpb}
+              validator={s => /^[0-9]+$/.test(s) && parseInt(s)}
+              onNumberChange={(e, v) => s.input.bpm = v} />
           </Grid>
         </Grid>
         <Grid item container wrap="wrap" spacing={2}>
