@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using bangbangboom.Data;
 using bangbangboom.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -37,6 +38,16 @@ namespace bangbangboom {
             services.AddLogging();
             services.AddMemoryCache();
 
+            var redis_conf = configs.GetConnectionString("Redis")
+                ?? throw new Exception("Redis not configured");
+            var redis = StackExchange.Redis.ConnectionMultiplexer.Connect(redis_conf);
+
+            services.AddStackExchangeRedisCache(opt => {
+                opt.Configuration = redis_conf;
+            });
+            services.AddDataProtection()
+                .PersistKeysToStackExchangeRedis(redis, "bangbangboom-data-protection-keys"); 
+
             services.Configure<GzipCompressionProviderOptions>(
                 options => options.Level = CompressionLevel.Fastest);
             services.AddResponseCompression(options => {
@@ -45,8 +56,9 @@ namespace bangbangboom {
             });
 
             AppDbContext.DefaultBuildOption += options => {
-                var connectionString = configs.GetConnectionString("MySql");
-                options.UseMySql(connectionString);
+                var connectionString = configs.GetConnectionString("Postgres")
+                    ?? throw new Exception("Postgres not configured.");
+                options.UseNpgsql(connectionString);
             };
 
             services.AddDbContext<AppDbContext>(options =>
@@ -69,7 +81,7 @@ namespace bangbangboom {
             });
 
             services.Configure<SecurityStampValidatorOptions>(options =>
-                options.ValidationInterval = TimeSpan.FromMinutes(5));
+                options.ValidationInterval = TimeSpan.FromHours(2));
 
             services.Configure<DataProtectionTokenProviderOptions>(options =>
                 options.TokenLifespan = TimeSpan.FromHours(2));
@@ -95,7 +107,18 @@ namespace bangbangboom {
             services.AddSingleton<GuidFileProvider>();
             services.AddSingleton<MediaFileProcessor>();
             services.AddSingleton<IHostedService, ScheduedTaskService>();
-            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddAutoChooseSender(configs.GetSection("SMTP"));
+
+            services.AddSwaggerGen(opt => {
+                opt.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo() {
+                    Title = "bangbangboom-server api",
+                    Version = "v1"
+                });
+                opt.EnableAnnotations();
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                opt.IncludeXmlComments(xmlPath);
+            });
 
             services.AddSingleton<AutoValidateAntiforgeryTokenAuthorizationFilter>();
             services.AddControllers(options =>
@@ -120,6 +143,14 @@ namespace bangbangboom {
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions() {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
+            app.UseSwagger(c => {
+                c.RouteTemplate = "/docs/{documentName}/api.json";
+            });
+            app.UseSwaggerUI(opt => {
+                opt.SwaggerEndpoint("/docs/v1/api.json", "bangbangboom-server api v1");
+                opt.RoutePrefix = "docs";
             });
 
             app.UseDefaultFiles();

@@ -12,8 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace bangbangboom.Services {
     public class GuidFileProviderOptions {
-        public string BaseDir { get; set; } = Path.Combine(
-            Environment.CurrentDirectory, ".files");
+        public string BaseDir { get; set; }
 
         public int SubDirCount { get; set; } = 1;
     }
@@ -33,84 +32,46 @@ namespace bangbangboom.Services {
                 subDirCount = 1;
         }
 
-        public Stream GetFileByGuid(string guid) {
-            var finfo = GetFileInfo(guid);
+        public Stream GetFileByGuid(Guid id) {
+            var finfo = GetFileInfoFromGuid(id);
             if (!finfo.Exists) throw new FileNotFoundException();
             return finfo.OpenRead();
         }
 
-        public async Task<string> SaveFileAsync(Stream fileStream) {
-            fileStream.Position = 0;
-            var guid = ToHex(Guid.NewGuid().ToByteArray());
-            fileStream.Position = 0;
-            var finfo = GetFileInfo(guid);
-            if (!finfo.Exists) {
-                finfo.Directory.Create();
-                var fs = finfo.Create();
-                await fileStream.CopyToAsync(fs);
-                fs.Close();
+        public async Task<bool> SaveFileAsync(Guid id, Stream fileStream) {
+            try {
+                fileStream.Position = 0;
+                var finfo = GetFileInfoFromGuid(id);
+                if (!finfo.Exists) {
+                    finfo.Directory.Create();
+                    using var fs = finfo.Create();
+                    await fileStream.CopyToAsync(fs);
+                    return true;
+                }
+                return false;
+            } finally {
+                fileStream.Position = 0;
             }
-            fileStream.Position = 0;
-            return guid;
         }
 
-        public bool DeleteFile(string guid) {
-            var finfo = GetFileInfo(guid);
+        public bool DeleteFile(Guid id) {
+            var finfo = GetFileInfoFromGuid(id);
             if (!finfo.Exists) return false;
             finfo.Delete();
             return true;
         }
 
-        private static string ToHex(byte[] bytes) {
-            StringBuilder hex = new StringBuilder(bytes.Length * 2);
-            foreach (byte b in bytes)
-                hex.Append(b.ToString("x2"));
-            return hex.ToString();
-        }
-
-        private FileInfo GetFileInfo(string guid) {
-            if (guid.Length < subDirCount * 2) throw new ArgumentException();
+        private FileInfo GetFileInfoFromGuid(Guid id) {
+            var str = id.ToString("N");
             var i = 0;
             var path = baseDir;
             while (i < subDirCount) {
-                path = Path.Combine(path, guid.Substring(i * 2, 2));
+                path = Path.Combine(path, str.Substring(i * 2, 2));
                 i++;
             }
-            path = Path.Combine(path, guid.Substring(i * 2));
+            path = Path.Combine(path, str.Substring(i * 2));
             return new FileInfo(path);
         }
     }
 
-    public static class GuidFileProviderExtensions {
-        public static async Task<string> SaveImageFileWithThumbnail(this GuidFileProvider provider,
-            MediaFileProcessor processor, IFormFile file) {
-            var id = "";
-            var fs = file.OpenReadStream();
-            if (!processor.TryProcessImage(fs, out var jpg)) return null;
-            id += await provider.SaveFileAsync(jpg);
-            if (processor.TryMinifyImage(jpg, out var min)) {
-                id += ":";
-                id += await provider.SaveFileAsync(min);
-            }
-            return id;
-        }
-
-        public static Stream GetImageWithThumbnail(this GuidFileProvider provider, string id, out string etag, bool min = false) {
-            var ids = id.Split(':');
-            if (ids.Length == 2 && min) {
-                etag = ids[1];
-                return provider.GetFileByGuid(ids[1]);
-            }
-            etag = ids[0];
-            return provider.GetFileByGuid(ids[0]);
-        }
-
-        public static void DeleteImageWithThumbnail(this GuidFileProvider provider, string id) {
-            if (id is null) return;
-            var ids = id.Split(':');
-            foreach (var guid in ids) {
-                provider.DeleteFile(guid);
-            }
-        }
-    }
 }

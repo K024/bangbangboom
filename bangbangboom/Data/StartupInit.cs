@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace bangbangboom {
     public static class StartupInitExtensions {
+
         public static async void InitData(this Startup startup, IServiceProvider provider) {
 
             using var scope = provider.CreateScope();
